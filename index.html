@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>دليل مواكب كربلاء</title>
+    
+    <!-- مكتبات التصميم والأيقونات -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- مكتبة الخريطة -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F7FBF7; overflow: hidden; }
+        .page { display: none; height: calc(100vh - 70px); overflow-y: auto; }
+        .page.active { display: block; }
+        #map { height: 100%; width: 100%; z-index: 1; }
+        
+        /* تنسيق شريط التنقل السفلي */
+        .nav-btn { flex: 1; text-align: center; padding: 10px 0; color: #9ca3af; transition: all 0.3s; }
+        .nav-btn.active { color: #1B5E20; font-weight: bold; }
+        .nav-btn i { font-size: 20px; margin-bottom: 4px; display: block; }
+        
+        /* تنسيق النوافذ المنبثقة */
+        .leaflet-popup-content { font-family: 'Cairo', sans-serif; text-align: right; margin: 10px; }
+        .leaflet-popup-content h3 { color: #1B5E20; font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- شاشة الترحيب (Splash) -->
+    <div id="splash" class="fixed inset-0 bg-[#1B5E20] z-50 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="bg-white rounded-full w-28 h-28 flex items-center justify-center shadow-2xl mb-6">
+            <i class="fa-solid fa-mosque text-5xl text-[#1B5E20]"></i>
+        </div>
+        <h1 class="text-white text-3xl font-bold mb-2">دليل مواكب كربلاء</h1>
+        <p class="text-[#C8E6C9] text-sm">دليلك إلى المواكب والخدمات الحسينية</p>
+        <div class="mt-8 text-white"><i class="fa-solid fa-circle-notch fa-spin text-2xl"></i></div>
+    </div>
+
+    <!-- التطبيق الرئيسي -->
+    <div id="app" class="hidden flex flex-col h-screen">
+        
+        <!-- الشريط العلوي -->
+        <header class="bg-white shadow-sm py-3 px-4 text-center z-10">
+            <h1 class="text-xl font-bold text-[#1B5E20]">دليل مواكب كربلاء</h1>
+        </header>
+
+        <!-- الصفحات -->
+        <main class="flex-1 relative bg-[#F7FBF7]">
+            
+            <!-- صفحة الخريطة -->
+            <div id="page-map" class="page active">
+                <div id="map"></div>
+                <button onclick="locateUser()" class="absolute bottom-6 left-4 z-[400] bg-white text-[#1B5E20] w-12 h-12 rounded-full shadow-lg text-xl hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                </button>
+            </div>
+
+            <!-- صفحة القائمة والبحث -->
+            <div id="page-list" class="page p-4">
+                <div class="relative mb-4">
+                    <i class="fa-solid fa-search absolute right-4 top-4 text-gray-400"></i>
+                    <input type="text" id="searchInput" onkeyup="renderList()" placeholder="ابحث عن موكب أو خدمة..." class="w-full bg-white border border-gray-200 rounded-xl py-3 pr-12 pl-4 focus:outline-none focus:border-[#1B5E20] shadow-sm">
+                </div>
+                <div id="mawkibList" class="space-y-3 pb-20">
+                    <!-- سيتم توليد المواكب هنا بواسطة JS -->
+                </div>
+            </div>
+
+            <!-- صفحة إضافة موكب -->
+            <div id="page-add" class="page p-4 bg-white">
+                <h2 class="text-lg font-bold text-[#1B5E20] mb-4">تسجيل موكب جديد</h2>
+                <form id="addForm" onsubmit="handleAddMawkib(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">اسم الموكب</label>
+                        <input type="text" id="mawkibName" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:border-[#1B5E20]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">الخدمات (مفصولة بفاصلة)</label>
+                        <input type="text" id="mawkibServices" placeholder="مثال: ماء، طعام، مبيت" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:border-[#1B5E20]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">العنوان / المنطقة</label>
+                        <input type="text" id="mawkibAddress" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:border-[#1B5E20]">
+                    </div>
+                    
+                    <!-- خريطة مصغرة لتحديد الموقع -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">حدد الموقع على الخريطة</label>
+                        <div id="pickMap" class="w-full h-48 rounded-lg border border-gray-300 z-0"></div>
+                        <p class="text-xs text-gray-500 mt-1">انقر على الخريطة لتحديد موقع الموكب بدقة.</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#1B5E20] text-white font-bold py-3 rounded-xl shadow-md hover:bg-green-900 transition mt-4">
+                        <i class="fa-solid fa-check-circle ml-2"></i> حفظ الموكب (قيد المراجعة)
+                    </button>
+                </form>
+            </div>
+        </main>
+
+        <!-- شريط التنقل السفلي -->
+        <nav class="bg-white border-t border-gray-200 flex justify-around z-20 h-[70px]">
+            <div class="nav-btn active" onclick="switchTab('map', this)">
+                <i class="fa-solid fa-map-location-dot"></i> الخريطة
+            </div>
+            <div class="nav-btn" onclick="switchTab('list', this)">
+                <i class="fa-solid fa-list-ul"></i> المواكب
+            </div>
+            <div class="nav-btn" onclick="switchTab('add', this)">
+                <i class="fa-solid fa-plus-circle"></i> إضافة
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. إعداد البيانات
+        // ==========================================
+        // بيانات افتراضية تظهر لأول مرة
+        const defaultMawkibs = [
+            { id: 1, name: "موكب أنصار الحسين", lat: 32.6160, lng: 44.0249, services: "طعام، ماء، استراحة", address: "شارع العباس" },
+            { id: 2, name: "موكب خدام الزائرين", lat: 32.6180, lng: 44.0280, services: "شاي، قهوة، مبيت", address: "حي الحسين" },
+            { id: 3, name: "موكب قمر بني هاشم", lat: 32.6130, lng: 44.0220, services: "إسعافات أولية، ماء", address: "باب القبلة" }
+        ];
+
+        // تحميل البيانات من ذاكرة المتصفح أو استخدام الافتراضية
+        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs'));
+        if (!mawkibs) {
+            mawkibs = [...defaultMawkibs];
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem('karbalaMawkibs', JSON.stringify(mawkibs));
+        }
+
+        // ==========================================
+        // 2. إخفاء شاشة الترحيب
+        // ==========================================
+        setTimeout(() => {
+            document.getElementById('splash').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash').style.display = 'none';
+                document.getElementById('app').classList.remove('hidden');
+                initMaps(); // تشغيل الخرائط بعد ظهور الواجهة
+            }, 500);
+        }, 2000);
+
+        // ==========================================
+        // 3. التنقل بين الصفحات (Tabs)
+        // ==========================================
+        function switchTab(pageId, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            btn.classList.add('active');
+
+            if (pageId === 'map') {
+                mainMap.invalidateSize(); // تحديث حجم الخريطة
+            } else if (pageId === 'list') {
+                renderList();
+            } else if (pageId === 'add') {
+                pickMap.invalidateSize();
+            }
+        }
+
+        // ==========================================
+        // 4. إعداد الخرائط (Leaflet)
+        // ==========================================
+        let mainMap, pickMap;
+        let mainMarkers = L.layerGroup();
+        let pickMarker = null;
+        let pickedLat = 32.6160;
+        let pickedLng = 44.0249;
+
+        const mawkibIcon = L.divIcon({
+            className: 'custom-icon',
+            html: '<div style="background-color: #1B5E20; color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);"><i class="fa-solid fa-mosque"></i></div>',
+            iconSize: [36, 36],
+            iconAnchor: [18, 36],
+            popupAnchor: [0, -36]
+        });
+
+        function initMaps() {
+            // خريطة العرض الرئيسية
+            mainMap = L.map('map').setView([32.6160, 44.0249], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(mainMap);
+            mainMarkers.addTo(mainMap);
+            updateMapMarkers();
+
+            // خريطة تحديد الموقع (في صفحة الإضافة)
+            pickMap = L.map('pickMap').setView([pickedLat, pickedLng], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19
+            }).addTo(pickMap);
+
+            // إضافة دبوس افتراضي
+            pickMarker = L.marker([pickedLat, pickedLng], { draggable: true }).addTo(pickMap);
+            
+            // حدث عند النقر على الخريطة لتحديد الموقع
+            pickMap.on('click', function(e) {
+                pickedLat = e.latlng.lat;
+                pickedLng = e.latlng.lng;
+                pickMarker.setLatLng([pickedLat, pickedLng]);
+            });
+        }
+
+        // تحديث الدبابيس على الخريطة الرئيسية
+        function updateMapMarkers() {
+            mainMarkers.clearLayers();
+            mawkibs.forEach(m => {
+                let marker = L.marker([m.lat, m.lng], {icon: mawkibIcon});
+                
+                let popupContent = `
+                    <div class="text-right">
+                        <h3>${m.name}</h3>
+                        <p class="text-xs text-gray-600 mb-2">${m.address}</p>
+                        <div class="text-xs mb-2 text-[#1B5E20] font-bold">${m.services}</div>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}" target="_blank" class="block bg-[#1B5E20] text-white text-center py-1 rounded text-sm mt-2 no-underline">
+                            <i class="fa-solid fa-diamond-turn-right ml-1"></i> الاتجاهات
+                        </a>
+                    </div>
+                `;
+                marker.bindPopup(popupContent);
+                mainMarkers.addLayer(marker);
+            });
+        }
+
+        // ==========================================
+        // 5. البحث وعرض القائمة
+        // ==========================================
+        function renderList() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const listDiv = document.getElementById('mawkibList');
+            listDiv.innerHTML = '';
+
+            const filtered = mawkibs.filter(m => 
+                m.name.toLowerCase().includes(query) || 
+                m.services.toLowerCase().includes(query) || 
+                m.address.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                listDiv.innerHTML = '<div class="text-center text-gray-500 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-2"></i><br>لا توجد نتائج مطابقة</div>';
+                return;
+            }
+
+            filtered.forEach(m => {
+                let card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center cursor-pointer transition hover:shadow-md';
+                card.onclick = () => {
+                    switchTab('map', document.querySelectorAll('.nav-btn')[0]);
+                    mainMap.setView([m.lat, m.lng], 17);
+                    mainMarkers.eachLayer(layer => {
+                        if (layer.getLatLng().lat === m.lat && layer.getLatLng().lng === m.lng) {
+                            layer.openPopup();
+                        }
+                    });
+                };
+                
+                card.innerHTML = `
+                    <div class="w-12 h-12 bg-[#E8F5E9] rounded-full flex items-center justify-center text-[#1B5E20] text-xl ml-3">
+                        <i class="fa-solid fa-mosque"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-[#1B5E20]">${m.name}</h3>
+                        <p class="text-xs text-gray-500 mb-1"><i class="fa-solid fa-location-dot ml-1"></i> ${m.address}</p>
+                        <p class="text-xs text-[#2E7D32] bg-[#E8F5E9] inline-block px-2 py-0.5 rounded">${m.services}</p>
+                    </div>
+                    <div class="text-gray-300"><i class="fa-solid fa-chevron-left"></i></div>
+                `;
+                listDiv.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 6. إضافة موكب جديد
+        // ==========================================
+        function handleAddMawkib(e) {
+            e.preventDefault();
+            
+            const newMawkib = {
+                id: Date.now(),
+                name: document.getElementById('mawkibName').value,
+                services: document.getElementById('mawkibServices').value,
+                address: document.getElementById('mawkibAddress').value,
+                lat: pickedLat,
+                lng: pickedLng
+            };
+
+            mawkibs.push(newMawkib);
+            saveData(); // حفظ في المتصفح
+            updateMapMarkers(); // تحديث الخريطة
+            
+            // إعادة تعيين النموذج
+            document.getElementById('addForm').reset();
+            
+            // إظهار رسالة نجاح
+            alert('تم حفظ الموكب بنجاح! يمكنك رؤيته الآن على الخريطة وفي القائمة.');
+            
+            // الانتقال إلى الخريطة
+            switchTab('map', document.querySelectorAll('.nav-btn')[0]);
+            mainMap.setView([pickedLat, pickedLng], 16);
+        }
+
+        // ==========================================
+        // 7. تحديد موقع المستخدم
+        // ==========================================
+        function locateUser() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        mainMap.setView([lat, lng], 16);
+                        L.circleMarker([lat, lng], {
+                            color: '#2196F3', fillColor: '#2196F3', fillOpacity: 1, radius: 8
+                        }).addTo(mainMap).bindPopup("موقعك الحالي").openPopup();
+                    },
+                    () => alert('يرجى السماح للمتصفح بالوصول إلى موقعك.')
+                );
+            }
+        }
+
+        // تشغيل عرض القائمة عند فتح التطبيق
+        renderList();
+    </script>
+</body>
+</html>
