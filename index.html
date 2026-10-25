@@ -35,6 +35,11 @@
         #mainMap, #pickMap, #previewMap { width: 100%; z-index: 1; }
         #mainMap { height: 100%; }
         
+        /* ✨ الحل السحري: فلتر يحول الخريطة العادية إلى داكنة ✨ */
+        .leaflet-tile-pane {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+
         /* تأثير الزجاج */
         .glass-panel {
             background: rgba(17, 24, 39, 0.85);
@@ -72,7 +77,7 @@
             <!-- ================= 1. الصفحة الرئيسية ================= -->
             <div id="page-home" class="page active pb-6">
                 
-                <!-- الهيدر الداكن (مطابق للصورة) -->
+                <!-- الهيدر الداكن -->
                 <div class="dark-header pb-10 px-5 pt-10 rounded-b-[40px] relative shadow-lg">
                     <div class="flex justify-between items-start mb-6">
                         <div class="flex items-center gap-3">
@@ -100,9 +105,8 @@
                 <!-- محتوى الصفحة -->
                 <div class="px-5 -mt-6 relative z-10">
                     
-                    <!-- بطاقة أقرب المواكب (تصميم زجاجي داكن) -->
+                    <!-- بطاقة أقرب المواكب -->
                     <button onclick="findClosestMawkib()" class="w-full glass-panel text-white p-4 rounded-2xl shadow-xl flex items-center justify-between mb-6 click-effect overflow-hidden relative">
-                        <!-- زخرفة خلفية -->
                         <div class="absolute inset-0 opacity-10 flex items-center justify-center text-6xl font-black pointer-events-none" style="font-family: serif;">يا حسين</div>
                         
                         <div class="flex items-center gap-3 relative z-10">
@@ -217,6 +221,7 @@
                     
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">حدد الموقع على الخريطة</label>
+                        <!-- سيتم تطبيق الفلتر الداكن عليها أيضاً تلقائياً -->
                         <div id="pickMap" class="w-full h-48 rounded-xl border border-gray-200 z-0"></div>
                         <p class="text-xs text-gray-500 mt-1">انقر على الخريطة لتحديد موقع الموكب.</p>
                     </div>
@@ -240,7 +245,7 @@
 
         </main>
 
-        <!-- شريط التنقل السفلي (الداكن) -->
+        <!-- شريط التنقل السفلي -->
         <nav class="bg-white flex justify-around z-20 h-[75px] shadow-[0_-5px_15px_rgba(0,0,0,0.05)] rounded-t-3xl px-2">
             <div class="nav-btn active" onclick="switchTab('home', 0)">
                 <i class="fa-solid fa-house"></i>
@@ -273,14 +278,14 @@
             { id: 5, name: "موكب خدمة الزوار", lat: 32.6110, lng: 44.0250, services: "شحن, استراحة", address: "قرب الحرم" }
         ];
 
-        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v3'));
+        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_final'));
         if (!mawkibs || mawkibs.length === 0) {
             mawkibs = [...defaultMawkibs];
             saveData();
         }
 
         function saveData() {
-            localStorage.setItem('karbalaMawkibs_v3', JSON.stringify(mawkibs));
+            localStorage.setItem('karbalaMawkibs_final', JSON.stringify(mawkibs));
         }
 
         // ==========================================
@@ -316,223 +321,7 @@
         }
 
         // ==========================================
-        // 4. إعداد الخرائط (Thame Dark)
+        // 4. إعداد الخرائط (استخدام OpenStreetMap + فلتر CSS)
         // ==========================================
         let mainMap, pickMap, previewMap;
-        let mainMarkers = L.layerGroup();
-        let previewMarkers = L.layerGroup();
-        let pickMarker = null;
-        let pickedLat = 32.6160;
-        let pickedLng = 44.0249;
-
-        // خريطة داكنة (CartoDB Dark Matter)
-        const darkTile = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-
-        const mawkibIcon = L.divIcon({
-            className: 'custom-icon',
-            html: '<div style="background-color: #2E7D32; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"><i class="fa-solid fa-mosque"></i></div>',
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -32]
-        });
-
-        const shrineIcon = L.divIcon({
-            className: 'custom-icon',
-            html: '<div style="color: #FBBF24; font-size: 35px; text-align: center; filter: drop-shadow(0 0 10px rgba(251,191,36,0.6));"><i class="fa-solid fa-mosque"></i></div>',
-            iconSize: [35, 35],
-            iconAnchor: [17, 35]
-        });
-
-        function initMaps() {
-            // 1. الخريطة المصغرة في الرئيسية
-            previewMap = L.map('previewMap', { zoomControl: false, dragging: false, scrollWheelZoom: false }).setView([32.6160, 44.0249], 14);
-            L.tileLayer(darkTile, { maxZoom: 19 }).addTo(previewMap);
-            
-            // أيقونة العتبة
-            L.marker([32.6163, 44.0330], {icon: shrineIcon}).addTo(previewMap).bindPopup("<b class='text-green-600'>العتبة الحسينية</b>");
-            
-            previewMarkers.addTo(previewMap);
-            mawkibs.forEach(m => {
-                L.marker([m.lat, m.lng], {icon: mawkibIcon}).addTo(previewMarkers);
-            });
-
-            // 2. الخريطة الكاملة
-            mainMap = L.map('mainMap').setView([32.6160, 44.0249], 14);
-            L.tileLayer(darkTile, { maxZoom: 19 }).addTo(mainMap);
-            L.marker([32.6163, 44.0330], {icon: shrineIcon}).addTo(mainMap).bindPopup("<b>العتبة الحسينية المقدسة</b>");
-            
-            mainMarkers.addTo(mainMap);
-            updateMainMapMarkers();
-
-            // 3. خريطة تحديد الموقع
-            pickMap = L.map('pickMap').setView([pickedLat, pickedLng], 14);
-            L.tileLayer(darkTile, { maxZoom: 19 }).addTo(pickMap);
-            pickMarker = L.marker([pickedLat, pickedLng], { draggable: true }).addTo(pickMap);
-            
-            pickMap.on('click', function(e) {
-                pickedLat = e.latlng.lat;
-                pickedLng = e.latlng.lng;
-                pickMarker.setLatLng([pickedLat, pickedLng]);
-            });
-        }
-
-        function updateMainMapMarkers() {
-            mainMarkers.clearLayers();
-            mawkibs.forEach(m => {
-                let marker = L.marker([m.lat, m.lng], {icon: mawkibIcon});
-                let popupContent = `
-                    <div class="text-right font-cairo">
-                        <h3 class="font-bold text-[#2E7D32]">${m.name}</h3>
-                        <p class="text-xs text-gray-600 mb-2">${m.address}</p>
-                        <div class="text-xs mb-2 text-gray-800 font-bold">${m.services}</div>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}" target="_blank" class="block bg-[#2E7D32] text-white text-center py-1 rounded text-sm mt-2 no-underline">
-                            <i class="fa-solid fa-diamond-turn-right ml-1"></i> الاتجاهات
-                        </a>
-                    </div>
-                `;
-                marker.bindPopup(popupContent);
-                mainMarkers.addLayer(marker);
-            });
-        }
-
-        // ==========================================
-        // 5. تحديث الأرقام في الخدمات
-        // ==========================================
-        function updateServiceCounts() {
-            const counts = { food: 0, water: 0, bed: 0, charge: 0, wc: 0, med: 0 };
-            
-            mawkibs.forEach(m => {
-                const s = m.services || '';
-                if (s.includes('طعام')) counts.food++;
-                if (s.includes('ماء') || s.includes('شاي')) counts.water++;
-                if (s.includes('مبيت') || s.includes('استراحة')) counts.bed++;
-                if (s.includes('شحن')) counts.charge++;
-                if (s.includes('مياه') || s.includes('WC')) counts.wc++;
-                if (s.includes('إسعاف')) counts.med++;
-            });
-
-            document.getElementById('count-food').textContent = counts.food + ' مواكب';
-            document.getElementById('count-water').textContent = counts.water + ' مواكب';
-            document.getElementById('count-bed').textContent = counts.bed + ' مواكب';
-            document.getElementById('count-charge').textContent = counts.charge + ' مواكب';
-            document.getElementById('count-wc').textContent = counts.wc + ' مواكب';
-            document.getElementById('count-med').textContent = counts.med + ' مواكب';
-        }
-
-        // ==========================================
-        // 6. البحث والقائمة
-        // ==========================================
-        function searchMawkibs() {
-            const query = document.getElementById('searchHome').value;
-            renderServicesList(query);
-            switchTab('services', 1); 
-        }
-
-        function filterByService(serviceName) {
-            document.getElementById('searchHome').value = serviceName;
-            renderServicesList(serviceName);
-            switchTab('services', 1);
-        }
-
-        function renderServicesList(filterText = '') {
-            const container = document.getElementById('servicesList');
-            container.innerHTML = '';
-            
-            let filtered = mawkibs;
-            if(filterText) {
-                const q = filterText.toLowerCase();
-                filtered = mawkibs.filter(m => 
-                    m.name.toLowerCase().includes(q) || 
-                    m.services.toLowerCase().includes(q) || 
-                    m.address.toLowerCase().includes(q)
-                );
-            }
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد مواكب مطابقة</div>';
-                return;
-            }
-
-            filtered.forEach(m => {
-                let card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center cursor-pointer click-effect';
-                card.onclick = () => {
-                    switchTab('map', 1);
-                    setTimeout(() => {
-                        mainMap.setView([m.lat, m.lng], 17);
-                        mainMarkers.eachLayer(layer => {
-                            if (layer.getLatLng().lat === m.lat && layer.getLatLng().lng === m.lng) layer.openPopup();
-                        });
-                    }, 200);
-                };
-                
-                card.innerHTML = `
-                    <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-[#2E7D32] text-xl ml-3">
-                        <i class="fa-solid fa-mosque"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-bold text-sm text-gray-800">${m.name}</h3>
-                        <p class="text-[11px] text-gray-500 mb-1"><i class="fa-solid fa-location-dot ml-1"></i>${m.address}</p>
-                        <span class="text-[10px] bg-green-50 text-[#2E7D32] px-2 py-0.5 rounded font-bold">${m.services}</span>
-                    </div>
-                    <i class="fa-solid fa-chevron-left text-gray-300"></i>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // ==========================================
-        // 7. إضافة موكب
-        // ==========================================
-        function handleAddMawkib(e) {
-            e.preventDefault();
-            
-            const newMawkib = {
-                id: Date.now(),
-                name: document.getElementById('mawkibName').value,
-                services: document.getElementById('mawkibServices').value,
-                address: document.getElementById('mawkibAddress').value,
-                lat: pickedLat,
-                lng: pickedLng
-            };
-
-            mawkibs.unshift(newMawkib);
-            saveData(); 
-            
-            updateMainMapMarkers(); 
-            updateServiceCounts();
-            renderServicesList();
-
-            // إضافة الدبوس للخريطة المصغرة
-            L.marker([newMawkib.lat, newMawkib.lng], {icon: mawkibIcon}).addTo(previewMarkers);
-            
-            document.getElementById('addForm').reset();
-            alert('تم حفظ الموكب بنجاح!');
-            switchTab('home', 0);
-        }
-
-        // ==========================================
-        // 8. تحديد موقع الزائر
-        // ==========================================
-        function findClosestMawkib() {
-            switchTab('map', 1);
-            locateUser();
-        }
-
-        function locateUser() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        mainMap.setView([lat, lng], 16);
-                        L.circleMarker([lat, lng], { color: '#3B82F6', fillColor: '#3B82F6', fillOpacity: 1, radius: 8 })
-                         .addTo(mainMap).bindPopup("موقعك الحالي").openPopup();
-                    },
-                    () => alert('يرجى السماح للمتصفح بالوصول إلى موقعك.')
-                );
-            }
-        }
-    </script>
-</body>
-</html>
+     
