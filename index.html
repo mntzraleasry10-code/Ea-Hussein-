@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #F0F2F5; overflow: hidden; }
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; overflow: hidden; }
         .page { display: none; height: calc(100vh - 75px); overflow-y: auto; padding-bottom: 100px; }
         .page.active { display: block; }
         
@@ -50,22 +50,20 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* حركة شريط التقدم للستوري */
+        /* شريط تقدم الستوري */
         .story-progress-bar { height: 3px; background: rgba(255,255,255,0.3); flex: 1; border-radius: 10px; overflow: hidden; }
         .story-progress-fill { height: 100%; background: white; width: 0%; transition: width 5s linear; }
 
-        /* إشعار التوست المنزلق */
-        #toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            transition: top 0.4s ease-in-out; z-index: 100000;
-            width: 90%; max-width: 400px;
-        }
-        #toast.show { top: 20px; }
+        /* التصميم العصري للمنشورات */
+        .modern-card { background: white; border-radius: 1.25rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; margin-bottom: 1rem; overflow: hidden; }
+        
+        /* نافذة التعليقات السفلية */
+        #commentsModal { transition: transform 0.3s ease-in-out; transform: translateY(100%); }
+        #commentsModal.show { transform: translateY(0); }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <!-- شاشة البداية -->
     <div id="splash" class="fixed inset-0 bg-[#111827] z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="w-32 h-32 mb-4 flex items-center justify-center bg-white rounded-full shadow-[0_0_30px_rgba(76,175,80,0.3)]">
             <i class="fa-solid fa-mosque text-6xl text-[#2E7D32]"></i>
@@ -173,30 +171,24 @@
                 </div>
             </div>
 
-            <!-- ================= 2. صفحة المنشورات ================= -->
-            <div id="page-posts" class="page bg-[#F0F2F5]">
-                <div class="bg-white p-3 shadow-sm flex justify-between items-center sticky top-0 z-20">
-                    <h2 class="font-extrabold text-[#1877F2] text-2xl">المنشورات</h2>
+            <!-- ================= 2. صفحة المنشورات (عصرية) ================= -->
+            <div id="page-posts" class="page bg-[#F8FAFC]">
+                <div class="bg-white/80 backdrop-blur-md p-3 shadow-sm flex justify-between items-center sticky top-0 z-20 border-b border-gray-100">
+                    <h2 class="font-black text-[#1B5E20] text-2xl">المنشورات</h2>
                     <div class="flex gap-2">
-                        <button class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600"><i class="fa-solid fa-magnifying-glass"></i></button>
-                        <button onclick="openPostModal()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600"><i class="fa-solid fa-plus"></i></button>
+                        <button class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 click-effect"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        <button onclick="openPostModal()" class="w-9 h-9 bg-[#1B5E20] text-white rounded-full flex items-center justify-center click-effect shadow-md"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
 
-                <div class="p-2">
-                    <div class="bg-white p-3 rounded-lg shadow-sm mb-3 flex items-center gap-2 border border-gray-200 cursor-pointer" onclick="openPostModal()">
-                        <div class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-gray-500"><i class="fa-solid fa-user"></i></div>
-                        <div class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-gray-500 text-sm">بم تفكر؟ (اكتب تحديثاً)...</div>
-                        <i class="fa-solid fa-image text-green-500 text-lg"></i>
-                    </div>
-
+                <div class="p-3">
                     <!-- قسم القصص -->
-                    <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-3" id="storiesContainer">
+                    <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-4 mb-2" id="storiesContainer">
                         <!-- سيتم توليد القصص هنا -->
                     </div>
 
                     <!-- خلاصة المنشورات -->
-                    <div id="postsContainer" class="space-y-3 pb-10">
+                    <div id="postsContainer" class="space-y-4 pb-10">
                         <!-- سيتم توليد المنشورات هنا -->
                     </div>
                 </div>
@@ -265,14 +257,47 @@
                 </form>
             </div>
 
-            <!-- ================= 6. صفحة حسابي ================= -->
-            <div id="page-account" class="page p-5 flex flex-col items-center justify-center bg-gray-50">
-                <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-sm">
-                    <i class="fa-solid fa-user text-4xl text-gray-400"></i>
+            <!-- ================= 6. الصفحة الشخصية (مثل فيسبوك) ================= -->
+            <div id="page-account" class="page bg-white">
+                <!-- صورة الغلاف -->
+                <div class="relative h-48 bg-gray-300">
+                    <img src="https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=800" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20"></div>
                 </div>
-                <h2 class="text-xl font-bold text-gray-800">زائر كريم</h2>
-                <p class="text-sm text-gray-500 mb-8">مرحباً بك في دليل مواكب كربلاء</p>
-                <button onclick="switchTab('home', 0)" class="w-full bg-[#2E7D32] text-white font-bold py-3.5 rounded-xl shadow-sm mb-3">العودة للرئيسية</button>
+                
+                <!-- معلومات الحساب -->
+                <div class="relative px-5 pb-5">
+                    <!-- الصورة الشخصية -->
+                    <div class="absolute -top-16 left-1/2 transform -translate-x-1/2">
+                        <div class="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg relative cursor-pointer" onclick="document.getElementById('profilePicInput').click()">
+                            <img id="profilePicDisplay" src="" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                                <i class="fa-solid fa-camera text-white text-2xl"></i>
+                            </div>
+                        </div>
+                        <input type="file" id="profilePicInput" accept="image/*" class="hidden" onchange="updateProfilePic(event)">
+                    </div>
+                    
+                    <div class="mt-20 text-center">
+                        <h2 id="profileNameDisplay" class="text-2xl font-black text-gray-800">زائر كريم</h2>
+                        <p class="text-sm text-gray-500 mb-4">دليل مواكب كربلاء</p>
+                        
+                        <!-- الأزرار -->
+                        <div class="flex justify-center gap-3 mb-6">
+                            <button onclick="openEditProfileModal()" class="bg-gray-100 text-gray-800 font-bold py-2 px-6 rounded-lg text-sm click-effect"><i class="fa-solid fa-pen ml-1"></i> تعديل الملف الشخصي</button>
+                            <button onclick="switchTab('posts', 1)" class="bg-[#1B5E20] text-white font-bold py-2 px-6 rounded-lg text-sm click-effect"><i class="fa-solid fa-plus ml-1"></i> إضافة قصة</button>
+                        </div>
+                        
+                        <!-- التبويبات -->
+                        <div class="border-t border-gray-200 pt-4">
+                            <div class="flex justify-around text-sm font-bold text-gray-500">
+                                <span class="text-[#1B5E20] border-b-2 border-[#1B5E20] pb-2">المنشورات</span>
+                                <span>الصور</span>
+                                <span>معلومات</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </main>
@@ -317,20 +342,24 @@
             </div>
             <button onclick="closeStory()" class="text-white text-3xl mr-auto pb-4"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <img id="storyImage" src="" class="w-full h-full object-contain">
+        
+        <!-- الصورة -->
+        <img id="storyImage" src="" class="w-full h-full object-contain pointer-events-none">
+        
+        <!-- مناطق التنقل (يمين ويسار) -->
+        <div class="absolute inset-y-0 right-0 w-1/3 z-40" onclick="prevStory()"></div>
+        <div class="absolute inset-y-0 left-0 w-1/3 z-40" onclick="nextStory()"></div>
     </div>
 
     <!-- ================= نافذة إنشاء / تعديل منشور ================= -->
     <div id="postModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
             <div class="flex justify-between items-center mb-4">
-                <h2 id="postModalTitle" class="text-xl font-bold text-gray-800"><i class="fa-solid fa-pen-nib text-[#1877F2] ml-2"></i> إنشاء منشور</h2>
+                <h2 id="postModalTitle" class="text-xl font-bold text-gray-800"><i class="fa-solid fa-pen-nib text-[#1B5E20] ml-2"></i> إنشاء منشور</h2>
                 <button onclick="closePostModal()" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <textarea id="postText" rows="3" placeholder="بم تفكر؟..." class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#1877F2] text-sm bg-gray-50 mb-3 resize-none"></textarea>
-            
-            <!-- معاينة الصورة داخل المودال (تظهر كاملة) -->
+            <textarea id="postText" rows="3" placeholder="بم تفكر؟..." class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#1B5E20] text-sm bg-gray-50 mb-3 resize-none"></textarea>
             <img id="postImagePreview" class="hidden w-full h-auto max-h-64 object-contain rounded-xl mb-3 border border-gray-200 bg-black">
             
             <div class="flex items-center gap-2 mb-4 bg-gray-50 p-2 rounded-xl border border-gray-200">
@@ -340,49 +369,49 @@
                 </label>
             </div>
 
-            <button id="submitPostBtn" onclick="submitPost()" class="w-full bg-[#1877F2] text-white font-bold py-3 rounded-xl shadow-md click-effect hover:bg-blue-700 transition">نشر</button>
+            <button id="submitPostBtn" onclick="submitPost()" class="w-full bg-[#1B5E20] text-white font-bold py-3 rounded-xl shadow-md click-effect hover:bg-green-900 transition">نشر</button>
         </div>
     </div>
 
-    <!-- ================= نافذة الإشعارات (إنستغرام) ================= -->
-    <div id="notifModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-end justify-center backdrop-blur-sm" onclick="closeNotifications(event)">
-        <div class="bg-white w-full max-w-md rounded-t-3xl p-4 shadow-2xl h-[80vh] flex flex-col" onclick="event.stopPropagation()">
-            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
-            <div class="flex justify-between items-center mb-4 px-2">
-                <h2 class="text-xl font-bold text-gray-800">الإشعارات</h2>
-                <button onclick="closeNotifications()" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+    <!-- ================= نافذة التعليقات (Bottom Sheet) ================= -->
+    <div id="commentsModal" class="fixed inset-0 bg-black/60 z-[9999] flex flex-col justify-end">
+        <div class="bg-white w-full rounded-t-3xl h-[70vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
+            <!-- رأس النافذة -->
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-3xl">
+                <h2 class="font-bold text-gray-800 text-lg">كل التعليقات</h2>
+                <button onclick="closeCommentsModal()" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <div id="notifList" class="space-y-1 overflow-y-auto hide-scrollbar flex-1">
-                <!-- JS يملأ الإشعارات -->
+            <!-- قائمة التعليقات -->
+            <div id="commentsList" class="flex-1 overflow-y-auto p-4 space-y-4 hide-scrollbar">
+                <!-- JS يملأ التعليقات -->
+            </div>
+            
+            <!-- إدخال التعليق -->
+            <div class="p-3 border-t border-gray-100 bg-white flex gap-2 items-center">
+                <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden"><img id="commentUserAvatar" src="" class="w-full h-full object-cover"></div>
+                <input type="text" id="modalCommentInput" placeholder="اكتب تعليقاً..." class="flex-1 bg-gray-100 border-none rounded-full px-4 py-2.5 text-sm focus:outline-none">
+                <button onclick="submitModalComment()" class="text-[#1B5E20] text-lg px-2"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- ================= إشعار التوست (المنزلق) ================= -->
-    <div id="toast" class="bg-gray-900 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-gray-700">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-[#2E7D32] rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-bell"></i></div>
-            <div>
-                <p id="toastText" class="text-sm font-bold">شخص نشر منشوراً جديداً</p>
-                <p class="text-[11px] text-gray-400">هل تريد تفاعل معه؟</p>
+    <!-- ================= نافذة تعديل الملف الشخصي ================= -->
+    <div id="editProfileModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">تعديل الملف الشخصي</h2>
+            <label class="block text-sm font-bold text-gray-700 mb-1">الاسم</label>
+            <input type="text" id="editNameInput" class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#1B5E20] text-sm bg-gray-50 mb-4">
+            <div class="flex gap-2">
+                <button onclick="saveProfileName()" class="flex-1 bg-[#1B5E20] text-white font-bold py-3 rounded-xl shadow-md">حفظ</button>
+                <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">إلغاء</button>
             </div>
-        </div>
-        <button onclick="viewNewPost()" class="bg-[#1877F2] text-white text-xs px-3 py-1.5 rounded-lg font-bold">عرض</button>
-    </div>
-
-    <!-- خيارات المنشور -->
-    <div id="actionModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-end justify-center backdrop-blur-sm" onclick="closeActionModal(event)">
-        <div class="bg-white w-full max-w-md rounded-t-3xl p-4 shadow-2xl" onclick="event.stopPropagation()">
-            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
-            <button onclick="editCurrentPost()" class="w-full text-right py-3 px-4 text-gray-800 font-bold border-b border-gray-100 flex items-center gap-3"><i class="fa-solid fa-pen text-blue-500"></i> تعديل المنشور</button>
-            <button onclick="deleteCurrentPost()" class="w-full text-right py-3 px-4 text-red-500 font-bold flex items-center gap-3"><i class="fa-solid fa-trash"></i> حذف المنشور</button>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // 1. البيانات
+        // 1. البيانات الأساسية
         // ==========================================
         const defaultImg = "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400&auto=format&fit=crop";
         
@@ -395,33 +424,74 @@
             { id: 1, text: "مرحباً بكم في دليل مواكب كربلاء. يمكنكم الآن إضافة مواكبكم والخدمات التي تقدمونها.", img: null, time: Date.now() - 86400000, author: "إدارة التطبيق", likes: 12, isLiked: false, comments: [] }
         ];
 
-        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v10')) || [...defaultMawkibs];
-        let posts = JSON.parse(localStorage.getItem('karbalaPosts_v6')) || [...defaultPosts];
-        let notifications = JSON.parse(localStorage.getItem('karbalaNotifs_v2')) || [
-            { id: 1, text: "<b>إدارة التطبيق</b> رحبت بك في التطبيق.", time: Date.now() - 86400000, read: false, avatar: defaultImg, img: null, linkPostId: null }
-        ];
-        let stories = JSON.parse(localStorage.getItem('karbalaStories_v2')) || [
+        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v12')) || [...defaultMawkibs];
+        let posts = JSON.parse(localStorage.getItem('karbalaPosts_v8')) || [...defaultPosts];
+        let stories = JSON.parse(localStorage.getItem('karbalaStories_v4')) || [
             { id: 1, author: "موكب العباس", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=400", avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100" },
             { id: 2, author: "خدام الزائرين", img: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400", avatar: "https://images.unsplash.com/photo-1590075865416-4c5c5e4f8e7d?q=80&w=100" }
         ];
+        
+        let profile = JSON.parse(localStorage.getItem('karbalaProfile_v1')) || {
+            name: "زائر كريم",
+            img: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200"
+        };
 
         let editingPostId = null;
-        let currentPostOptionsId = null;
         let postImageBase64 = null;
+        let currentStoryIndex = 0;
         let storyTimeout = null;
-        let latestPostIdToView = null;
+        let activeCommentPostId = null;
 
         function saveAll() {
             try {
-                localStorage.setItem('karbalaMawkibs_v10', JSON.stringify(mawkibs));
-                localStorage.setItem('karbalaPosts_v6', JSON.stringify(posts));
-                localStorage.setItem('karbalaNotifs_v2', JSON.stringify(notifications));
-                localStorage.setItem('karbalaStories_v2', JSON.stringify(stories));
-            } catch (e) { alert("مساحة التخزين ممتلئة، يرجى استخدام صور أصغر."); }
+                localStorage.setItem('karbalaMawkibs_v12', JSON.stringify(mawkibs));
+                localStorage.setItem('karbalaPosts_v8', JSON.stringify(posts));
+                localStorage.setItem('karbalaStories_v4', JSON.stringify(stories));
+                localStorage.setItem('karbalaProfile_v1', JSON.stringify(profile));
+            } catch (e) { 
+                alert("مساحة التخزين ممتلئة (بسبب الصور الكبيرة جداً)، يرجى حذف بعض المنشورات القديمة.");
+            }
         }
 
         // ==========================================
-        // 2. شاشة البداية
+        // 2. ضغط الصور (لحل مشكلة المساحة نهائياً)
+        // ==========================================
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 600; // تصغير الأبعاد إلى 600 بكسل فقط
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    // ضغط الجودة إلى 0.5 (توفير مساحة ضخم مع بقاء الصورة مقبولة)
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                    callback(dataUrl);
+                };
+            };
+        }
+
+        // ==========================================
+        // 3. شاشة البداية
         // ==========================================
         setTimeout(() => {
             document.getElementById('splash').style.opacity = '0';
@@ -433,96 +503,67 @@
                 renderServicesList();
                 renderPosts();
                 renderStories();
-                updateNotificationDot();
+                renderProfile();
             }, 500);
         }, 1500);
 
         // ==========================================
-        // 3. الإشعارات وتصميم إنستغرام + التوست
+        // 4. الصفحة الشخصية
         // ==========================================
-        function showToast(text, postId) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastText').innerHTML = text;
-            latestPostIdToView = postId;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 5000);
+        function renderProfile() {
+            document.getElementById('profilePicDisplay').src = profile.img;
+            document.getElementById('profileNameDisplay').innerText = profile.name;
+            document.getElementById('commentUserAvatar').src = profile.img;
         }
 
-        function viewNewPost() {
-            document.getElementById('toast').classList.remove('show');
-            if(latestPostIdToView) {
-                const postElement = document.getElementById(`post-${latestPostIdToView}`);
-                if(postElement) {
-                    postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    postElement.classList.add('ring-4', 'ring-blue-300');
-                    setTimeout(() => postElement.classList.remove('ring-4', 'ring-blue-300'), 2000);
-                }
+        function updateProfilePic(event) {
+            const file = event.target.files[0];
+            if (file) {
+                compressImage(file, function(compressedBase64) {
+                    profile.img = compressedBase64;
+                    saveAll();
+                    renderProfile();
+                    renderPosts(); // تحديث صورة المستخدم في التعليقات والمنشورات
+                });
             }
         }
 
-        function updateNotificationDot() {
-            const unread = notifications.some(n => !n.read);
-            document.getElementById('notifDot').style.display = unread ? 'block' : 'none';
+        function openEditProfileModal() {
+            document.getElementById('editNameInput').value = profile.name;
+            document.getElementById('editProfileModal').classList.remove('hidden');
         }
 
-        function openNotifications() {
-            renderNotifications();
-            document.getElementById('notifModal').classList.remove('hidden');
-            notifications.forEach(n => n.read = true);
-            saveAll();
-            updateNotificationDot();
-        }
-        
-        function closeNotifications(e) {
-            if(!e || e.target.id === 'notifModal') document.getElementById('notifModal').classList.add('hidden');
-        }
-
-        function renderNotifications() {
-            const list = document.getElementById('notifList');
-            list.innerHTML = '';
-            
-            if(notifications.length === 0) {
-                list.innerHTML = '<div class="text-center text-gray-500 mt-10">لا توجد إشعارات</div>';
-                return;
+        function saveProfileName() {
+            const newName = document.getElementById('editNameInput').value.trim();
+            if(newName) {
+                profile.name = newName;
+                saveAll();
+                renderProfile();
+                document.getElementById('editProfileModal').classList.add('hidden');
             }
-
-            notifications.forEach(n => {
-                let imgHtml = n.img ? `<img src="${n.img}" class="w-10 h-10 object-cover rounded-md ml-auto">` : '';
-                let timeStr = new Date(n.time).toLocaleDateString('ar-EG');
-                list.innerHTML += `
-                    <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer" onclick="closeNotifications()">
-                        <img src="${n.avatar || defaultImg}" class="w-10 h-10 rounded-full object-cover border border-gray-200">
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-800">${n.text}</p>
-                            <span class="text-[10px] text-gray-400">${timeStr}</span>
-                        </div>
-                        ${imgHtml}
-                    </div>
-                `;
-            });
         }
 
         // ==========================================
-        // 4. الستوري (Stories)
+        // 5. الستوري (مع التنقل والسحب)
         // ==========================================
         function renderStories() {
             const container = document.getElementById('storiesContainer');
             container.innerHTML = `
                 <input type="file" id="storyUpload" accept="image/*" class="hidden" onchange="handleStoryUpload(event)">
-                <div class="min-w-[100px] h-[160px] bg-white rounded-xl shadow-sm border border-gray-200 relative overflow-hidden cursor-pointer flex flex-col click-effect" onclick="document.getElementById('storyUpload').click()">
-                    <img src="${defaultImg}" class="w-full h-[110px] object-cover">
+                <div class="min-w-[105px] h-[170px] bg-white rounded-2xl shadow-sm border border-gray-200 relative overflow-hidden cursor-pointer flex flex-col click-effect" onclick="document.getElementById('storyUpload').click()">
+                    <img src="${profile.img}" class="w-full h-[115px] object-cover">
                     <div class="flex-1 flex items-end justify-center pb-2"><span class="text-[11px] font-bold text-gray-700">إنشاء قصة</span></div>
-                    <div class="absolute bottom-[40px] left-1/2 transform -translate-x-1/2 bg-white rounded-full p-1 border-2 border-white">
-                        <div class="w-7 h-7 bg-[#1877F2] text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
+                    <div class="absolute bottom-[45px] left-1/2 transform -translate-x-1/2 bg-white rounded-full p-1 border-2 border-white">
+                        <div class="w-7 h-7 bg-[#1B5E20] text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
                     </div>
                 </div>
             `;
 
-            stories.forEach(s => {
+            stories.forEach((s, index) => {
                 container.innerHTML += `
-                    <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center click-effect" style="background-image: url('${s.img}');" onclick="viewStory(${s.id})">
+                    <div class="min-w-[105px] h-[170px] rounded-2xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center click-effect" style="background-image: url('${s.img}');" onclick="viewStory(${index})">
                         <div class="absolute inset-0 bg-black/30"></div>
-                        <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
+                        <div class="absolute top-2 left-2 w-8 h-8 rounded-full border-2 border-green-500 overflow-hidden">
                             <img src="${s.avatar || defaultImg}" class="w-full h-full object-cover">
                         </div>
                         <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold">${s.author}</span>
@@ -534,21 +575,20 @@
         function handleStoryUpload(event) {
             const file = event.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const newStory = { id: Date.now(), author: "أنت (زائر)", img: e.target.result, avatar: "" };
+                compressImage(file, function(compressedBase64) {
+                    const newStory = { id: Date.now(), author: profile.name, img: compressedBase64, avatar: profile.img };
                     stories.unshift(newStory);
                     saveAll();
                     renderStories();
-                    viewStory(newStory.id);
-                };
-                reader.readAsDataURL(file);
+                    viewStory(0); // عرض القصة الجديدة
+                });
             }
         }
 
-        function viewStory(id) {
-            const story = stories.find(s => s.id === id);
-            if (!story) return;
+        function viewStory(index) {
+            if(index < 0 || index >= stories.length) { closeStory(); return; }
+            currentStoryIndex = index;
+            const story = stories[index];
 
             document.getElementById('storyImage').src = story.img;
             document.getElementById('storyAuthor').innerText = story.author;
@@ -567,7 +607,25 @@
             }, 50);
 
             clearTimeout(storyTimeout);
-            storyTimeout = setTimeout(() => { closeStory(); }, 5000);
+            storyTimeout = setTimeout(() => { nextStory(); }, 5000);
+        }
+
+        function nextStory() {
+            clearTimeout(storyTimeout);
+            if(currentStoryIndex < stories.length - 1) {
+                viewStory(currentStoryIndex + 1);
+            } else {
+                closeStory();
+            }
+        }
+
+        function prevStory() {
+            clearTimeout(storyTimeout);
+            if(currentStoryIndex > 0) {
+                viewStory(currentStoryIndex - 1);
+            } else {
+                viewStory(0); // إعادة تشغيل الحالية
+            }
         }
 
         function closeStory() {
@@ -575,8 +633,20 @@
             clearTimeout(storyTimeout);
         }
 
+        // دعم السحب باليد (Swipe)
+        let touchStartX = 0;
+        document.getElementById('storyModal').addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        document.getElementById('storyModal').addEventListener('touchend', e => {
+            let touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX < touchStartX - 50) nextStory(); // سحب لليسار
+            if (touchEndX > touchStartX + 50) prevStory(); // سحب لليمين
+        }, false);
+
         // ==========================================
-        // 5. المنشورات (تعديل العرض ليكون كامل)
+        // 6. المنشورات والتعليقات (التصميم الجديد)
         // ==========================================
         function renderPosts() {
             const container = document.getElementById('postsContainer');
@@ -587,56 +657,41 @@
                 const timeString = date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
                 const dateString = date.toLocaleDateString('ar-EG');
 
-                let commentsHtml = '';
-                if (p.comments && p.comments.length > 0) {
-                    p.comments.forEach(c => {
-                        commentsHtml += `<div class="bg-gray-100 p-2 rounded-2xl text-xs mb-1"><b class="text-gray-900 block">${c.author}</b>${c.text}</div>`;
-                    });
-                }
-
-                // عرض الصورة كاملة دون قص (object-contain)
-                let imgHtml = p.img ? `<img src="${p.img}" class="w-full max-h-[500px] object-contain bg-gray-50 border-y border-gray-100">` : '';
-
+                let imgHtml = p.img ? `<img src="${p.img}" class="w-full max-h-[450px] object-contain bg-gray-50 border-y border-gray-100">` : '';
+                
                 let card = document.createElement('div');
                 card.id = `post-${p.id}`;
-                card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 relative mb-3 transition-all duration-500';
+                card.className = 'modern-card relative';
                 card.innerHTML = `
-                    <div class="flex items-center justify-between p-3">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-user"></i></div>
+                    <div class="flex items-center justify-between p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-50 text-[#1B5E20] rounded-full flex items-center justify-center font-bold text-lg overflow-hidden border border-green-100">
+                                <img src="${p.author === profile.name ? profile.img : defaultImg}" class="w-full h-full object-cover">
+                            </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-900">${p.author}</span>
-                                <span class="block text-[11px] text-gray-500">${dateString} - ${timeString} · <i class="fa-solid fa-earth-asia"></i></span>
+                                <span class="block text-[11px] text-gray-500">${dateString} - ${timeString}</span>
                             </div>
                         </div>
-                        <button onclick="openActionModal(${p.id})" class="text-gray-400 px-2 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-ellipsis"></i></button>
+                        <button onclick="openActionModal(${p.id})" class="text-gray-400 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-ellipsis"></i></button>
                     </div>
                     
-                    <p class="text-sm text-gray-800 leading-relaxed px-3 pb-3">${p.text}</p>
+                    <p class="text-[15px] text-gray-800 leading-relaxed px-4 pb-4">${p.text}</p>
                     ${imgHtml}
                     
-                    <div class="flex items-center justify-between px-3 py-1 border-t border-gray-200 mx-3 mt-1">
-                        <button onclick="toggleLike(${p.id})" class="flex items-center gap-1.5 py-2 text-sm ${p.isLiked ? 'text-[#1877F2]' : 'text-gray-500'} hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
-                            <i class="${p.isLiked ? 'fa-solid' : 'fa-regular'} fa-thumbs-up text-lg"></i>
-                            <span>أعجبني (${p.likes || 0})</span>
+                    <div class="flex items-center justify-between px-4 py-2 border-t border-gray-100 mt-2">
+                        <button onclick="toggleLike(${p.id})" class="flex items-center gap-2 py-1.5 text-sm ${p.isLiked ? 'text-red-500 font-bold' : 'text-gray-500 font-medium'} hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
+                            <i class="${p.isLiked ? 'fa-solid' : 'fa-regular'} fa-heart text-lg"></i>
+                            <span>إعجاب (${p.likes || 0})</span>
                         </button>
-                        <button onclick="toggleComments(${p.id})" class="flex items-center gap-1.5 py-2 text-sm text-gray-500 hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
-                            <i class="fa-regular fa-comment text-lg"></i>
+                        <button onclick="openCommentsModal(${p.id})" class="flex items-center gap-2 py-1.5 text-sm text-gray-500 font-medium hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
+                            <i class="fa-regular fa-comment-dots text-lg"></i>
                             <span>تعليق (${p.comments ? p.comments.length : 0})</span>
                         </button>
-                        <button onclick="sharePost('${p.text.replace(/'/g, "\\'")}')" class="flex items-center gap-1.5 py-2 text-sm text-gray-500 hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
-                            <i class="fa-solid fa-share text-lg"></i>
+                        <button onclick="sharePost('${p.text.replace(/'/g, "\\'")}')" class="flex items-center gap-2 py-1.5 text-sm text-gray-500 font-medium hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
+                            <i class="fa-solid fa-share-nodes text-lg"></i>
                             <span>مشاركة</span>
                         </button>
-                    </div>
-
-                    <div id="comments-section-${p.id}" class="hidden px-3 pb-3 border-t border-gray-100 mt-1 pt-3">
-                        <div class="mb-2 max-h-40 overflow-y-auto hide-scrollbar flex flex-col gap-1">${commentsHtml}</div>
-                        <div class="flex gap-2 items-center">
-                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500"><i class="fa-solid fa-user text-xs"></i></div>
-                            <input type="text" id="comment-input-${p.id}" placeholder="اكتب تعليقاً..." class="flex-1 border-none rounded-full px-4 py-2 text-sm focus:outline-none bg-gray-100">
-                            <button onclick="addComment(${p.id})" class="text-[#1877F2] px-2 text-lg"><i class="fa-solid fa-paper-plane"></i></button>
-                        </div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -649,29 +704,85 @@
             saveAll(); renderPosts();
         }
 
-        function toggleComments(id) { document.getElementById(`comments-section-${id}`).classList.toggle('hidden'); }
-
-        function addComment(id) {
-            const input = document.getElementById(`comment-input-${id}`);
-            const text = input.value.trim();
-            if (!text) return;
-            const post = posts.find(p => p.id === id);
-            post.comments.push({ author: "أنت (زائر)", text: text });
-            saveAll(); renderPosts();
-            setTimeout(() => document.getElementById(`comments-section-${id}`).classList.remove('hidden'), 100);
-        }
-
         async function sharePost(text) {
             if (navigator.share) {
-                try { await navigator.share({ title: 'دليل مواكب كربلاء', text: text }); } catch (e) {}
+                try {
+                    await navigator.share({
+                        title: 'دليل مواكب كربلاء',
+                        text: text,
+                        url: window.location.href
+                    });
+                } catch (e) { console.log('Share failed'); }
             } else {
                 navigator.clipboard.writeText(text);
-                alert('تم نسخ نص المنشور للمشاركة');
+                alert('تم نسخ النص (المشاركة غير مدعومة في هذا المتصفح)');
             }
         }
 
+        // التعليقات (Bottom Sheet)
+        function openCommentsModal(postId) {
+            activeCommentPostId = postId;
+            renderCommentsList();
+            document.getElementById('commentsModal').classList.add('show');
+        }
+
+        function closeCommentsModal() {
+            document.getElementById('commentsModal').classList.remove('show');
+        }
+
+        function renderCommentsList() {
+            const post = posts.find(p => p.id === activeCommentPostId);
+            const list = document.getElementById('commentsList');
+            list.innerHTML = '';
+            
+            if (!post.comments || post.comments.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-400 mt-10">لا توجد تعليقات بعد، كن أول المعلقين!</div>';
+                return;
+            }
+
+            post.comments.forEach(c => {
+                list.innerHTML += `
+                    <div class="flex gap-3">
+                        <div class="w-9 h-9 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                            <img src="${c.avatar || defaultImg}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-100 rounded-2xl p-3">
+                                <span class="font-bold text-sm text-gray-900 block mb-1">${c.author}</span>
+                                <span class="text-sm text-gray-800">${c.text}</span>
+                            </div>
+                            <div class="flex gap-4 text-xs font-bold text-gray-500 mt-1 px-2">
+                                <button class="hover:text-blue-600">إعجاب</button>
+                                <button class="hover:text-blue-600">رد</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function submitModalComment() {
+            const input = document.getElementById('modalCommentInput');
+            const text = input.value.trim();
+            if(!text || !activeCommentPostId) return;
+
+            const post = posts.find(p => p.id === activeCommentPostId);
+            post.comments.push({ author: profile.name, text: text, avatar: profile.img });
+            input.value = '';
+            
+            saveAll();
+            renderPosts();
+            renderCommentsList();
+        }
+
         // خيارات المنشور
-        function openActionModal(id) { currentPostOptionsId = id; document.getElementById('actionModal').classList.remove('hidden'); }
+        function openActionModal(id) { 
+            currentPostOptionsId = id; 
+            if(posts.find(p=>p.id===id).author !== profile.name) {
+                alert('لا يمكنك تعديل منشور ليس لك'); return;
+            }
+            document.getElementById('actionModal').classList.remove('hidden'); 
+        }
         function closeActionModal(e) { if(!e || e.target.id === 'actionModal') document.getElementById('actionModal').classList.add('hidden'); }
         
         function deleteCurrentPost() {
@@ -685,7 +796,7 @@
             const p = posts.find(x => x.id === currentPostOptionsId);
             if(!p) return;
             editingPostId = p.id;
-            document.getElementById('postModalTitle').innerHTML = '<i class="fa-solid fa-pen text-[#1877F2] ml-2"></i> تعديل المنشور';
+            document.getElementById('postModalTitle').innerHTML = '<i class="fa-solid fa-pen text-[#1B5E20] ml-2"></i> تعديل المنشور';
             document.getElementById('submitPostBtn').innerText = 'تحديث';
             document.getElementById('postText').value = p.text;
             postImageBase64 = p.img;
@@ -699,10 +810,9 @@
             document.getElementById('postModal').classList.remove('hidden');
         }
 
-        // إنشاء منشور
         function openPostModal() {
             editingPostId = null;
-            document.getElementById('postModalTitle').innerHTML = '<i class="fa-solid fa-pen-nib text-[#1877F2] ml-2"></i> إنشاء منشور';
+            document.getElementById('postModalTitle').innerHTML = '<i class="fa-solid fa-pen-nib text-[#1B5E20] ml-2"></i> إنشاء منشور';
             document.getElementById('submitPostBtn').innerText = 'نشر';
             document.getElementById('postText').value = '';
             postImageBase64 = null;
@@ -714,13 +824,11 @@
         function previewPostImage(event) {
             const file = event.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    postImageBase64 = e.target.result;
+                compressImage(file, function(compressedBase64) {
+                    postImageBase64 = compressedBase64;
                     document.getElementById('postImagePreview').src = postImageBase64;
                     document.getElementById('postImagePreview').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
+                });
             }
         }
 
@@ -728,40 +836,29 @@
             const text = document.getElementById('postText').value.trim();
             if (!text && !postImageBase64) { alert('اكتب نصاً أو أضف صورة'); return; }
 
-            let newPostId = null;
-
             if (editingPostId) {
                 const p = posts.find(x => x.id === editingPostId);
                 p.text = text;
                 p.img = postImageBase64;
-                notifications.unshift({ id: Date.now(), text: "<b>أنت</b> قمت بتعديل منشورك.", time: Date.now(), read: false, avatar: "", img: postImageBase64 });
             } else {
-                newPostId = Date.now();
-                posts.unshift({ id: newPostId, text: text, img: postImageBase64, time: Date.now(), author: "أنت (زائر)", likes: 0, isLiked: false, comments: [] });
-                
-                // إشعار داخل التطبيق (إنستغرام ستايل)
-                notifications.unshift({ 
+                posts.unshift({ 
                     id: Date.now(), 
-                    text: "<b>شخص (أنت)</b> نشر منشوراً جديداً. هل تريد تفاعل معه؟", 
+                    text: text, 
+                    img: postImageBase64, 
                     time: Date.now(), 
-                    read: false, 
-                    avatar: "", 
-                    img: postImageBase64,
-                    linkPostId: newPostId
+                    author: profile.name, 
+                    likes: 0, 
+                    isLiked: false, 
+                    comments: [] 
                 });
-
-                // إظهار التوست المنزلق
-                showToast("شخص نشر منشوراً جديداً", newPostId);
             }
             
-            saveAll(); renderPosts(); updateNotificationDot(); closePostModal();
-            
-            // التمرير لأعلى
+            saveAll(); renderPosts(); closePostModal();
             document.getElementById('page-posts').scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ==========================================
-        // 6. التنقل والخرائط والمواكب (نفس الكود القديم)
+        // 7. التنقل والخرائط (الكود الأساسي السابق)
         // ==========================================
         window.addEventListener('popstate', function (event) {
             if (!document.getElementById('page-home').classList.contains('active')) switchTab('home', 0);
@@ -936,13 +1033,11 @@
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('imagePreview').src = e.target.result;
+                compressImage(file, function(compressedBase64) {
+                    document.getElementById('imagePreview').src = compressedBase64;
                     document.getElementById('imagePreview').classList.remove('hidden');
-                    pickedImageBase64 = e.target.result;
-                };
-                reader.readAsDataURL(file);
+                    pickedImageBase64 = compressedBase64;
+                });
             }
         }
 
