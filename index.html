@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; overflow: hidden; }
+        body { font-family: 'Cairo', sans-serif; background-color: #F0F2F5; overflow: hidden; }
         .page { display: none; height: calc(100vh - 75px); overflow-y: auto; padding-bottom: 100px; }
         .page.active { display: block; }
         
@@ -30,9 +30,8 @@
         .leaflet-popup-content { font-family: 'Cairo', sans-serif; text-align: right; margin: 10px; }
         .click-effect:active { transform: scale(0.96); transition: 0.1s; }
         
-        /* تصغير أيقونات شريط التنقل قليلاً لاستيعاب 5 أزرار */
         .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; cursor: pointer; transition: 0.3s; padding: 6px 0; }
-        .nav-btn.active { color: #4CAF50; background: #111827; border-radius: 12px; margin: 4px; }
+        .nav-btn.active { color: #1B5E20; background: #E8F5E9; border-radius: 12px; margin: 4px; }
         .nav-btn i { font-size: 18px; margin-bottom: 4px; }
         .nav-btn span { font-size: 10px; font-weight: 700; }
 
@@ -47,7 +46,11 @@
         .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .btn-edit { background: #E3F2FD; color: #1976D2; }
         .btn-delete { background: #FFEBEE; color: #D32F2F; }
-        .liked { color: #ef4444 !important; }
+        .liked { color: #1877F2 !important; font-weight: bold; }
+
+        /* إخفاء شريط التمرير للقصص */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -63,7 +66,7 @@
     <div id="app" class="hidden flex flex-col h-screen bg-gray-100">
         <main class="flex-1 relative">
             
-            <!-- ================= 1. الصفحة الرئيسية (نظيفة) ================= -->
+            <!-- ================= 1. الصفحة الرئيسية ================= -->
             <div id="page-home" class="page active">
                 <div class="dark-header pb-10 px-5 pt-10 rounded-b-[40px] relative shadow-lg">
                     <div class="flex justify-between items-start mb-6">
@@ -103,7 +106,6 @@
                         <i class="fa-solid fa-chevron-left text-gray-400 relative z-10"></i>
                     </button>
 
-                    <!-- الخدمات -->
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="font-extrabold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-star text-green-600 text-sm"></i> الخدمات المتوفرة</h2>
                         <button onclick="switchTab('services', 2)" class="text-gray-500 text-sm font-semibold flex items-center gap-1">عرض الكل <i class="fa-solid fa-circle-chevron-left"></i></button>
@@ -160,14 +162,58 @@
                 </div>
             </div>
 
-            <!-- ================= 2. صفحة المنشورات (جديدة) ================= -->
-            <div id="page-posts" class="page bg-gray-50">
-                <div class="bg-white p-4 shadow-sm flex justify-between items-center sticky top-0 z-10">
-                    <h2 class="font-extrabold text-[#2E7D32] text-xl flex items-center gap-2"><i class="fa-solid fa-bullhorn"></i> آخر المنشورات</h2>
-                    <button onclick="openPostModal()" class="bg-green-100 text-[#2E7D32] px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm click-effect"><i class="fa-solid fa-plus ml-1"></i> إضافة</button>
+            <!-- ================= 2. صفحة المنشورات (تصميم فيسبوك) ================= -->
+            <div id="page-posts" class="page bg-[#F0F2F5]">
+                <!-- الشريط العلوي للفيسبوك -->
+                <div class="bg-white p-3 shadow-sm flex justify-between items-center sticky top-0 z-20">
+                    <h2 class="font-extrabold text-[#1877F2] text-2xl">المنشورات</h2>
+                    <div class="flex gap-2">
+                        <button class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        <button onclick="openPostModal()" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600"><i class="fa-solid fa-plus"></i></button>
+                    </div>
                 </div>
-                <div class="p-5">
-                    <div id="postsContainer" class="space-y-4">
+
+                <div class="p-2">
+                    <!-- مربع بم تفكر -->
+                    <div class="bg-white p-3 rounded-lg shadow-sm mb-3 flex items-center gap-2 border border-gray-200 cursor-pointer" onclick="openPostModal()">
+                        <div class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-gray-500"><i class="fa-solid fa-user"></i></div>
+                        <div class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-gray-500 text-sm">بم تفكر؟ (اكتب تحديثاً)...</div>
+                        <i class="fa-solid fa-image text-green-500 text-lg"></i>
+                    </div>
+
+                    <!-- قسم القصص (Stories) -->
+                    <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-3">
+                        <!-- إنشاء قصة -->
+                        <div class="min-w-[100px] h-[160px] bg-white rounded-xl shadow-sm border border-gray-200 relative overflow-hidden cursor-pointer flex flex-col" onclick="openPostModal()">
+                            <img src="https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=200" class="w-full h-[110px] object-cover">
+                            <div class="flex-1 flex items-end justify-center pb-2">
+                                <span class="text-[11px] font-bold text-gray-700">إنشاء قصة</span>
+                            </div>
+                            <div class="absolute bottom-[40px] left-1/2 transform -translate-x-1/2 bg-white rounded-full p-1 border-2 border-white">
+                                <div class="w-7 h-7 bg-[#1877F2] text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
+                            </div>
+                        </div>
+                        
+                        <!-- قصص تجريبية -->
+                        <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=200');">
+                            <div class="absolute inset-0 bg-black/30"></div>
+                            <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100" class="w-full h-full object-cover">
+                            </div>
+                            <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold text-shadow">موكب العباس</span>
+                        </div>
+                        
+                        <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=200');">
+                            <div class="absolute inset-0 bg-black/30"></div>
+                            <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1590075865416-4c5c5e4f8e7d?q=80&w=100" class="w-full h-full object-cover">
+                            </div>
+                            <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold text-shadow">خدام الزائرين</span>
+                        </div>
+                    </div>
+
+                    <!-- خلاصة المنشورات -->
+                    <div id="postsContainer" class="space-y-3">
                         <!-- سيتم توليد المنشورات هنا -->
                     </div>
                 </div>
@@ -184,7 +230,7 @@
                 </button>
             </div>
 
-            <!-- ================= 4. صفحة الخدمات/القائمة ================= -->
+            <!-- ================= 4. صفحة الخدمات ================= -->
             <div id="page-services" class="page p-5 bg-gray-50">
                 <div class="flex items-center gap-3 mb-6 mt-2">
                     <button onclick="switchTab('home', 0)" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-gray-600 click-effect"><i class="fa-solid fa-arrow-right"></i></button>
@@ -206,61 +252,35 @@
                 </div>
 
                 <form id="addForm" onsubmit="handleSaveMawkib(event)" class="space-y-5">
-                    
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">صورة الموكب</label>
                         <input type="file" id="mawkibImage" accept="image/*" onchange="previewImage(event)" class="w-full border border-gray-200 rounded-xl p-2 text-sm bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
                         <img id="imagePreview" class="hidden w-full h-40 object-cover rounded-xl mt-3 border border-gray-200 shadow-sm">
                     </div>
-
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">اسم الموكب</label>
                         <input type="text" id="mawkibName" required class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-green-600 text-sm bg-gray-50">
                     </div>
-                    
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">العنوان / المنطقة</label>
                         <input type="text" id="mawkibAddress" required class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-green-600 text-sm bg-gray-50">
                     </div>
-                    
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">الخدمات المتوفرة</label>
                         <div class="service-list">
-                            <label class="service-item">
-                                <input type="checkbox" name="service" value="طعام" class="service-checkbox">
-                                <span class="service-name"><span class="text-xl">🍲</span> طعام ووجبات</span>
-                            </label>
-                            <label class="service-item">
-                                <input type="checkbox" name="service" value="ماء" class="service-checkbox">
-                                <span class="service-name"><span class="text-xl">💧</span> ماء وشاي وقهوة</span>
-                            </label>
-                            <label class="service-item">
-                                <input type="checkbox" name="service" value="مبيت" class="service-checkbox">
-                                <span class="service-name"><span class="text-xl">🛏️</span> أماكن المبيت</span>
-                            </label>
-                            <label class="service-item">
-                                <input type="checkbox" name="service" value="إسعاف" class="service-checkbox">
-                                <span class="service-name"><span class="text-xl">🩺</span> إسعافات أولية</span>
-                            </label>
-                            <label class="service-item">
-                                <input type="checkbox" name="service" value="مياه" class="service-checkbox">
-                                <span class="service-name"><span class="text-xl">🚻</span> دورات مياه ووضوء</span>
-                            </label>
-                            <label class="service-item">
-                                <input type="checkbox" name="service" value="شحن" class="service-checkbox">
-                                <span class="service-name"><span class="text-xl">🔋</span> شحن هواتف</span>
-                            </label>
+                            <label class="service-item"><input type="checkbox" name="service" value="طعام" class="service-checkbox"><span class="service-name"><span class="text-xl">🍲</span> طعام ووجبات</span></label>
+                            <label class="service-item"><input type="checkbox" name="service" value="ماء" class="service-checkbox"><span class="service-name"><span class="text-xl">💧</span> ماء وشاي وقهوة</span></label>
+                            <label class="service-item"><input type="checkbox" name="service" value="مبيت" class="service-checkbox"><span class="service-name"><span class="text-xl">🛏️</span> أماكن المبيت</span></label>
+                            <label class="service-item"><input type="checkbox" name="service" value="إسعاف" class="service-checkbox"><span class="service-name"><span class="text-xl">🩺</span> إسعافات أولية</span></label>
+                            <label class="service-item"><input type="checkbox" name="service" value="مياه" class="service-checkbox"><span class="service-name"><span class="text-xl">🚻</span> دورات مياه ووضوء</span></label>
+                            <label class="service-item"><input type="checkbox" name="service" value="شحن" class="service-checkbox"><span class="service-name"><span class="text-xl">🔋</span> شحن هواتف</span></label>
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">حدد الموقع على الخريطة</label>
                         <div id="pickMap" class="w-full h-56 rounded-xl border border-gray-200 z-0"></div>
                     </div>
-
-                    <button type="submit" id="submitBtn" class="w-full bg-[#2E7D32] text-white font-bold py-4 rounded-xl shadow-md mt-4 click-effect">
-                        <i class="fa-solid fa-check-circle ml-2"></i> حفظ وإرسال
-                    </button>
+                    <button type="submit" id="submitBtn" class="w-full bg-[#2E7D32] text-white font-bold py-4 rounded-xl shadow-md mt-4 click-effect"><i class="fa-solid fa-check-circle ml-2"></i> حفظ وإرسال</button>
                 </form>
             </div>
 
@@ -276,7 +296,7 @@
 
         </main>
 
-        <!-- شريط التنقل السفلي (5 أزرار) -->
+        <!-- شريط التنقل السفلي -->
         <nav class="bg-white flex justify-around z-50 h-[75px] shadow-[0_-5px_15px_rgba(0,0,0,0.05)] rounded-t-3xl px-2 fixed bottom-0 w-full">
             <div class="nav-btn active" onclick="switchTab('home', 0)">
                 <i class="fa-solid fa-house"></i>
@@ -304,12 +324,12 @@
     <!-- نافذة إضافة منشور -->
     <div id="postModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
-            <h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fa-solid fa-pen-nib text-green-600 ml-2"></i> إضافة منشور جديد</h2>
-            <textarea id="postText" rows="4" placeholder="اكتب خبراً أو تحديثاً للمواكب هنا..." class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-green-600 text-sm bg-gray-50 mb-4 resize-none"></textarea>
-            <div class="flex gap-3">
-                <button onclick="submitPost()" class="flex-1 bg-[#2E7D32] text-white font-bold py-3 rounded-xl shadow-md click-effect hover:bg-green-800 transition">نشر الآن</button>
-                <button onclick="closePostModal()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl click-effect hover:bg-gray-300 transition">إلغاء</button>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-pen-nib text-[#1877F2] ml-2"></i> إنشاء منشور</h2>
+                <button onclick="closePostModal()" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            <textarea id="postText" rows="4" placeholder="بم تفكر؟..." class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#1877F2] text-sm bg-gray-50 mb-4 resize-none"></textarea>
+            <button onclick="submitPost()" class="w-full bg-[#1877F2] text-white font-bold py-3 rounded-xl shadow-md click-effect hover:bg-blue-700 transition">نشر</button>
         </div>
     </div>
 
@@ -327,18 +347,14 @@
 
         const defaultPosts = [
             { id: 1, text: "مرحباً بكم في دليل مواكب كربلاء. يمكنكم الآن إضافة مواكبكم والخدمات التي تقدمونها.", time: Date.now() - 86400000, author: "إدارة التطبيق", likes: 12, isLiked: false, comments: [] },
-            { id: 2, text: "موكب أنصار الحسين يعلن عن توزيع وجبات ساخنة طوال فترة الليل.", time: Date.now() - 3600000, author: "موكب أنصار الحسين", likes: 45, isLiked: false, comments: [{author: "علي", text: "جزاكم الله خيراً"}] }
+            { id: 2, text: "موكب أنصار الحسين يعلن عن توزيع وجبات ساخنة طوال فترة الليل. نسألكم الدعاء.", time: Date.now() - 3600000, author: "موكب أنصار الحسين", likes: 45, isLiked: false, comments: [{author: "علي", text: "جزاكم الله خيراً"}] }
         ];
 
-        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v6')) || [...defaultMawkibs];
-        let posts = JSON.parse(localStorage.getItem('karbalaPosts_v2')) || [...defaultPosts];
+        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v7')) || [...defaultMawkibs];
+        let posts = JSON.parse(localStorage.getItem('karbalaPosts_v3')) || [...defaultPosts];
 
-        function saveData() {
-            try { localStorage.setItem('karbalaMawkibs_v6', JSON.stringify(mawkibs)); } catch (e) {}
-        }
-        function savePosts() {
-            try { localStorage.setItem('karbalaPosts_v2', JSON.stringify(posts)); } catch (e) {}
-        }
+        function saveData() { try { localStorage.setItem('karbalaMawkibs_v7', JSON.stringify(mawkibs)); } catch (e) {} }
+        function savePosts() { try { localStorage.setItem('karbalaPosts_v3', JSON.stringify(posts)); } catch (e) {} }
 
         // ==========================================
         // 2. شاشة البداية
@@ -356,7 +372,7 @@
         }, 1500);
 
         // ==========================================
-        // 3. نظام المنشورات
+        // 3. نظام المنشورات (تصميم فيسبوك)
         // ==========================================
         function renderPosts() {
             const container = document.getElementById('postsContainer');
@@ -376,48 +392,59 @@
                 if (p.comments && p.comments.length > 0) {
                     p.comments.forEach(c => {
                         commentsHtml += `
-                            <div class="bg-white p-2 rounded-lg text-xs mb-2 shadow-sm border border-gray-100">
-                                <span class="font-bold text-[#2E7D32] block mb-1">${c.author}</span>
+                            <div class="bg-gray-100 p-2 rounded-2xl text-xs mb-2 w-max max-w-full">
+                                <span class="font-bold text-gray-900 block mb-0.5">${c.author}</span>
                                 <span class="text-gray-700">${c.text}</span>
                             </div>
                         `;
                     });
-                } else {
-                    commentsHtml = '<p class="text-xs text-gray-400 text-center py-2">لا توجد تعليقات بعد. كن أول المعلقين!</p>';
                 }
 
                 let card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative';
+                card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 relative';
                 card.innerHTML = `
-                    <div class="flex items-center gap-2 mb-2">
-                        <div class="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-xs">
-                            <i class="fa-solid fa-user-tie"></i>
+                    <!-- رأس المنشور -->
+                    <div class="flex items-center justify-between p-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-bold text-lg">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-900">${p.author || 'مسؤول الموكب'}</span>
+                                <span class="block text-[11px] text-gray-500">${dateString} - ${timeString} · <i class="fa-solid fa-earth-asia"></i></span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="block text-sm font-bold text-gray-800">${p.author || 'مسؤول الموكب'}</span>
-                            <span class="block text-[10px] text-gray-400">${dateString} - ${timeString}</span>
-                        </div>
+                        <button class="text-gray-400 px-2"><i class="fa-solid fa-ellipsis"></i></button>
                     </div>
-                    <p class="text-sm text-gray-700 leading-relaxed mb-3">${p.text}</p>
                     
-                    <div class="flex items-center gap-4 border-t border-gray-100 pt-3 text-sm text-gray-500">
-                        <button onclick="toggleLike(${p.id})" class="flex items-center gap-1 hover:text-red-500 transition ${p.isLiked ? 'liked' : ''}">
-                            <i class="${p.isLiked ? 'fa-solid' : 'fa-regular'} fa-heart text-base"></i>
-                            <span>${p.likes || 0}</span>
+                    <!-- نص المنشور -->
+                    <p class="text-sm text-gray-800 leading-relaxed px-3 pb-3">${p.text}</p>
+                    
+                    <!-- أزرار التفاعل -->
+                    <div class="flex items-center justify-between px-3 py-1 border-t border-gray-200 mx-3">
+                        <button onclick="toggleLike(${p.id})" class="flex items-center gap-1.5 py-2 text-sm ${p.isLiked ? 'text-[#1877F2]' : 'text-gray-500'} hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
+                            <i class="${p.isLiked ? 'fa-solid' : 'fa-regular'} fa-thumbs-up text-lg"></i>
+                            <span>أعجبني (${p.likes || 0})</span>
                         </button>
-                        <button onclick="toggleComments(${p.id})" class="flex items-center gap-1 hover:text-blue-500 transition">
-                            <i class="fa-regular fa-comment text-base"></i>
-                            <span>${p.comments ? p.comments.length : 0}</span>
+                        <button onclick="toggleComments(${p.id})" class="flex items-center gap-1.5 py-2 text-sm text-gray-500 hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
+                            <i class="fa-regular fa-comment text-lg"></i>
+                            <span>تعليق (${p.comments ? p.comments.length : 0})</span>
+                        </button>
+                        <button class="flex items-center gap-1.5 py-2 text-sm text-gray-500 hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
+                            <i class="fa-solid fa-share text-lg"></i>
+                            <span>مشاركة</span>
                         </button>
                     </div>
 
-                    <div id="comments-section-${p.id}" class="hidden mt-3 pt-3 border-t border-gray-50">
-                        <div class="mb-2 max-h-32 overflow-y-auto hide-scrollbar">
+                    <!-- قسم التعليقات -->
+                    <div id="comments-section-${p.id}" class="hidden px-3 pb-3 border-t border-gray-100 mt-1 pt-3">
+                        <div class="mb-2 max-h-40 overflow-y-auto hide-scrollbar flex flex-col gap-1">
                             ${commentsHtml}
                         </div>
-                        <div class="flex gap-2 mt-2">
-                            <input type="text" id="comment-input-${p.id}" placeholder="أضف تعليقاً..." class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-500 bg-gray-50">
-                            <button onclick="addComment(${p.id})" class="bg-[#2E7D32] text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-green-800 transition"><i class="fa-solid fa-paper-plane"></i></button>
+                        <div class="flex gap-2 items-center">
+                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 flex-shrink-0"><i class="fa-solid fa-user text-xs"></i></div>
+                            <input type="text" id="comment-input-${p.id}" placeholder="اكتب تعليقاً..." class="flex-1 border-none rounded-full px-4 py-2 text-sm focus:outline-none bg-gray-100">
+                            <button onclick="addComment(${p.id})" class="text-[#1877F2] px-2 text-lg"><i class="fa-solid fa-paper-plane"></i></button>
                         </div>
                     </div>
                 `;
@@ -473,10 +500,12 @@
             savePosts();
             renderPosts();
             closePostModal();
+            // التمرير لأعلى الصفحة لرؤية المنشور
+            document.getElementById('page-posts').scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ==========================================
-        // 4. التنقل والخرائط (نفس الكود)
+        // 4. التنقل والخرائط
         // ==========================================
         window.addEventListener('popstate', function (event) {
             if (!document.getElementById('page-home').classList.contains('active')) {
