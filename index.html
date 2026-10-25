@@ -43,12 +43,12 @@
         .service-checkbox:checked::after { content: ''; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; }
         .service-name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-        /* أزرار التعديل والحذف */
         .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .btn-edit { background: #E3F2FD; color: #1976D2; }
-        .btn-edit:hover { background: #BBDEFB; }
         .btn-delete { background: #FFEBEE; color: #D32F2F; }
-        .btn-delete:hover { background: #FFCDD2; }
+        
+        /* تأثيرات زر الإعجاب */
+        .liked { color: #ef4444 !important; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -104,6 +104,17 @@
                         <i class="fa-solid fa-chevron-left text-gray-400 relative z-10"></i>
                     </button>
 
+                    <!-- 📢 قسم المنشورات -->
+                    <div class="flex justify-between items-center mb-4 mt-2">
+                        <h2 class="font-extrabold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-bullhorn text-green-600 text-sm"></i> آخر المنشورات</h2>
+                        <button onclick="openPostModal()" class="bg-green-100 text-[#2E7D32] px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm click-effect"><i class="fa-solid fa-plus ml-1"></i> إضافة</button>
+                    </div>
+                    
+                    <div id="postsContainer" class="space-y-4 mb-8">
+                        <!-- سيتم توليد المنشورات هنا -->
+                    </div>
+
+                    <!-- الخدمات -->
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="font-extrabold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-star text-green-600 text-sm"></i> الخدمات المتوفرة</h2>
                         <button onclick="switchTab('services', 1)" class="text-gray-500 text-sm font-semibold flex items-center gap-1">عرض الكل <i class="fa-solid fa-circle-chevron-left"></i></button>
@@ -283,6 +294,18 @@
         </nav>
     </div>
 
+    <!-- نافذة إضافة منشور -->
+    <div id="postModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+            <h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fa-solid fa-pen-nib text-green-600 ml-2"></i> إضافة منشور جديد</h2>
+            <textarea id="postText" rows="4" placeholder="اكتب خبراً أو تحديثاً للمواكب هنا..." class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-green-600 text-sm bg-gray-50 mb-4 resize-none"></textarea>
+            <div class="flex gap-3">
+                <button onclick="submitPost()" class="flex-1 bg-[#2E7D32] text-white font-bold py-3 rounded-xl shadow-md click-effect hover:bg-green-800 transition">نشر الآن</button>
+                <button onclick="closePostModal()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl click-effect hover:bg-gray-300 transition">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==========================================
         // 1. البيانات
@@ -295,22 +318,23 @@
             { id: 3, name: "موكب قمر بني هاشم", lat: 32.6130, lng: 44.0220, services: "إسعاف, مياه", address: "باب القبلة", img: defaultImg }
         ];
 
-        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v4'));
-        if (!mawkibs || mawkibs.length === 0) {
-            mawkibs = [...defaultMawkibs];
-            saveData();
-        }
+        const defaultPosts = [
+            { id: 1, text: "مرحباً بكم في دليل مواكب كربلاء. يمكنكم الآن إضافة مواكبكم والخدمات التي تقدمونها.", time: Date.now() - 86400000, author: "إدارة التطبيق", likes: 12, isLiked: false, comments: [] },
+            { id: 2, text: "موكب أنصار الحسين يعلن عن توزيع وجبات ساخنة طوال فترة الليل.", time: Date.now() - 3600000, author: "موكب أنصار الحسين", likes: 45, isLiked: false, comments: [{author: "علي", text: "جزاكم الله خيراً"}] }
+        ];
+
+        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v6')) || [...defaultMawkibs];
+        let posts = JSON.parse(localStorage.getItem('karbalaPosts_v2')) || [...defaultPosts];
 
         function saveData() {
-            try {
-                localStorage.setItem('karbalaMawkibs_v4', JSON.stringify(mawkibs));
-            } catch (e) {
-                alert("مساحة التخزين ممتلئة، يرجى اختيار صورة أصغر.");
-            }
+            try { localStorage.setItem('karbalaMawkibs_v6', JSON.stringify(mawkibs)); } catch (e) {}
+        }
+        function savePosts() {
+            try { localStorage.setItem('karbalaPosts_v2', JSON.stringify(posts)); } catch (e) {}
         }
 
         // ==========================================
-        // 2. إخفاء شاشة البداية والتنقل
+        // 2. شاشة البداية
         // ==========================================
         setTimeout(() => {
             document.getElementById('splash').style.opacity = '0';
@@ -320,9 +344,162 @@
                 initMaps();
                 updateServiceCounts();
                 renderServicesList();
+                renderPosts();
             }, 500);
         }, 1500);
 
+        // ==========================================
+        // 3. نظام المنشورات والإعجابات والتعليقات
+        // ==========================================
+        function renderPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+            
+            // عرض آخر 3 منشورات
+            const latestPosts = posts.slice(0, 3);
+
+            latestPosts.forEach(p => {
+                const date = new Date(p.time);
+                const timeString = date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                const dateString = date.toLocaleDateString('ar-EG');
+
+                // تجهيز التعليقات
+                let commentsHtml = '';
+                if (p.comments && p.comments.length > 0) {
+                    p.comments.forEach(c => {
+                        commentsHtml += `
+                            <div class="bg-white p-2 rounded-lg text-xs mb-2 shadow-sm border border-gray-100">
+                                <span class="font-bold text-[#2E7D32] block mb-1">${c.author}</span>
+                                <span class="text-gray-700">${c.text}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    commentsHtml = '<p class="text-xs text-gray-400 text-center py-2">لا توجد تعليقات بعد. كن أول المعلقين!</p>';
+                }
+
+                let card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative';
+                card.innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-gray-800">${p.author || 'مسؤول الموكب'}</span>
+                            <span class="block text-[10px] text-gray-400">${dateString} - ${timeString}</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-700 leading-relaxed mb-3">${p.text}</p>
+                    
+                    <!-- أزرار التفاعل (لايك وتعليق) -->
+                    <div class="flex items-center gap-4 border-t border-gray-100 pt-3 text-sm text-gray-500">
+                        <button onclick="toggleLike(${p.id})" class="flex items-center gap-1 hover:text-red-500 transition ${p.isLiked ? 'liked' : ''}">
+                            <i class="${p.isLiked ? 'fa-solid' : 'fa-regular'} fa-heart text-base"></i>
+                            <span>${p.likes || 0}</span>
+                        </button>
+                        <button onclick="toggleComments(${p.id})" class="flex items-center gap-1 hover:text-blue-500 transition">
+                            <i class="fa-regular fa-comment text-base"></i>
+                            <span>${p.comments ? p.comments.length : 0}</span>
+                        </button>
+                    </div>
+
+                    <!-- قسم التعليقات المخفي -->
+                    <div id="comments-section-${p.id}" class="hidden mt-3 pt-3 border-t border-gray-50">
+                        <div class="mb-2 max-h-32 overflow-y-auto hide-scrollbar">
+                            ${commentsHtml}
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <input type="text" id="comment-input-${p.id}" placeholder="أضف تعليقاً..." class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-500 bg-gray-50">
+                            <button onclick="addComment(${p.id})" class="bg-[#2E7D32] text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-green-800 transition"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleLike(id) {
+            const post = posts.find(p => p.id === id);
+            if (!post) return;
+            
+            if (post.isLiked) {
+                post.likes--;
+                post.isLiked = false;
+            } else {
+                post.likes++;
+                post.isLiked = true;
+            }
+            savePosts();
+            renderPosts();
+        }
+
+        function toggleComments(id) {
+            const section = document.getElementById(`comments-section-${id}`);
+            if(section) section.classList.toggle('hidden');
+        }
+
+        function addComment(id) {
+            const input = document.getElementById(`comment-input-${id}`);
+            const text = input.value.trim();
+            if (!text) return;
+
+            const post = posts.find(p => p.id === id);
+            if (!post) return;
+
+            if (!post.comments) post.comments = [];
+            
+            post.comments.push({
+                author: "أنت (زائر)",
+                text: text
+            });
+
+            savePosts();
+            renderPosts();
+            
+            // فتح التعليقات تلقائياً بعد الإضافة
+            setTimeout(() => {
+                const newSection = document.getElementById(`comments-section-${id}`);
+                if(newSection) newSection.classList.remove('hidden');
+            }, 100);
+        }
+
+        function openPostModal() {
+            document.getElementById('postModal').classList.remove('hidden');
+            document.getElementById('postText').focus();
+        }
+
+        function closePostModal() {
+            document.getElementById('postModal').classList.add('hidden');
+            document.getElementById('postText').value = '';
+        }
+
+        function submitPost() {
+            const text = document.getElementById('postText').value.trim();
+            if (!text) {
+                alert('يرجى كتابة نص المنشور أولاً');
+                return;
+            }
+
+            const newPost = {
+                id: Date.now(),
+                text: text,
+                time: Date.now(),
+                author: "أنت (زائر)",
+                likes: 0,
+                isLiked: false,
+                comments: []
+            };
+
+            posts.unshift(newPost);
+            savePosts();
+            renderPosts();
+            closePostModal();
+        }
+
+        // ==========================================
+        // 4. باقي الكود (الخرائط، التنقل، المواكب)
+        // ==========================================
         window.addEventListener('popstate', function (event) {
             if (!document.getElementById('page-home').classList.contains('active')) {
                 switchTab('home', 0);
@@ -332,25 +509,16 @@
         function switchTab(pageId, navIndex) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            
             document.getElementById(`page-${pageId}`).classList.add('active');
-            
             const btns = document.querySelectorAll('.nav-btn');
             if(btns[navIndex]) btns[navIndex].classList.add('active');
-
             if (pageId === 'map' && mainMap) setTimeout(() => mainMap.invalidateSize(), 200);
             if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 200);
             if (pageId === 'home' && previewMap) setTimeout(() => previewMap.invalidateSize(), 200);
             if (pageId === 'services') renderServicesList();
-            
-            if(pageId !== 'home') {
-                history.pushState({page: pageId}, '', '#' + pageId);
-            }
+            if(pageId !== 'home') history.pushState({page: pageId}, '', '#' + pageId);
         }
 
-        // ==========================================
-        // 3. الخرائط
-        // ==========================================
         let mainMap, pickMap, previewMap;
         let mainMarkers = L.layerGroup();
         let previewMarkers = L.layerGroup();
@@ -360,18 +528,8 @@
         let pickedImageBase64 = null;
 
         const osmTile = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-        const mawkibIcon = L.divIcon({
-            className: 'custom-icon',
-            html: '<div style="background-color: #2E7D32; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"><i class="fa-solid fa-mosque"></i></div>',
-            iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16]
-        });
-
-        const shrineIcon = L.divIcon({
-            className: 'custom-icon',
-            html: '<div style="color: #FBBF24; font-size: 35px; text-align: center; filter: drop-shadow(0 0 10px rgba(251,191,36,0.6));"><i class="fa-solid fa-mosque"></i></div>',
-            iconSize: [35, 35], iconAnchor: [17, 17] 
-        });
+        const mawkibIcon = L.divIcon({ className: 'custom-icon', html: '<div style="background-color: #2E7D32; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"><i class="fa-solid fa-mosque"></i></div>', iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16] });
+        const shrineIcon = L.divIcon({ className: 'custom-icon', html: '<div style="color: #FBBF24; font-size: 35px; text-align: center; filter: drop-shadow(0 0 10px rgba(251,191,36,0.6));"><i class="fa-solid fa-mosque"></i></div>', iconSize: [35, 35], iconAnchor: [17, 17] });
 
         function initMaps() {
             previewMap = L.map('previewMap', { zoomControl: false, dragging: false, scrollWheelZoom: false }).setView([32.6160, 44.0249], 14);
@@ -389,15 +547,8 @@
             pickMap = L.map('pickMap').setView([pickedLat, pickedLng], 14);
             L.tileLayer(osmTile, { maxZoom: 19 }).addTo(pickMap);
             pickMarker = L.marker([pickedLat, pickedLng], { draggable: true }).addTo(pickMap);
-            
-            pickMap.on('click', function(e) {
-                pickedLat = e.latlng.lat; pickedLng = e.latlng.lng;
-                pickMarker.setLatLng([pickedLat, pickedLng]);
-            });
-            pickMarker.on('dragend', function(e) {
-                let position = pickMarker.getLatLng();
-                pickedLat = position.lat; pickedLng = position.lng;
-            });
+            pickMap.on('click', function(e) { pickedLat = e.latlng.lat; pickedLng = e.latlng.lng; pickMarker.setLatLng([pickedLat, pickedLng]); });
+            pickMarker.on('dragend', function(e) { let position = pickMarker.getLatLng(); pickedLat = position.lat; pickedLng = position.lng; });
         }
 
         function updateMainMapMarkers() {
@@ -405,16 +556,13 @@
             mawkibs.forEach(m => {
                 let marker = L.marker([m.lat, m.lng], {icon: mawkibIcon});
                 marker.mawkibId = m.id; 
-                
                 let popupContent = `
                     <div class="text-right font-cairo" style="width: 150px;">
                         <img src="${m.img}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;">
                         <h3 class="font-bold text-[#2E7D32] text-sm">${m.name}</h3>
                         <p class="text-[10px] text-gray-600 mb-1">${m.address}</p>
                         <div class="text-[10px] mb-2 text-gray-800 font-bold">${m.services}</div>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}" target="_blank" class="block bg-[#2E7D32] text-white text-center py-1 rounded text-xs mt-2 no-underline">
-                            <i class="fa-solid fa-diamond-turn-right ml-1"></i> الاتجاهات
-                        </a>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}" target="_blank" class="block bg-[#2E7D32] text-white text-center py-1 rounded text-xs mt-2 no-underline"><i class="fa-solid fa-diamond-turn-right ml-1"></i> الاتجاهات</a>
                     </div>
                 `;
                 marker.bindPopup(popupContent);
@@ -424,14 +572,9 @@
 
         function updatePreviewMapMarkers() {
             previewMarkers.clearLayers();
-            mawkibs.forEach(m => {
-                L.marker([m.lat, m.lng], {icon: mawkibIcon}).addTo(previewMarkers);
-            });
+            mawkibs.forEach(m => { L.marker([m.lat, m.lng], {icon: mawkibIcon}).addTo(previewMarkers); });
         }
 
-        // ==========================================
-        // 4. الإحصائيات
-        // ==========================================
         function updateServiceCounts() {
             const counts = { food: 0, water: 0, bed: 0, charge: 0, wc: 0, med: 0 };
             mawkibs.forEach(m => {
@@ -443,7 +586,6 @@
                 if (s.includes('مياه')) counts.wc++;
                 if (s.includes('إسعاف')) counts.med++;
             });
-
             document.getElementById('count-food').textContent = counts.food + ' مواكب';
             document.getElementById('count-water').textContent = counts.water + ' مواكب';
             document.getElementById('count-bed').textContent = counts.bed + ' مواكب';
@@ -452,19 +594,8 @@
             document.getElementById('count-med').textContent = counts.med + ' مواكب';
         }
 
-        // ==========================================
-        // 5. القائمة (مع أزرار التعديل والحذف)
-        // ==========================================
-        function searchMawkibs() {
-            renderServicesList(document.getElementById('searchHome').value);
-            switchTab('services', 1); 
-        }
-
-        function filterByService(serviceName) {
-            document.getElementById('searchHome').value = serviceName;
-            renderServicesList(serviceName);
-            switchTab('services', 1);
-        }
+        function searchMawkibs() { renderServicesList(document.getElementById('searchHome').value); switchTab('services', 1); }
+        function filterByService(serviceName) { document.getElementById('searchHome').value = serviceName; renderServicesList(serviceName); switchTab('services', 1); }
 
         function renderServicesList(filterText = '') {
             const container = document.getElementById('servicesList');
@@ -474,26 +605,14 @@
                 const q = filterText.toLowerCase();
                 filtered = mawkibs.filter(m => m.name.toLowerCase().includes(q) || m.services.toLowerCase().includes(q) || m.address.toLowerCase().includes(q));
             }
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد مواكب مطابقة</div>';
-                return;
-            }
-
+            if (filtered.length === 0) { container.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد مواكب مطابقة</div>'; return; }
             filtered.forEach(m => {
                 let card = document.createElement('div');
                 card.className = 'bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center cursor-pointer click-effect mb-3 relative';
-                
                 card.onclick = () => {
                     switchTab('map', 1);
-                    setTimeout(() => {
-                        mainMap.setView([m.lat, m.lng], 17);
-                        mainMarkers.eachLayer(layer => {
-                            if (layer.mawkibId === m.id) layer.openPopup();
-                        });
-                    }, 300);
+                    setTimeout(() => { mainMap.setView([m.lat, m.lng], 17); mainMarkers.eachLayer(layer => { if (layer.mawkibId === m.id) layer.openPopup(); }); }, 300);
                 };
-                
                 card.innerHTML = `
                     <img src="${m.img || defaultImg}" class="w-16 h-16 rounded-xl object-cover ml-3 border border-gray-100" alt="صورة">
                     <div class="flex-1">
@@ -501,31 +620,21 @@
                         <p class="text-[11px] text-gray-500 mb-1"><i class="fa-solid fa-location-dot ml-1 text-green-600"></i>${m.address}</p>
                         <span class="text-[10px] bg-green-50 text-[#2E7D32] px-2 py-0.5 rounded font-bold border border-green-100">${m.services}</span>
                     </div>
-                    <!-- أزرار التعديل والحذف -->
                     <div class="flex flex-col gap-2 mr-2">
-                        <button onclick="editMawkib(event, ${m.id})" class="action-btn btn-edit" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteMawkib(event, ${m.id})" class="action-btn btn-delete" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="editMawkib(event, ${m.id})" class="action-btn btn-edit"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteMawkib(event, ${m.id})" class="action-btn btn-delete"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // ==========================================
-        // 6. الحذف والتعديل
-        // ==========================================
-        let editingMawkibId = null; // متغير لمعرفة إذا كنا نعدل أم نضيف
-
+        let editingMawkibId = null;
         function deleteMawkib(event, id) {
-            event.stopPropagation(); // منع فتح الخريطة عند الضغط على الزر
+            event.stopPropagation();
             if(confirm('هل أنت متأكد من حذف هذا الموكب نهائياً؟')) {
                 mawkibs = mawkibs.filter(m => m.id !== id);
-                saveData();
-                renderServicesList();
-                updateMainMapMarkers();
-                updatePreviewMapMarkers();
-                updateServiceCounts();
-                alert('تم حذف الموكب بنجاح');
+                saveData(); renderServicesList(); updateMainMapMarkers(); updatePreviewMapMarkers(); updateServiceCounts();
             }
         }
 
@@ -533,38 +642,18 @@
             event.stopPropagation();
             const m = mawkibs.find(x => x.id === id);
             if(!m) return;
-
             editingMawkibId = id;
-            
-            // تغيير واجهة النموذج
             document.getElementById('formTitle').innerText = "تعديل بيانات الموكب";
             document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-pen-to-square ml-2"></i> تحديث البيانات';
             document.getElementById('cancelBtn').classList.remove('hidden');
-
-            // تعبئة البيانات
             document.getElementById('mawkibName').value = m.name;
             document.getElementById('mawkibAddress').value = m.address;
-            
-            // تحديد الخدمات
-            document.querySelectorAll('input[name="service"]').forEach(cb => {
-                cb.checked = m.services.includes(cb.value);
-            });
-
-            // الصورة والموقع
+            document.querySelectorAll('input[name="service"]').forEach(cb => { cb.checked = m.services.includes(cb.value); });
             pickedImageBase64 = m.img;
-            if(m.img) {
-                document.getElementById('imagePreview').src = m.img;
-                document.getElementById('imagePreview').classList.remove('hidden');
-            }
-
+            if(m.img) { document.getElementById('imagePreview').src = m.img; document.getElementById('imagePreview').classList.remove('hidden'); }
             pickedLat = m.lat; pickedLng = m.lng;
-            
-            // الانتقال للصفحة وتحديث الخريطة
             switchTab('add', 2);
-            setTimeout(() => {
-                pickMap.setView([pickedLat, pickedLng], 16);
-                pickMarker.setLatLng([pickedLat, pickedLng]);
-            }, 300);
+            setTimeout(() => { pickMap.setView([pickedLat, pickedLng], 16); pickMarker.setLatLng([pickedLat, pickedLng]); }, 300);
         }
 
         function prepareAddNew() {
@@ -576,18 +665,11 @@
             document.getElementById('imagePreview').classList.add('hidden');
             pickedImageBase64 = null;
             document.querySelectorAll('input[name="service"]').forEach(cb => cb.checked = false);
-            
             switchTab('add', 2);
         }
 
-        function cancelEdit() {
-            prepareAddNew();
-            switchTab('home', 0);
-        }
+        function cancelEdit() { prepareAddNew(); switchTab('home', 0); }
 
-        // ==========================================
-        // 7. الحفظ (إضافة أو تحديث)
-        // ==========================================
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
@@ -603,64 +685,34 @@
 
         function handleSaveMawkib(e) {
             e.preventDefault();
-            
             const selectedServices = Array.from(document.querySelectorAll('input[name="service"]:checked')).map(cb => cb.value).join(', ');
-            
-            if (!selectedServices) {
-                alert('يرجى اختيار خدمة واحدة على الأقل');
-                return;
-            }
-
+            if (!selectedServices) { alert('يرجى اختيار خدمة واحدة على الأقل'); return; }
             const data = {
                 name: document.getElementById('mawkibName').value,
                 services: selectedServices,
                 address: document.getElementById('mawkibAddress').value,
-                lat: pickedLat,
-                lng: pickedLng,
+                lat: pickedLat, lng: pickedLng,
                 img: pickedImageBase64 || defaultImg
             };
-
             if (editingMawkibId) {
-                // تحديث موكب موجود
                 const index = mawkibs.findIndex(m => m.id === editingMawkibId);
-                if(index !== -1) {
-                    mawkibs[index] = { ...mawkibs[index], ...data };
-                    alert('تم تعديل بيانات الموكب بنجاح!');
-                }
+                if(index !== -1) { mawkibs[index] = { ...mawkibs[index], ...data }; alert('تم تعديل بيانات الموكب بنجاح!'); }
             } else {
-                // إضافة موكب جديد
-                const newMawkib = { id: Date.now(), ...data };
-                mawkibs.unshift(newMawkib);
-                alert('تم حفظ الموكب بنجاح!');
+                mawkibs.unshift({ id: Date.now(), ...data }); alert('تم حفظ الموكب بنجاح!');
             }
-
-            saveData(); 
-            updateMainMapMarkers(); 
-            updatePreviewMapMarkers();
-            updateServiceCounts();
-            renderServicesList();
-            
-            prepareAddNew(); // تصفير النموذج
-            switchTab('home', 0);
+            saveData(); updateMainMapMarkers(); updatePreviewMapMarkers(); updateServiceCounts(); renderServicesList();
+            prepareAddNew(); switchTab('home', 0);
         }
 
-        // ==========================================
-        // 8. تحديد الموقع
-        // ==========================================
-        function findClosestMawkib() {
-            switchTab('map', 1);
-            locateUser();
-        }
+        function findClosestMawkib() { switchTab('map', 1); locateUser(); }
 
         function locateUser() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
+                        const lat = position.coords.latitude; const lng = position.coords.longitude;
                         mainMap.setView([lat, lng], 16);
-                        L.circleMarker([lat, lng], { color: '#3B82F6', fillColor: '#3B82F6', fillOpacity: 1, radius: 8 })
-                         .addTo(mainMap).bindPopup("موقعك الحالي").openPopup();
+                        L.circleMarker([lat, lng], { color: '#3B82F6', fillColor: '#3B82F6', fillOpacity: 1, radius: 8 }).addTo(mainMap).bindPopup("موقعك الحالي").openPopup();
                     },
                     () => alert('يرجى السماح للمتصفح بالوصول إلى موقعك.')
                 );
