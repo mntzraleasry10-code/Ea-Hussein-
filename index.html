@@ -30,10 +30,11 @@
         .leaflet-popup-content { font-family: 'Cairo', sans-serif; text-align: right; margin: 10px; }
         .click-effect:active { transform: scale(0.96); transition: 0.1s; }
         
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; cursor: pointer; transition: 0.3s; padding: 8px 0; }
-        .nav-btn.active { color: #4CAF50; background: #111827; border-radius: 15px; margin: 5px; }
-        .nav-btn i { font-size: 20px; margin-bottom: 4px; }
-        .nav-btn span { font-size: 11px; font-weight: 700; }
+        /* تصغير أيقونات شريط التنقل قليلاً لاستيعاب 5 أزرار */
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; cursor: pointer; transition: 0.3s; padding: 6px 0; }
+        .nav-btn.active { color: #4CAF50; background: #111827; border-radius: 12px; margin: 4px; }
+        .nav-btn i { font-size: 18px; margin-bottom: 4px; }
+        .nav-btn span { font-size: 10px; font-weight: 700; }
 
         .service-list { background: #1a1a1a; border-radius: 15px; overflow: hidden; margin-top: 10px; }
         .service-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #333; color: white; cursor: pointer; }
@@ -46,8 +47,6 @@
         .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .btn-edit { background: #E3F2FD; color: #1976D2; }
         .btn-delete { background: #FFEBEE; color: #D32F2F; }
-        
-        /* تأثيرات زر الإعجاب */
         .liked { color: #ef4444 !important; }
     </style>
 </head>
@@ -64,7 +63,7 @@
     <div id="app" class="hidden flex flex-col h-screen bg-gray-100">
         <main class="flex-1 relative">
             
-            <!-- ================= 1. الصفحة الرئيسية ================= -->
+            <!-- ================= 1. الصفحة الرئيسية (نظيفة) ================= -->
             <div id="page-home" class="page active">
                 <div class="dark-header pb-10 px-5 pt-10 rounded-b-[40px] relative shadow-lg">
                     <div class="flex justify-between items-start mb-6">
@@ -104,20 +103,10 @@
                         <i class="fa-solid fa-chevron-left text-gray-400 relative z-10"></i>
                     </button>
 
-                    <!-- 📢 قسم المنشورات -->
-                    <div class="flex justify-between items-center mb-4 mt-2">
-                        <h2 class="font-extrabold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-bullhorn text-green-600 text-sm"></i> آخر المنشورات</h2>
-                        <button onclick="openPostModal()" class="bg-green-100 text-[#2E7D32] px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm click-effect"><i class="fa-solid fa-plus ml-1"></i> إضافة</button>
-                    </div>
-                    
-                    <div id="postsContainer" class="space-y-4 mb-8">
-                        <!-- سيتم توليد المنشورات هنا -->
-                    </div>
-
                     <!-- الخدمات -->
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="font-extrabold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-star text-green-600 text-sm"></i> الخدمات المتوفرة</h2>
-                        <button onclick="switchTab('services', 1)" class="text-gray-500 text-sm font-semibold flex items-center gap-1">عرض الكل <i class="fa-solid fa-circle-chevron-left"></i></button>
+                        <button onclick="switchTab('services', 2)" class="text-gray-500 text-sm font-semibold flex items-center gap-1">عرض الكل <i class="fa-solid fa-circle-chevron-left"></i></button>
                     </div>
                     
                     <div class="grid grid-cols-3 gap-4 mb-8">
@@ -157,7 +146,7 @@
                         <h2 class="font-extrabold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-star text-green-600 text-sm"></i> خريطة المواكب</h2>
                     </div>
                     
-                    <div class="relative w-full h-44 rounded-3xl overflow-hidden shadow-md mb-6 border-2 border-white cursor-pointer" onclick="switchTab('map', 1)">
+                    <div class="relative w-full h-44 rounded-3xl overflow-hidden shadow-md mb-6 border-2 border-white cursor-pointer" onclick="switchTab('map', 0)">
                         <div id="previewMap" class="w-full h-full pointer-events-none"></div>
                         <button class="absolute bottom-3 left-3 bg-white w-9 h-9 rounded-full shadow flex items-center justify-center text-gray-800 z-[400]">
                             <i class="fa-solid fa-crosshairs"></i>
@@ -171,7 +160,20 @@
                 </div>
             </div>
 
-            <!-- ================= 2. صفحة الخريطة ================= -->
+            <!-- ================= 2. صفحة المنشورات (جديدة) ================= -->
+            <div id="page-posts" class="page bg-gray-50">
+                <div class="bg-white p-4 shadow-sm flex justify-between items-center sticky top-0 z-10">
+                    <h2 class="font-extrabold text-[#2E7D32] text-xl flex items-center gap-2"><i class="fa-solid fa-bullhorn"></i> آخر المنشورات</h2>
+                    <button onclick="openPostModal()" class="bg-green-100 text-[#2E7D32] px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm click-effect"><i class="fa-solid fa-plus ml-1"></i> إضافة</button>
+                </div>
+                <div class="p-5">
+                    <div id="postsContainer" class="space-y-4">
+                        <!-- سيتم توليد المنشورات هنا -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 3. صفحة الخريطة ================= -->
             <div id="page-map" class="page relative bg-gray-100 !p-0">
                 <button onclick="switchTab('home', 0)" class="absolute top-6 right-4 z-[500] bg-white text-gray-800 w-10 h-10 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 click-effect">
                     <i class="fa-solid fa-arrow-right"></i>
@@ -182,7 +184,7 @@
                 </button>
             </div>
 
-            <!-- ================= 3. صفحة الخدمات/القائمة ================= -->
+            <!-- ================= 4. صفحة الخدمات/القائمة ================= -->
             <div id="page-services" class="page p-5 bg-gray-50">
                 <div class="flex items-center gap-3 mb-6 mt-2">
                     <button onclick="switchTab('home', 0)" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-gray-600 click-effect"><i class="fa-solid fa-arrow-right"></i></button>
@@ -193,7 +195,7 @@
                 </div>
             </div>
 
-            <!-- ================= 4. صفحة إضافة / تعديل موكب ================= -->
+            <!-- ================= 5. صفحة إضافة / تعديل موكب ================= -->
             <div id="page-add" class="page p-5 bg-white">
                 <div class="flex items-center justify-between mb-6 mt-2">
                     <div class="flex items-center gap-3">
@@ -262,7 +264,7 @@
                 </form>
             </div>
 
-            <!-- ================= 5. صفحة حسابي ================= -->
+            <!-- ================= 6. صفحة حسابي ================= -->
             <div id="page-account" class="page p-5 flex flex-col items-center justify-center bg-gray-50">
                 <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-sm">
                     <i class="fa-solid fa-user text-4xl text-gray-400"></i>
@@ -274,20 +276,25 @@
 
         </main>
 
+        <!-- شريط التنقل السفلي (5 أزرار) -->
         <nav class="bg-white flex justify-around z-50 h-[75px] shadow-[0_-5px_15px_rgba(0,0,0,0.05)] rounded-t-3xl px-2 fixed bottom-0 w-full">
             <div class="nav-btn active" onclick="switchTab('home', 0)">
                 <i class="fa-solid fa-house"></i>
                 <span>الرئيسية</span>
             </div>
-            <div class="nav-btn" onclick="switchTab('services', 1)">
+            <div class="nav-btn" onclick="switchTab('posts', 1)">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span>المنشورات</span>
+            </div>
+            <div class="nav-btn" onclick="switchTab('services', 2)">
                 <i class="fa-solid fa-clipboard-list"></i>
                 <span>الخدمات</span>
             </div>
-            <div class="nav-btn" onclick="switchTab('add', 2)">
-                <i class="fa-regular fa-square-plus text-2xl"></i>
+            <div class="nav-btn" onclick="switchTab('add', 3)">
+                <i class="fa-regular fa-square-plus text-xl"></i>
                 <span>تسجيل موكب</span>
             </div>
-            <div class="nav-btn" onclick="switchTab('account', 3)">
+            <div class="nav-btn" onclick="switchTab('account', 4)">
                 <i class="fa-regular fa-user"></i>
                 <span>حسابي</span>
             </div>
@@ -349,21 +356,22 @@
         }, 1500);
 
         // ==========================================
-        // 3. نظام المنشورات والإعجابات والتعليقات
+        // 3. نظام المنشورات
         // ==========================================
         function renderPosts() {
             const container = document.getElementById('postsContainer');
             container.innerHTML = '';
             
-            // عرض آخر 3 منشورات
-            const latestPosts = posts.slice(0, 3);
+            if(posts.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد منشورات حالياً</div>';
+                return;
+            }
 
-            latestPosts.forEach(p => {
+            posts.forEach(p => {
                 const date = new Date(p.time);
                 const timeString = date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
                 const dateString = date.toLocaleDateString('ar-EG');
 
-                // تجهيز التعليقات
                 let commentsHtml = '';
                 if (p.comments && p.comments.length > 0) {
                     p.comments.forEach(c => {
@@ -392,7 +400,6 @@
                     </div>
                     <p class="text-sm text-gray-700 leading-relaxed mb-3">${p.text}</p>
                     
-                    <!-- أزرار التفاعل (لايك وتعليق) -->
                     <div class="flex items-center gap-4 border-t border-gray-100 pt-3 text-sm text-gray-500">
                         <button onclick="toggleLike(${p.id})" class="flex items-center gap-1 hover:text-red-500 transition ${p.isLiked ? 'liked' : ''}">
                             <i class="${p.isLiked ? 'fa-solid' : 'fa-regular'} fa-heart text-base"></i>
@@ -404,7 +411,6 @@
                         </button>
                     </div>
 
-                    <!-- قسم التعليقات المخفي -->
                     <div id="comments-section-${p.id}" class="hidden mt-3 pt-3 border-t border-gray-50">
                         <div class="mb-2 max-h-32 overflow-y-auto hide-scrollbar">
                             ${commentsHtml}
@@ -422,14 +428,8 @@
         function toggleLike(id) {
             const post = posts.find(p => p.id === id);
             if (!post) return;
-            
-            if (post.isLiked) {
-                post.likes--;
-                post.isLiked = false;
-            } else {
-                post.likes++;
-                post.isLiked = true;
-            }
+            if (post.isLiked) { post.likes--; post.isLiked = false; } 
+            else { post.likes++; post.isLiked = true; }
             savePosts();
             renderPosts();
         }
@@ -443,21 +443,12 @@
             const input = document.getElementById(`comment-input-${id}`);
             const text = input.value.trim();
             if (!text) return;
-
             const post = posts.find(p => p.id === id);
             if (!post) return;
-
             if (!post.comments) post.comments = [];
-            
-            post.comments.push({
-                author: "أنت (زائر)",
-                text: text
-            });
-
+            post.comments.push({ author: "أنت (زائر)", text: text });
             savePosts();
             renderPosts();
-            
-            // فتح التعليقات تلقائياً بعد الإضافة
             setTimeout(() => {
                 const newSection = document.getElementById(`comments-section-${id}`);
                 if(newSection) newSection.classList.remove('hidden');
@@ -476,21 +467,8 @@
 
         function submitPost() {
             const text = document.getElementById('postText').value.trim();
-            if (!text) {
-                alert('يرجى كتابة نص المنشور أولاً');
-                return;
-            }
-
-            const newPost = {
-                id: Date.now(),
-                text: text,
-                time: Date.now(),
-                author: "أنت (زائر)",
-                likes: 0,
-                isLiked: false,
-                comments: []
-            };
-
+            if (!text) { alert('يرجى كتابة نص المنشور أولاً'); return; }
+            const newPost = { id: Date.now(), text: text, time: Date.now(), author: "أنت (زائر)", likes: 0, isLiked: false, comments: [] };
             posts.unshift(newPost);
             savePosts();
             renderPosts();
@@ -498,7 +476,7 @@
         }
 
         // ==========================================
-        // 4. باقي الكود (الخرائط، التنقل، المواكب)
+        // 4. التنقل والخرائط (نفس الكود)
         // ==========================================
         window.addEventListener('popstate', function (event) {
             if (!document.getElementById('page-home').classList.contains('active')) {
@@ -510,12 +488,14 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`page-${pageId}`).classList.add('active');
+            
             const btns = document.querySelectorAll('.nav-btn');
             if(btns[navIndex]) btns[navIndex].classList.add('active');
+
             if (pageId === 'map' && mainMap) setTimeout(() => mainMap.invalidateSize(), 200);
             if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 200);
             if (pageId === 'home' && previewMap) setTimeout(() => previewMap.invalidateSize(), 200);
-            if (pageId === 'services') renderServicesList();
+            
             if(pageId !== 'home') history.pushState({page: pageId}, '', '#' + pageId);
         }
 
@@ -594,8 +574,8 @@
             document.getElementById('count-med').textContent = counts.med + ' مواكب';
         }
 
-        function searchMawkibs() { renderServicesList(document.getElementById('searchHome').value); switchTab('services', 1); }
-        function filterByService(serviceName) { document.getElementById('searchHome').value = serviceName; renderServicesList(serviceName); switchTab('services', 1); }
+        function searchMawkibs() { renderServicesList(document.getElementById('searchHome').value); switchTab('services', 2); }
+        function filterByService(serviceName) { document.getElementById('searchHome').value = serviceName; renderServicesList(serviceName); switchTab('services', 2); }
 
         function renderServicesList(filterText = '') {
             const container = document.getElementById('servicesList');
@@ -610,7 +590,7 @@
                 let card = document.createElement('div');
                 card.className = 'bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center cursor-pointer click-effect mb-3 relative';
                 card.onclick = () => {
-                    switchTab('map', 1);
+                    switchTab('map', 0);
                     setTimeout(() => { mainMap.setView([m.lat, m.lng], 17); mainMarkers.eachLayer(layer => { if (layer.mawkibId === m.id) layer.openPopup(); }); }, 300);
                 };
                 card.innerHTML = `
@@ -652,7 +632,7 @@
             pickedImageBase64 = m.img;
             if(m.img) { document.getElementById('imagePreview').src = m.img; document.getElementById('imagePreview').classList.remove('hidden'); }
             pickedLat = m.lat; pickedLng = m.lng;
-            switchTab('add', 2);
+            switchTab('add', 3);
             setTimeout(() => { pickMap.setView([pickedLat, pickedLng], 16); pickMarker.setLatLng([pickedLat, pickedLng]); }, 300);
         }
 
@@ -665,7 +645,7 @@
             document.getElementById('imagePreview').classList.add('hidden');
             pickedImageBase64 = null;
             document.querySelectorAll('input[name="service"]').forEach(cb => cb.checked = false);
-            switchTab('add', 2);
+            switchTab('add', 3);
         }
 
         function cancelEdit() { prepareAddNew(); switchTab('home', 0); }
@@ -704,7 +684,7 @@
             prepareAddNew(); switchTab('home', 0);
         }
 
-        function findClosestMawkib() { switchTab('map', 1); locateUser(); }
+        function findClosestMawkib() { switchTab('map', 0); locateUser(); }
 
         function locateUser() {
             if (navigator.geolocation) {
