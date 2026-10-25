@@ -49,6 +49,10 @@
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* تأثيرات الستوري */
+        .story-progress-bar { height: 3px; background: rgba(255,255,255,0.3); flex: 1; border-radius: 10px; overflow: hidden; }
+        .story-progress-fill { height: 100%; background: white; width: 0%; transition: width 5s linear; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -77,9 +81,9 @@
                                 <p class="text-gray-300 text-xs font-semibold mt-1">دليلك إلى المواكب والخدمات الحسينية</p>
                             </div>
                         </div>
-                        <button onclick="alert('لا توجد إشعارات جديدة حالياً')" class="relative text-white text-xl bg-white/10 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md click-effect">
+                        <button onclick="openNotifications()" class="relative text-white text-xl bg-white/10 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md click-effect">
                             <i class="fa-regular fa-bell"></i>
-                            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-green-500 rounded-full border border-gray-900"></span>
+                            <span id="notifDot" class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border border-gray-900"></span>
                         </button>
                     </div>
 
@@ -179,37 +183,8 @@
                     </div>
 
                     <!-- قسم القصص (Stories) -->
-                    <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-3">
-                        <!-- إدخال مخفي لرفع صورة القصة -->
-                        <input type="file" id="storyUpload" accept="image/*" class="hidden" onchange="handleStoryUpload(event)">
-                        
-                        <!-- إنشاء قصة -->
-                        <div class="min-w-[100px] h-[160px] bg-white rounded-xl shadow-sm border border-gray-200 relative overflow-hidden cursor-pointer flex flex-col click-effect" onclick="document.getElementById('storyUpload').click()">
-                            <img src="https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=200" class="w-full h-[110px] object-cover">
-                            <div class="flex-1 flex items-end justify-center pb-2">
-                                <span class="text-[11px] font-bold text-gray-700">إنشاء قصة</span>
-                            </div>
-                            <div class="absolute bottom-[40px] left-1/2 transform -translate-x-1/2 bg-white rounded-full p-1 border-2 border-white">
-                                <div class="w-7 h-7 bg-[#1877F2] text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
-                            </div>
-                        </div>
-                        
-                        <!-- قصص تجريبية (عند الضغط عليها تعرض الصورة بملء الشاشة) -->
-                        <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center click-effect" style="background-image: url('https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=200');" onclick="openStory('https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=800')">
-                            <div class="absolute inset-0 bg-black/30"></div>
-                            <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100" class="w-full h-full object-cover">
-                            </div>
-                            <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold">موكب العباس</span>
-                        </div>
-                        
-                        <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center click-effect" style="background-image: url('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=200');" onclick="openStory('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=800')">
-                            <div class="absolute inset-0 bg-black/30"></div>
-                            <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1590075865416-4c5c5e4f8e7d?q=80&w=100" class="w-full h-full object-cover">
-                            </div>
-                            <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold">خدام الزائرين</span>
-                        </div>
+                    <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-3" id="storiesContainer">
+                        <!-- سيتم توليد القصص هنا عبر JS -->
                     </div>
 
                     <!-- خلاصة المنشورات -->
@@ -321,21 +296,70 @@
         </nav>
     </div>
 
-    <!-- ================= نافذة عرض القصة (Story Viewer) ================= -->
-    <div id="storyModal" class="fixed inset-0 bg-black z-[9999] hidden flex items-center justify-center">
-        <button onclick="closeStory()" class="absolute top-6 right-4 text-white text-3xl z-50 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-        <img id="storyImage" src="" class="max-w-full max-h-full object-contain">
+    <!-- ================= شاشة عرض الستوري الحقيقية ================= -->
+    <div id="storyModal" class="fixed inset-0 bg-black z-[9999] hidden flex flex-col">
+        <!-- شريط التقدم العلوي -->
+        <div class="p-4 flex gap-1 z-50">
+            <div class="story-progress-bar"><div class="story-progress-fill" id="storyProgress"></div></div>
+        </div>
+        <!-- معلومات الناشر -->
+        <div class="absolute top-10 left-4 right-4 flex items-center gap-2 z-50 px-4">
+            <div class="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-gray-500">
+                <img id="storyAvatar" src="" class="w-full h-full object-cover">
+            </div>
+            <div class="text-white">
+                <span id="storyAuthor" class="font-bold text-sm block"></span>
+                <span class="text-xs text-gray-300">الآن</span>
+            </div>
+            <button onclick="closeStory()" class="text-white text-3xl mr-auto pb-4"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <!-- الصورة -->
+        <img id="storyImage" src="" class="w-full h-full object-contain">
     </div>
 
-    <!-- نافذة إضافة منشور -->
+    <!-- ================= نافذة المنشورات (إنشاء/تعديل) ================= -->
     <div id="postModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-pen-nib text-[#1877F2] ml-2"></i> إنشاء منشور</h2>
+                <h2 id="postModalTitle" class="text-xl font-bold text-gray-800"><i class="fa-solid fa-pen-nib text-[#1877F2] ml-2"></i> إنشاء منشور</h2>
                 <button onclick="closePostModal()" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <textarea id="postText" rows="4" placeholder="بم تفكر؟..." class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#1877F2] text-sm bg-gray-50 mb-4 resize-none"></textarea>
-            <button onclick="submitPost()" class="w-full bg-[#1877F2] text-white font-bold py-3 rounded-xl shadow-md click-effect hover:bg-blue-700 transition">نشر</button>
+            
+            <textarea id="postText" rows="3" placeholder="بم تفكر؟..." class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#1877F2] text-sm bg-gray-50 mb-3 resize-none"></textarea>
+            
+            <!-- معاينة الصورة في المنشور -->
+            <img id="postImagePreview" class="hidden w-full h-40 object-cover rounded-xl mb-3 border border-gray-200">
+            
+            <div class="flex items-center gap-2 mb-4 bg-gray-50 p-2 rounded-xl border border-gray-200">
+                <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer text-gray-600 hover:bg-gray-200 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-image text-green-500 text-lg"></i> إضافة صورة
+                    <input type="file" id="postImageInput" accept="image/*" class="hidden" onchange="previewPostImage(event)">
+                </label>
+            </div>
+
+            <button id="submitPostBtn" onclick="submitPost()" class="w-full bg-[#1877F2] text-white font-bold py-3 rounded-xl shadow-md click-effect hover:bg-blue-700 transition">نشر</button>
+        </div>
+    </div>
+
+    <!-- ================= نافذة الإشعارات ================= -->
+    <div id="notifModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-bell text-[#2E7D32] ml-2"></i> الإشعارات</h2>
+                <button onclick="closeNotifications()" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="notifList" class="space-y-3 max-h-64 overflow-y-auto hide-scrollbar">
+                <!-- JS يملأ الإشعارات -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= نافذة خيارات المنشور (3 نقاط) ================= -->
+    <div id="actionModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-end justify-center backdrop-blur-sm" onclick="closeActionModal(event)">
+        <div class="bg-white w-full max-w-md rounded-t-3xl p-4 shadow-2xl" onclick="event.stopPropagation()">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            <button onclick="editCurrentPost()" class="w-full text-right py-3 px-4 text-gray-800 font-bold border-b border-gray-100 flex items-center gap-3"><i class="fa-solid fa-pen text-blue-500"></i> تعديل المنشور</button>
+            <button onclick="deleteCurrentPost()" class="w-full text-right py-3 px-4 text-red-500 font-bold flex items-center gap-3"><i class="fa-solid fa-trash"></i> حذف المنشور</button>
         </div>
     </div>
 
@@ -347,20 +371,36 @@
         
         const defaultMawkibs = [
             { id: 1, name: "موكب أنصار الحسين", lat: 32.6160, lng: 44.0249, services: "طعام, ماء", address: "شارع العباس", img: defaultImg },
-            { id: 2, name: "موكب خدام الزائرين", lat: 32.6180, lng: 44.0280, services: "ماء, مبيت", address: "حي الحسين", img: defaultImg },
-            { id: 3, name: "موكب قمر بني هاشم", lat: 32.6130, lng: 44.0220, services: "إسعاف, مياه", address: "باب القبلة", img: defaultImg }
+            { id: 2, name: "موكب خدام الزائرين", lat: 32.6180, lng: 44.0280, services: "ماء, مبيت", address: "حي الحسين", img: defaultImg }
         ];
 
         const defaultPosts = [
-            { id: 1, text: "مرحباً بكم في دليل مواكب كربلاء. يمكنكم الآن إضافة مواكبكم والخدمات التي تقدمونها.", time: Date.now() - 86400000, author: "إدارة التطبيق", likes: 12, isLiked: false, comments: [] },
-            { id: 2, text: "موكب أنصار الحسين يعلن عن توزيع وجبات ساخنة طوال فترة الليل. نسألكم الدعاء.", time: Date.now() - 3600000, author: "موكب أنصار الحسين", likes: 45, isLiked: false, comments: [{author: "علي", text: "جزاكم الله خيراً"}] }
+            { id: 1, text: "مرحباً بكم في دليل مواكب كربلاء. يمكنكم الآن إضافة مواكبكم والخدمات التي تقدمونها.", img: null, time: Date.now() - 86400000, author: "إدارة التطبيق", likes: 12, isLiked: false, comments: [] }
         ];
 
-        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v8')) || [...defaultMawkibs];
-        let posts = JSON.parse(localStorage.getItem('karbalaPosts_v4')) || [...defaultPosts];
+        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v9')) || [...defaultMawkibs];
+        let posts = JSON.parse(localStorage.getItem('karbalaPosts_v5')) || [...defaultPosts];
+        let notifications = JSON.parse(localStorage.getItem('karbalaNotifs_v1')) || [
+            { id: 1, text: "مرحباً بك في تطبيق دليل مواكب كربلاء!", time: Date.now() - 86400000, read: false }
+        ];
+        let stories = JSON.parse(localStorage.getItem('karbalaStories_v1')) || [
+            { id: 1, author: "موكب العباس", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=400", avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100" },
+            { id: 2, author: "خدام الزائرين", img: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400", avatar: "https://images.unsplash.com/photo-1590075865416-4c5c5e4f8e7d?q=80&w=100" }
+        ];
 
-        function saveData() { try { localStorage.setItem('karbalaMawkibs_v8', JSON.stringify(mawkibs)); } catch (e) {} }
-        function savePosts() { try { localStorage.setItem('karbalaPosts_v4', JSON.stringify(posts)); } catch (e) {} }
+        let editingPostId = null;
+        let currentPostOptionsId = null;
+        let postImageBase64 = null;
+        let storyTimeout = null;
+
+        function saveAll() {
+            try {
+                localStorage.setItem('karbalaMawkibs_v9', JSON.stringify(mawkibs));
+                localStorage.setItem('karbalaPosts_v5', JSON.stringify(posts));
+                localStorage.setItem('karbalaNotifs_v1', JSON.stringify(notifications));
+                localStorage.setItem('karbalaStories_v1', JSON.stringify(stories));
+            } catch (e) { alert("مساحة التخزين ممتلئة، يرجى استخدام صور أصغر."); }
+        }
 
         // ==========================================
         // 2. شاشة البداية
@@ -374,20 +414,64 @@
                 updateServiceCounts();
                 renderServicesList();
                 renderPosts();
+                renderStories();
+                updateNotificationDot();
             }, 500);
         }, 1500);
 
         // ==========================================
-        // 3. نظام القصص (Stories)
+        // 3. الإشعارات
         // ==========================================
-        function openStory(imageUrl) {
-            document.getElementById('storyImage').src = imageUrl;
-            document.getElementById('storyModal').classList.remove('hidden');
+        function updateNotificationDot() {
+            const unread = notifications.some(n => !n.read);
+            document.getElementById('notifDot').style.display = unread ? 'block' : 'none';
         }
 
-        function closeStory() {
-            document.getElementById('storyModal').classList.add('hidden');
-            setTimeout(() => { document.getElementById('storyImage').src = ''; }, 300);
+        function openNotifications() {
+            const list = document.getElementById('notifList');
+            list.innerHTML = '';
+            notifications.forEach(n => {
+                list.innerHTML += `
+                    <div class="p-3 rounded-xl border border-gray-100 ${n.read ? 'bg-gray-50' : 'bg-green-50'}">
+                        <p class="text-sm font-bold text-gray-800">${n.text}</p>
+                        <span class="text-[10px] text-gray-400">${new Date(n.time).toLocaleString('ar-EG')}</span>
+                    </div>
+                `;
+                n.read = true; // Mark as read
+            });
+            saveAll();
+            updateNotificationDot();
+            document.getElementById('notifModal').classList.remove('hidden');
+        }
+        function closeNotifications() { document.getElementById('notifModal').classList.add('hidden'); }
+
+        // ==========================================
+        // 4. الستوري (Stories)
+        // ==========================================
+        function renderStories() {
+            const container = document.getElementById('storiesContainer');
+            container.innerHTML = `
+                <input type="file" id="storyUpload" accept="image/*" class="hidden" onchange="handleStoryUpload(event)">
+                <div class="min-w-[100px] h-[160px] bg-white rounded-xl shadow-sm border border-gray-200 relative overflow-hidden cursor-pointer flex flex-col click-effect" onclick="document.getElementById('storyUpload').click()">
+                    <img src="https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=200" class="w-full h-[110px] object-cover">
+                    <div class="flex-1 flex items-end justify-center pb-2"><span class="text-[11px] font-bold text-gray-700">إنشاء قصة</span></div>
+                    <div class="absolute bottom-[40px] left-1/2 transform -translate-x-1/2 bg-white rounded-full p-1 border-2 border-white">
+                        <div class="w-7 h-7 bg-[#1877F2] text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
+                    </div>
+                </div>
+            `;
+
+            stories.forEach(s => {
+                container.innerHTML += `
+                    <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center click-effect" style="background-image: url('${s.img}');" onclick="viewStory(${s.id})">
+                        <div class="absolute inset-0 bg-black/30"></div>
+                        <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
+                            <img src="${s.avatar || defaultImg}" class="w-full h-full object-cover">
+                        </div>
+                        <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold">${s.author}</span>
+                    </div>
+                `;
+            });
         }
 
         function handleStoryUpload(event) {
@@ -395,24 +479,53 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    openStory(e.target.result);
+                    const newStory = { id: Date.now(), author: "أنت (زائر)", img: e.target.result, avatar: "" };
+                    stories.unshift(newStory);
+                    saveAll();
+                    renderStories();
+                    viewStory(newStory.id);
                 };
                 reader.readAsDataURL(file);
             }
         }
 
+        function viewStory(id) {
+            const story = stories.find(s => s.id === id);
+            if (!story) return;
+
+            document.getElementById('storyImage').src = story.img;
+            document.getElementById('storyAuthor').innerText = story.author;
+            document.getElementById('storyAvatar').src = story.avatar || defaultImg;
+            
+            const modal = document.getElementById('storyModal');
+            const progress = document.getElementById('storyProgress');
+            
+            modal.classList.remove('hidden');
+            progress.style.transition = 'none';
+            progress.style.width = '0%';
+
+            // بدء حركة شريط التقدم (5 ثواني)
+            setTimeout(() => {
+                progress.style.transition = 'width 5s linear';
+                progress.style.width = '100%';
+            }, 50);
+
+            clearTimeout(storyTimeout);
+            storyTimeout = setTimeout(() => { closeStory(); }, 5000);
+        }
+
+        function closeStory() {
+            document.getElementById('storyModal').classList.add('hidden');
+            clearTimeout(storyTimeout);
+        }
+
         // ==========================================
-        // 4. نظام المنشورات
+        // 5. المنشورات (Posts)
         // ==========================================
         function renderPosts() {
             const container = document.getElementById('postsContainer');
             container.innerHTML = '';
             
-            if(posts.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد منشورات حالياً</div>';
-                return;
-            }
-
             posts.forEach(p => {
                 const date = new Date(p.time);
                 const timeString = date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
@@ -421,34 +534,30 @@
                 let commentsHtml = '';
                 if (p.comments && p.comments.length > 0) {
                     p.comments.forEach(c => {
-                        commentsHtml += `
-                            <div class="bg-gray-100 p-2 rounded-2xl text-xs mb-2 w-max max-w-full">
-                                <span class="font-bold text-gray-900 block mb-0.5">${c.author}</span>
-                                <span class="text-gray-700">${c.text}</span>
-                            </div>
-                        `;
+                        commentsHtml += `<div class="bg-gray-100 p-2 rounded-2xl text-xs mb-1"><b class="text-gray-900 block">${c.author}</b>${c.text}</div>`;
                     });
                 }
 
+                let imgHtml = p.img ? `<img src="${p.img}" class="w-full max-h-64 object-cover border-y border-gray-100">` : '';
+
                 let card = document.createElement('div');
-                card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 relative';
+                card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 relative mb-3';
                 card.innerHTML = `
                     <div class="flex items-center justify-between p-3">
                         <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-bold text-lg">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
+                            <div class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-user"></i></div>
                             <div>
-                                <span class="block text-sm font-bold text-gray-900">${p.author || 'مسؤول الموكب'}</span>
+                                <span class="block text-sm font-bold text-gray-900">${p.author}</span>
                                 <span class="block text-[11px] text-gray-500">${dateString} - ${timeString} · <i class="fa-solid fa-earth-asia"></i></span>
                             </div>
                         </div>
-                        <button class="text-gray-400 px-2"><i class="fa-solid fa-ellipsis"></i></button>
+                        <button onclick="openActionModal(${p.id})" class="text-gray-400 px-2 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-ellipsis"></i></button>
                     </div>
                     
                     <p class="text-sm text-gray-800 leading-relaxed px-3 pb-3">${p.text}</p>
+                    ${imgHtml}
                     
-                    <div class="flex items-center justify-between px-3 py-1 border-t border-gray-200 mx-3">
+                    <div class="flex items-center justify-between px-3 py-1 border-t border-gray-200 mx-3 mt-1">
                         <button onclick="toggleLike(${p.id})" class="flex items-center gap-1.5 py-2 text-sm ${p.isLiked ? 'text-[#1877F2]' : 'text-gray-500'} hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
                             <i class="${p.isLiked ? 'fa-solid' : 'fa-regular'} fa-thumbs-up text-lg"></i>
                             <span>أعجبني (${p.likes || 0})</span>
@@ -457,18 +566,16 @@
                             <i class="fa-regular fa-comment text-lg"></i>
                             <span>تعليق (${p.comments ? p.comments.length : 0})</span>
                         </button>
-                        <button class="flex items-center gap-1.5 py-2 text-sm text-gray-500 hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
+                        <button onclick="sharePost('${p.text.replace(/'/g, "\\'")}')" class="flex items-center gap-1.5 py-2 text-sm text-gray-500 hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
                             <i class="fa-solid fa-share text-lg"></i>
                             <span>مشاركة</span>
                         </button>
                     </div>
 
                     <div id="comments-section-${p.id}" class="hidden px-3 pb-3 border-t border-gray-100 mt-1 pt-3">
-                        <div class="mb-2 max-h-40 overflow-y-auto hide-scrollbar flex flex-col gap-1">
-                            ${commentsHtml}
-                        </div>
+                        <div class="mb-2 max-h-40 overflow-y-auto hide-scrollbar flex flex-col gap-1">${commentsHtml}</div>
                         <div class="flex gap-2 items-center">
-                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 flex-shrink-0"><i class="fa-solid fa-user text-xs"></i></div>
+                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500"><i class="fa-solid fa-user text-xs"></i></div>
                             <input type="text" id="comment-input-${p.id}" placeholder="اكتب تعليقاً..." class="flex-1 border-none rounded-full px-4 py-2 text-sm focus:outline-none bg-gray-100">
                             <button onclick="addComment(${p.id})" class="text-[#1877F2] px-2 text-lg"><i class="fa-solid fa-paper-plane"></i></button>
                         </div>
@@ -480,62 +587,113 @@
 
         function toggleLike(id) {
             const post = posts.find(p => p.id === id);
-            if (!post) return;
-            if (post.isLiked) { post.likes--; post.isLiked = false; } 
-            else { post.likes++; post.isLiked = true; }
-            savePosts();
-            renderPosts();
+            if (post.isLiked) { post.likes--; post.isLiked = false; } else { post.likes++; post.isLiked = true; }
+            saveAll(); renderPosts();
         }
 
-        function toggleComments(id) {
-            const section = document.getElementById(`comments-section-${id}`);
-            if(section) section.classList.toggle('hidden');
-        }
+        function toggleComments(id) { document.getElementById(`comments-section-${id}`).classList.toggle('hidden'); }
 
         function addComment(id) {
             const input = document.getElementById(`comment-input-${id}`);
             const text = input.value.trim();
             if (!text) return;
             const post = posts.find(p => p.id === id);
-            if (!post) return;
-            if (!post.comments) post.comments = [];
             post.comments.push({ author: "أنت (زائر)", text: text });
-            savePosts();
-            renderPosts();
-            setTimeout(() => {
-                const newSection = document.getElementById(`comments-section-${id}`);
-                if(newSection) newSection.classList.remove('hidden');
-            }, 100);
+            saveAll(); renderPosts();
+            setTimeout(() => document.getElementById(`comments-section-${id}`).classList.remove('hidden'), 100);
         }
 
-        function openPostModal() {
+        async function sharePost(text) {
+            if (navigator.share) {
+                try { await navigator.share({ title: 'دليل مواكب كربلاء', text: text }); } catch (e) {}
+            } else {
+                navigator.clipboard.writeText(text);
+                alert('تم نسخ نص المنشور للمشاركة');
+            }
+        }
+
+        // خيارات المنشور (النقاط الثلاث)
+        function openActionModal(id) {
+            currentPostOptionsId = id;
+            document.getElementById('actionModal').classList.remove('hidden');
+        }
+        function closeActionModal(e) {
+            if(!e || e.target.id === 'actionModal') document.getElementById('actionModal').classList.add('hidden');
+        }
+        
+        function deleteCurrentPost() {
+            if(confirm('حذف هذا المنشور؟')) {
+                posts = posts.filter(p => p.id !== currentPostOptionsId);
+                saveAll(); renderPosts(); closeActionModal();
+            }
+        }
+
+        function editCurrentPost() {
+            const p = posts.find(x => x.id === currentPostOptionsId);
+            if(!p) return;
+            editingPostId = p.id;
+            document.getElementById('postModalTitle').innerHTML = '<i class="fa-solid fa-pen text-[#1877F2] ml-2"></i> تعديل المنشور';
+            document.getElementById('submitPostBtn').innerText = 'تحديث';
+            document.getElementById('postText').value = p.text;
+            postImageBase64 = p.img;
+            if(p.img) {
+                document.getElementById('postImagePreview').src = p.img;
+                document.getElementById('postImagePreview').classList.remove('hidden');
+            } else {
+                document.getElementById('postImagePreview').classList.add('hidden');
+            }
+            closeActionModal();
             document.getElementById('postModal').classList.remove('hidden');
-            document.getElementById('postText').focus();
         }
 
-        function closePostModal() {
-            document.getElementById('postModal').classList.add('hidden');
+        // إنشاء / تعديل منشور
+        function openPostModal() {
+            editingPostId = null;
+            document.getElementById('postModalTitle').innerHTML = '<i class="fa-solid fa-pen-nib text-[#1877F2] ml-2"></i> إنشاء منشور';
+            document.getElementById('submitPostBtn').innerText = 'نشر';
             document.getElementById('postText').value = '';
+            postImageBase64 = null;
+            document.getElementById('postImagePreview').classList.add('hidden');
+            document.getElementById('postModal').classList.remove('hidden');
+        }
+        function closePostModal() { document.getElementById('postModal').classList.add('hidden'); }
+
+        function previewPostImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    postImageBase64 = e.target.result;
+                    document.getElementById('postImagePreview').src = postImageBase64;
+                    document.getElementById('postImagePreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         function submitPost() {
             const text = document.getElementById('postText').value.trim();
-            if (!text) { alert('يرجى كتابة نص المنشور أولاً'); return; }
-            const newPost = { id: Date.now(), text: text, time: Date.now(), author: "أنت (زائر)", likes: 0, isLiked: false, comments: [] };
-            posts.unshift(newPost);
-            savePosts();
-            renderPosts();
-            closePostModal();
+            if (!text && !postImageBase64) { alert('اكتب نصاً أو أضف صورة'); return; }
+
+            if (editingPostId) {
+                const p = posts.find(x => x.id === editingPostId);
+                p.text = text;
+                p.img = postImageBase64;
+                notifications.unshift({ id: Date.now(), text: "تم تعديل المنشور بنجاح", time: Date.now(), read: false });
+            } else {
+                posts.unshift({ id: Date.now(), text: text, img: postImageBase64, time: Date.now(), author: "أنت (زائر)", likes: 0, isLiked: false, comments: [] });
+                notifications.unshift({ id: Date.now(), text: "تم نشر منشورك بنجاح!", time: Date.now(), read: false });
+            }
+            
+            saveAll(); renderPosts(); updateNotificationDot(); closePostModal();
             document.getElementById('page-posts').scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ==========================================
-        // 5. التنقل والخرائط
+        // 6. باقي الكود (التنقل والخرائط والمواكب)
         // ==========================================
         window.addEventListener('popstate', function (event) {
-            if (!document.getElementById('page-home').classList.contains('active')) {
-                switchTab('home', 0);
-            }
+            if (!document.getElementById('page-home').classList.contains('active')) switchTab('home', 0);
         });
 
         function switchTab(pageId, navIndex) {
@@ -668,7 +826,7 @@
             event.stopPropagation();
             if(confirm('هل أنت متأكد من حذف هذا الموكب نهائياً؟')) {
                 mawkibs = mawkibs.filter(m => m.id !== id);
-                saveData(); renderServicesList(); updateMainMapMarkers(); updatePreviewMapMarkers(); updateServiceCounts();
+                saveAll(); renderServicesList(); updateMainMapMarkers(); updatePreviewMapMarkers(); updateServiceCounts();
             }
         }
 
@@ -734,7 +892,7 @@
             } else {
                 mawkibs.unshift({ id: Date.now(), ...data }); alert('تم حفظ الموكب بنجاح!');
             }
-            saveData(); updateMainMapMarkers(); updatePreviewMapMarkers(); updateServiceCounts(); renderServicesList();
+            saveAll(); updateMainMapMarkers(); updatePreviewMapMarkers(); updateServiceCounts(); renderServicesList();
             prepareAddNew(); switchTab('home', 0);
         }
 
