@@ -46,9 +46,7 @@
         .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .btn-edit { background: #E3F2FD; color: #1976D2; }
         .btn-delete { background: #FFEBEE; color: #D32F2F; }
-        .liked { color: #1877F2 !important; font-weight: bold; }
 
-        /* إخفاء شريط التمرير للقصص */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -164,7 +162,6 @@
 
             <!-- ================= 2. صفحة المنشورات (تصميم فيسبوك) ================= -->
             <div id="page-posts" class="page bg-[#F0F2F5]">
-                <!-- الشريط العلوي للفيسبوك -->
                 <div class="bg-white p-3 shadow-sm flex justify-between items-center sticky top-0 z-20">
                     <h2 class="font-extrabold text-[#1877F2] text-2xl">المنشورات</h2>
                     <div class="flex gap-2">
@@ -183,8 +180,11 @@
 
                     <!-- قسم القصص (Stories) -->
                     <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-3">
+                        <!-- إدخال مخفي لرفع صورة القصة -->
+                        <input type="file" id="storyUpload" accept="image/*" class="hidden" onchange="handleStoryUpload(event)">
+                        
                         <!-- إنشاء قصة -->
-                        <div class="min-w-[100px] h-[160px] bg-white rounded-xl shadow-sm border border-gray-200 relative overflow-hidden cursor-pointer flex flex-col" onclick="openPostModal()">
+                        <div class="min-w-[100px] h-[160px] bg-white rounded-xl shadow-sm border border-gray-200 relative overflow-hidden cursor-pointer flex flex-col click-effect" onclick="document.getElementById('storyUpload').click()">
                             <img src="https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=200" class="w-full h-[110px] object-cover">
                             <div class="flex-1 flex items-end justify-center pb-2">
                                 <span class="text-[11px] font-bold text-gray-700">إنشاء قصة</span>
@@ -194,21 +194,21 @@
                             </div>
                         </div>
                         
-                        <!-- قصص تجريبية -->
-                        <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=200');">
+                        <!-- قصص تجريبية (عند الضغط عليها تعرض الصورة بملء الشاشة) -->
+                        <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center click-effect" style="background-image: url('https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=200');" onclick="openStory('https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=800')">
                             <div class="absolute inset-0 bg-black/30"></div>
                             <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
                                 <img src="https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100" class="w-full h-full object-cover">
                             </div>
-                            <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold text-shadow">موكب العباس</span>
+                            <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold">موكب العباس</span>
                         </div>
                         
-                        <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=200');">
+                        <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center click-effect" style="background-image: url('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=200');" onclick="openStory('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=800')">
                             <div class="absolute inset-0 bg-black/30"></div>
                             <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
                                 <img src="https://images.unsplash.com/photo-1590075865416-4c5c5e4f8e7d?q=80&w=100" class="w-full h-full object-cover">
                             </div>
-                            <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold text-shadow">خدام الزائرين</span>
+                            <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold">خدام الزائرين</span>
                         </div>
                     </div>
 
@@ -321,6 +321,12 @@
         </nav>
     </div>
 
+    <!-- ================= نافذة عرض القصة (Story Viewer) ================= -->
+    <div id="storyModal" class="fixed inset-0 bg-black z-[9999] hidden flex items-center justify-center">
+        <button onclick="closeStory()" class="absolute top-6 right-4 text-white text-3xl z-50 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <img id="storyImage" src="" class="max-w-full max-h-full object-contain">
+    </div>
+
     <!-- نافذة إضافة منشور -->
     <div id="postModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
@@ -350,11 +356,11 @@
             { id: 2, text: "موكب أنصار الحسين يعلن عن توزيع وجبات ساخنة طوال فترة الليل. نسألكم الدعاء.", time: Date.now() - 3600000, author: "موكب أنصار الحسين", likes: 45, isLiked: false, comments: [{author: "علي", text: "جزاكم الله خيراً"}] }
         ];
 
-        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v7')) || [...defaultMawkibs];
-        let posts = JSON.parse(localStorage.getItem('karbalaPosts_v3')) || [...defaultPosts];
+        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v8')) || [...defaultMawkibs];
+        let posts = JSON.parse(localStorage.getItem('karbalaPosts_v4')) || [...defaultPosts];
 
-        function saveData() { try { localStorage.setItem('karbalaMawkibs_v7', JSON.stringify(mawkibs)); } catch (e) {} }
-        function savePosts() { try { localStorage.setItem('karbalaPosts_v3', JSON.stringify(posts)); } catch (e) {} }
+        function saveData() { try { localStorage.setItem('karbalaMawkibs_v8', JSON.stringify(mawkibs)); } catch (e) {} }
+        function savePosts() { try { localStorage.setItem('karbalaPosts_v4', JSON.stringify(posts)); } catch (e) {} }
 
         // ==========================================
         // 2. شاشة البداية
@@ -372,7 +378,31 @@
         }, 1500);
 
         // ==========================================
-        // 3. نظام المنشورات (تصميم فيسبوك)
+        // 3. نظام القصص (Stories)
+        // ==========================================
+        function openStory(imageUrl) {
+            document.getElementById('storyImage').src = imageUrl;
+            document.getElementById('storyModal').classList.remove('hidden');
+        }
+
+        function closeStory() {
+            document.getElementById('storyModal').classList.add('hidden');
+            setTimeout(() => { document.getElementById('storyImage').src = ''; }, 300);
+        }
+
+        function handleStoryUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    openStory(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // ==========================================
+        // 4. نظام المنشورات
         // ==========================================
         function renderPosts() {
             const container = document.getElementById('postsContainer');
@@ -403,7 +433,6 @@
                 let card = document.createElement('div');
                 card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 relative';
                 card.innerHTML = `
-                    <!-- رأس المنشور -->
                     <div class="flex items-center justify-between p-3">
                         <div class="flex items-center gap-2">
                             <div class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-bold text-lg">
@@ -417,10 +446,8 @@
                         <button class="text-gray-400 px-2"><i class="fa-solid fa-ellipsis"></i></button>
                     </div>
                     
-                    <!-- نص المنشور -->
                     <p class="text-sm text-gray-800 leading-relaxed px-3 pb-3">${p.text}</p>
                     
-                    <!-- أزرار التفاعل -->
                     <div class="flex items-center justify-between px-3 py-1 border-t border-gray-200 mx-3">
                         <button onclick="toggleLike(${p.id})" class="flex items-center gap-1.5 py-2 text-sm ${p.isLiked ? 'text-[#1877F2]' : 'text-gray-500'} hover:bg-gray-50 flex-1 justify-center rounded-lg transition">
                             <i class="${p.isLiked ? 'fa-solid' : 'fa-regular'} fa-thumbs-up text-lg"></i>
@@ -436,7 +463,6 @@
                         </button>
                     </div>
 
-                    <!-- قسم التعليقات -->
                     <div id="comments-section-${p.id}" class="hidden px-3 pb-3 border-t border-gray-100 mt-1 pt-3">
                         <div class="mb-2 max-h-40 overflow-y-auto hide-scrollbar flex flex-col gap-1">
                             ${commentsHtml}
@@ -500,12 +526,11 @@
             savePosts();
             renderPosts();
             closePostModal();
-            // التمرير لأعلى الصفحة لرؤية المنشور
             document.getElementById('page-posts').scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ==========================================
-        // 4. التنقل والخرائط
+        // 5. التنقل والخرائط
         // ==========================================
         window.addEventListener('popstate', function (event) {
             if (!document.getElementById('page-home').classList.contains('active')) {
