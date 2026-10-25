@@ -9,32 +9,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- مكتبة الخريطة -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
         body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; overflow: hidden; }
-        /* زيادة المساحة السفلية لمنع تداخل المحتوى مع شريط التنقل */
         .page { display: none; height: calc(100vh - 75px); overflow-y: auto; padding-bottom: 100px; }
         .page.active { display: block; }
         
         .dark-header {
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(17, 24, 39, 0.95)), 
                         url('https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=800&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center top;
+            background-size: cover; background-position: center top;
         }
 
         #mainMap, #pickMap, #previewMap { width: 100%; z-index: 1; }
         #mainMap { height: 100%; }
         
-        .glass-panel {
-            background: rgba(17, 24, 39, 0.85);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
+        .glass-panel { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .leaflet-popup-content { font-family: 'Cairo', sans-serif; text-align: right; margin: 10px; }
         .click-effect:active { transform: scale(0.96); transition: 0.1s; }
         
@@ -43,7 +35,6 @@
         .nav-btn i { font-size: 20px; margin-bottom: 4px; }
         .nav-btn span { font-size: 11px; font-weight: 700; }
 
-        /* تصميم قائمة الخدمات الداكنة */
         .service-list { background: #1a1a1a; border-radius: 15px; overflow: hidden; margin-top: 10px; }
         .service-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #333; color: white; cursor: pointer; }
         .service-item:last-child { border-bottom: none; }
@@ -51,11 +42,17 @@
         .service-checkbox:checked { border-color: #4CAF50; }
         .service-checkbox:checked::after { content: ''; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; }
         .service-name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+        /* أزرار التعديل والحذف */
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .btn-edit { background: #E3F2FD; color: #1976D2; }
+        .btn-edit:hover { background: #BBDEFB; }
+        .btn-delete { background: #FFEBEE; color: #D32F2F; }
+        .btn-delete:hover { background: #FFCDD2; }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <!-- شاشة البداية -->
     <div id="splash" class="fixed inset-0 bg-[#111827] z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="w-32 h-32 mb-4 flex items-center justify-center bg-white rounded-full shadow-[0_0_30px_rgba(76,175,80,0.3)]">
             <i class="fa-solid fa-mosque text-6xl text-[#2E7D32]"></i>
@@ -64,14 +61,11 @@
         <p class="text-[#4CAF50] text-sm font-semibold">دليلك إلى المواكب والخدمات الحسينية</p>
     </div>
 
-    <!-- التطبيق -->
     <div id="app" class="hidden flex flex-col h-screen bg-gray-100">
-        
         <main class="flex-1 relative">
             
             <!-- ================= 1. الصفحة الرئيسية ================= -->
             <div id="page-home" class="page active">
-                
                 <div class="dark-header pb-10 px-5 pt-10 rounded-b-[40px] relative shadow-lg">
                     <div class="flex justify-between items-start mb-6">
                         <div class="flex items-center gap-3">
@@ -83,7 +77,6 @@
                                 <p class="text-gray-300 text-xs font-semibold mt-1">دليلك إلى المواكب والخدمات الحسينية</p>
                             </div>
                         </div>
-                        <!-- تفعيل زر الإشعارات -->
                         <button onclick="alert('لا توجد إشعارات جديدة حالياً')" class="relative text-white text-xl bg-white/10 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md click-effect">
                             <i class="fa-regular fa-bell"></i>
                             <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-green-500 rounded-full border border-gray-900"></span>
@@ -116,7 +109,6 @@
                         <button onclick="switchTab('services', 1)" class="text-gray-500 text-sm font-semibold flex items-center gap-1">عرض الكل <i class="fa-solid fa-circle-chevron-left"></i></button>
                     </div>
                     
-                    <!-- تصحيح ربط الخدمات هنا -->
                     <div class="grid grid-cols-3 gap-4 mb-8">
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer click-effect" onclick="filterByService('طعام')">
                             <i class="fa-solid fa-utensils text-2xl text-black mb-2"></i>
@@ -161,7 +153,7 @@
                         </button>
                     </div>
 
-                    <button onclick="switchTab('add', 2)" class="w-full bg-[#2E7D32] text-white p-4 rounded-2xl shadow-lg flex items-center justify-center gap-3 click-effect hover:bg-green-800 transition">
+                    <button onclick="prepareAddNew()" class="w-full bg-[#2E7D32] text-white p-4 rounded-2xl shadow-lg flex items-center justify-center gap-3 click-effect hover:bg-green-800 transition">
                         <i class="fa-solid fa-plus text-lg"></i>
                         <span class="font-bold text-lg">تسجيل موكب جديد</span>
                     </button>
@@ -170,13 +162,10 @@
 
             <!-- ================= 2. صفحة الخريطة ================= -->
             <div id="page-map" class="page relative bg-gray-100 !p-0">
-                <!-- زر رجوع -->
                 <button onclick="switchTab('home', 0)" class="absolute top-6 right-4 z-[500] bg-white text-gray-800 w-10 h-10 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 click-effect">
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
-                
                 <div id="mainMap"></div>
-                
                 <button onclick="locateUser()" class="absolute bottom-24 left-4 z-[400] bg-white text-[#2E7D32] w-12 h-12 rounded-full shadow-lg text-xl flex items-center justify-center hover:bg-gray-100 transition click-effect">
                     <i class="fa-solid fa-location-crosshairs"></i>
                 </button>
@@ -188,22 +177,25 @@
                     <button onclick="switchTab('home', 0)" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-gray-600 click-effect"><i class="fa-solid fa-arrow-right"></i></button>
                     <h2 class="font-extrabold text-gray-800 text-xl">كل المواكب</h2>
                 </div>
-                <div id="servicesList" class="space-y-4">
+                <div id="servicesList" class="space-y-3 pb-8">
                     <!-- JS يملأ هذه القائمة -->
                 </div>
             </div>
 
-            <!-- ================= 4. صفحة إضافة موكب ================= -->
+            <!-- ================= 4. صفحة إضافة / تعديل موكب ================= -->
             <div id="page-add" class="page p-5 bg-white">
-                <div class="flex items-center gap-3 mb-6 mt-2">
-                    <button onclick="switchTab('home', 0)" class="bg-gray-100 w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-gray-600 click-effect"><i class="fa-solid fa-arrow-right"></i></button>
-                    <h2 class="text-xl font-bold text-gray-800">تسجيل موكب جديد</h2>
+                <div class="flex items-center justify-between mb-6 mt-2">
+                    <div class="flex items-center gap-3">
+                        <button onclick="cancelEdit()" class="bg-gray-100 w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-gray-600 click-effect"><i class="fa-solid fa-arrow-right"></i></button>
+                        <h2 id="formTitle" class="text-xl font-bold text-gray-800">تسجيل موكب جديد</h2>
+                    </div>
+                    <button id="cancelBtn" onclick="cancelEdit()" class="hidden text-red-500 text-sm font-bold bg-red-50 px-3 py-1 rounded-lg">إلغاء التعديل</button>
                 </div>
 
-                <form id="addForm" onsubmit="handleAddMawkib(event)" class="space-y-5">
+                <form id="addForm" onsubmit="handleSaveMawkib(event)" class="space-y-5">
                     
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">صورة الموكب (بطاقة الموكب)</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">صورة الموكب</label>
                         <input type="file" id="mawkibImage" accept="image/*" onchange="previewImage(event)" class="w-full border border-gray-200 rounded-xl p-2 text-sm bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
                         <img id="imagePreview" class="hidden w-full h-40 object-cover rounded-xl mt-3 border border-gray-200 shadow-sm">
                     </div>
@@ -219,7 +211,7 @@
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">الخدمات المتوفرة (اختر خدمة أو أكثر)</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">الخدمات المتوفرة</label>
                         <div class="service-list">
                             <label class="service-item">
                                 <input type="checkbox" name="service" value="طعام" class="service-checkbox">
@@ -251,11 +243,10 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">حدد الموقع على الخريطة</label>
                         <div id="pickMap" class="w-full h-56 rounded-xl border border-gray-200 z-0"></div>
-                        <p class="text-xs text-gray-500 mt-2">انقر على الخريطة أو اسحب الدبوس لتحديد موقع الموكب.</p>
                     </div>
 
-                    <button type="submit" class="w-full bg-[#2E7D32] text-white font-bold py-4 rounded-xl shadow-md mt-4 click-effect">
-                        <i class="fa-solid fa-check-circle ml-2"></i> حفظ وإرسال للمراجعة
+                    <button type="submit" id="submitBtn" class="w-full bg-[#2E7D32] text-white font-bold py-4 rounded-xl shadow-md mt-4 click-effect">
+                        <i class="fa-solid fa-check-circle ml-2"></i> حفظ وإرسال
                     </button>
                 </form>
             </div>
@@ -272,7 +263,6 @@
 
         </main>
 
-        <!-- شريط التنقل السفلي -->
         <nav class="bg-white flex justify-around z-50 h-[75px] shadow-[0_-5px_15px_rgba(0,0,0,0.05)] rounded-t-3xl px-2 fixed bottom-0 w-full">
             <div class="nav-btn active" onclick="switchTab('home', 0)">
                 <i class="fa-solid fa-house"></i>
@@ -305,7 +295,7 @@
             { id: 3, name: "موكب قمر بني هاشم", lat: 32.6130, lng: 44.0220, services: "إسعاف, مياه", address: "باب القبلة", img: defaultImg }
         ];
 
-        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v3'));
+        let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v4'));
         if (!mawkibs || mawkibs.length === 0) {
             mawkibs = [...defaultMawkibs];
             saveData();
@@ -313,14 +303,14 @@
 
         function saveData() {
             try {
-                localStorage.setItem('karbalaMawkibs_v3', JSON.stringify(mawkibs));
+                localStorage.setItem('karbalaMawkibs_v4', JSON.stringify(mawkibs));
             } catch (e) {
                 alert("مساحة التخزين ممتلئة، يرجى اختيار صورة أصغر.");
             }
         }
 
         // ==========================================
-        // 2. إخفاء شاشة البداية
+        // 2. إخفاء شاشة البداية والتنقل
         // ==========================================
         setTimeout(() => {
             document.getElementById('splash').style.opacity = '0';
@@ -333,9 +323,6 @@
             }, 500);
         }, 1500);
 
-        // ==========================================
-        // 3. التنقل ومنع الخروج
-        // ==========================================
         window.addEventListener('popstate', function (event) {
             if (!document.getElementById('page-home').classList.contains('active')) {
                 switchTab('home', 0);
@@ -351,20 +338,18 @@
             const btns = document.querySelectorAll('.nav-btn');
             if(btns[navIndex]) btns[navIndex].classList.add('active');
 
-            // إصلاح حجم الخرائط عند التنقل
             if (pageId === 'map' && mainMap) setTimeout(() => mainMap.invalidateSize(), 200);
             if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 200);
             if (pageId === 'home' && previewMap) setTimeout(() => previewMap.invalidateSize(), 200);
             if (pageId === 'services') renderServicesList();
             
-            // إضافة حالة للتاريخ
             if(pageId !== 'home') {
                 history.pushState({page: pageId}, '', '#' + pageId);
             }
         }
 
         // ==========================================
-        // 4. الخرائط
+        // 3. الخرائط
         // ==========================================
         let mainMap, pickMap, previewMap;
         let mainMarkers = L.layerGroup();
@@ -419,7 +404,6 @@
             mainMarkers.clearLayers();
             mawkibs.forEach(m => {
                 let marker = L.marker([m.lat, m.lng], {icon: mawkibIcon});
-                // ✨ ربط الدبوس بالمعرف الخاص به لمنع الخطأ ✨
                 marker.mawkibId = m.id; 
                 
                 let popupContent = `
@@ -438,8 +422,15 @@
             });
         }
 
+        function updatePreviewMapMarkers() {
+            previewMarkers.clearLayers();
+            mawkibs.forEach(m => {
+                L.marker([m.lat, m.lng], {icon: mawkibIcon}).addTo(previewMarkers);
+            });
+        }
+
         // ==========================================
-        // 5. أرقام الخدمات
+        // 4. الإحصائيات
         // ==========================================
         function updateServiceCounts() {
             const counts = { food: 0, water: 0, bed: 0, charge: 0, wc: 0, med: 0 };
@@ -462,7 +453,7 @@
         }
 
         // ==========================================
-        // 6. البحث والقائمة (تم إصلاح التوجيه)
+        // 5. القائمة (مع أزرار التعديل والحذف)
         // ==========================================
         function searchMawkibs() {
             renderServicesList(document.getElementById('searchHome').value);
@@ -491,17 +482,14 @@
 
             filtered.forEach(m => {
                 let card = document.createElement('div');
-                card.className = 'bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center cursor-pointer click-effect mb-3';
+                card.className = 'bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center cursor-pointer click-effect mb-3 relative';
                 
-                // ✨ إصلاح التوجيه للنقر على البطاقة ✨
                 card.onclick = () => {
                     switchTab('map', 1);
                     setTimeout(() => {
                         mainMap.setView([m.lat, m.lng], 17);
                         mainMarkers.eachLayer(layer => {
-                            if (layer.mawkibId === m.id) {
-                                layer.openPopup();
-                            }
+                            if (layer.mawkibId === m.id) layer.openPopup();
                         });
                     }, 300);
                 };
@@ -513,14 +501,92 @@
                         <p class="text-[11px] text-gray-500 mb-1"><i class="fa-solid fa-location-dot ml-1 text-green-600"></i>${m.address}</p>
                         <span class="text-[10px] bg-green-50 text-[#2E7D32] px-2 py-0.5 rounded font-bold border border-green-100">${m.services}</span>
                     </div>
-                    <i class="fa-solid fa-chevron-left text-gray-300"></i>
+                    <!-- أزرار التعديل والحذف -->
+                    <div class="flex flex-col gap-2 mr-2">
+                        <button onclick="editMawkib(event, ${m.id})" class="action-btn btn-edit" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteMawkib(event, ${m.id})" class="action-btn btn-delete" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 `;
                 container.appendChild(card);
             });
         }
 
         // ==========================================
-        // 7. إضافة موكب
+        // 6. الحذف والتعديل
+        // ==========================================
+        let editingMawkibId = null; // متغير لمعرفة إذا كنا نعدل أم نضيف
+
+        function deleteMawkib(event, id) {
+            event.stopPropagation(); // منع فتح الخريطة عند الضغط على الزر
+            if(confirm('هل أنت متأكد من حذف هذا الموكب نهائياً؟')) {
+                mawkibs = mawkibs.filter(m => m.id !== id);
+                saveData();
+                renderServicesList();
+                updateMainMapMarkers();
+                updatePreviewMapMarkers();
+                updateServiceCounts();
+                alert('تم حذف الموكب بنجاح');
+            }
+        }
+
+        function editMawkib(event, id) {
+            event.stopPropagation();
+            const m = mawkibs.find(x => x.id === id);
+            if(!m) return;
+
+            editingMawkibId = id;
+            
+            // تغيير واجهة النموذج
+            document.getElementById('formTitle').innerText = "تعديل بيانات الموكب";
+            document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-pen-to-square ml-2"></i> تحديث البيانات';
+            document.getElementById('cancelBtn').classList.remove('hidden');
+
+            // تعبئة البيانات
+            document.getElementById('mawkibName').value = m.name;
+            document.getElementById('mawkibAddress').value = m.address;
+            
+            // تحديد الخدمات
+            document.querySelectorAll('input[name="service"]').forEach(cb => {
+                cb.checked = m.services.includes(cb.value);
+            });
+
+            // الصورة والموقع
+            pickedImageBase64 = m.img;
+            if(m.img) {
+                document.getElementById('imagePreview').src = m.img;
+                document.getElementById('imagePreview').classList.remove('hidden');
+            }
+
+            pickedLat = m.lat; pickedLng = m.lng;
+            
+            // الانتقال للصفحة وتحديث الخريطة
+            switchTab('add', 2);
+            setTimeout(() => {
+                pickMap.setView([pickedLat, pickedLng], 16);
+                pickMarker.setLatLng([pickedLat, pickedLng]);
+            }, 300);
+        }
+
+        function prepareAddNew() {
+            editingMawkibId = null;
+            document.getElementById('formTitle').innerText = "تسجيل موكب جديد";
+            document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-check-circle ml-2"></i> حفظ وإرسال للمراجعة';
+            document.getElementById('cancelBtn').classList.add('hidden');
+            document.getElementById('addForm').reset();
+            document.getElementById('imagePreview').classList.add('hidden');
+            pickedImageBase64 = null;
+            document.querySelectorAll('input[name="service"]').forEach(cb => cb.checked = false);
+            
+            switchTab('add', 2);
+        }
+
+        function cancelEdit() {
+            prepareAddNew();
+            switchTab('home', 0);
+        }
+
+        // ==========================================
+        // 7. الحفظ (إضافة أو تحديث)
         // ==========================================
         function previewImage(event) {
             const file = event.target.files[0];
@@ -535,7 +601,7 @@
             }
         }
 
-        function handleAddMawkib(e) {
+        function handleSaveMawkib(e) {
             e.preventDefault();
             
             const selectedServices = Array.from(document.querySelectorAll('input[name="service"]:checked')).map(cb => cb.value).join(', ');
@@ -545,8 +611,7 @@
                 return;
             }
 
-            const newMawkib = {
-                id: Date.now(),
+            const data = {
                 name: document.getElementById('mawkibName').value,
                 services: selectedServices,
                 address: document.getElementById('mawkibAddress').value,
@@ -555,20 +620,27 @@
                 img: pickedImageBase64 || defaultImg
             };
 
-            mawkibs.unshift(newMawkib);
+            if (editingMawkibId) {
+                // تحديث موكب موجود
+                const index = mawkibs.findIndex(m => m.id === editingMawkibId);
+                if(index !== -1) {
+                    mawkibs[index] = { ...mawkibs[index], ...data };
+                    alert('تم تعديل بيانات الموكب بنجاح!');
+                }
+            } else {
+                // إضافة موكب جديد
+                const newMawkib = { id: Date.now(), ...data };
+                mawkibs.unshift(newMawkib);
+                alert('تم حفظ الموكب بنجاح!');
+            }
+
             saveData(); 
             updateMainMapMarkers(); 
+            updatePreviewMapMarkers();
             updateServiceCounts();
             renderServicesList();
-
-            L.marker([newMawkib.lat, newMawkib.lng], {icon: mawkibIcon}).addTo(previewMarkers);
             
-            document.getElementById('addForm').reset();
-            document.getElementById('imagePreview').classList.add('hidden');
-            pickedImageBase64 = null;
-            document.querySelectorAll('input[name="service"]').forEach(cb => cb.checked = false);
-            
-            alert('تم حفظ الموكب بنجاح!');
+            prepareAddNew(); // تصفير النموذج
             switchTab('home', 0);
         }
 
