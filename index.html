@@ -33,8 +33,6 @@
             padding-bottom: 20px; 
         }
         .page.active { display: block; }
-        
-        #page-reels { overflow: hidden; padding: 0; height: calc(100dvh - 70px); }
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -60,6 +58,7 @@
         .nav-btn i { font-size: 22px; margin-bottom: 4px; }
         .nav-btn span { font-size: 10px; font-weight: 700; }
 
+        /* قائمة الخدمات في نموذج التسجيل */
         .service-list { background: #1a1a1a; border-radius: 15px; overflow: hidden; margin-top: 10px; }
         .service-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #333; color: white; cursor: pointer; }
         .service-item:last-child { border-bottom: none; }
@@ -68,29 +67,25 @@
         .service-checkbox:checked::after { content: ''; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; }
         .service-name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-        .action-btn { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-        .btn-edit { background: #E3F2FD; color: #1976D2; }
-        .btn-delete { background: #FFEBEE; color: #D32F2F; }
-
-        /* تصميم الدردشة */
-        #chatRoomModal { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
-        #chatRoomModal.show { transform: translateX(0); }
-        .msg-bubble { max-width: 80%; padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; position: relative; word-wrap: break-word; }
-        .msg-sent { background: #dcf8c6; align-self: flex-end; border-bottom-left-radius: 2px; }
-        .msg-received { background: white; align-self: flex-start; border-bottom-right-radius: 2px; border: 1px solid #e2e8f0; }
-        .msg-time { font-size: 10px; color: #94a3b8; margin-top: 4px; display: block; text-align: left; }
-
-        /* تصميم الريلز */
-        .reel-container { height: 100%; width: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; }
-        .reel-card { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: black; display: flex; align-items: center; justify-content: center; }
-        .reel-video { width: 100%; height: 100%; object-fit: cover; }
-        .reel-overlay { position: absolute; bottom: 20px; right: 15px; left: 15px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 10; }
-
-        .modal { transition: opacity 0.3s; }
-        .modal.hidden { opacity: 0; pointer-events: none; }
+        /* تصميم المنشورات */
+        .post-card { background: white; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-bottom: 12px; overflow: hidden; border: 1px solid #f1f5f9; }
+        .post-image { width: 100%; max-height: 400px; object-fit: cover; border-top: 1px solid #f0f2f5; border-bottom: 1px solid #f0f2f5; }
         
+        /* تصميم القصص (Stories) */
+        .story-item { min-w-[100px] h-[160px] rounded-xl relative overflow-hidden cursor-pointer bg-cover bg-center shadow-sm border border-gray-200; }
+        .story-progress-bar { height: 3px; background: rgba(255,255,255,0.3); flex: 1; border-radius: 10px; overflow: hidden; }
+        .story-progress-fill { height: 100%; background: white; width: 0%; transition: width 5s linear; }
+
+        /* القائمة الجانبية */
         #settingsSidebar { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
         #settingsSidebar.show { transform: translateX(0); }
+        
+        /* نافذة المعرض */
+        .gallery-img { cursor: pointer; border-radius: 10px; object-fit: cover; height: 100px; width: 100%; border: 2px solid transparent; transition: 0.2s; }
+        .gallery-img:hover { border-color: #2E7D32; transform: scale(1.02); }
+
+        #commentsModal { transition: transform 0.3s ease-in-out, visibility 0.3s; transform: translateY(100%); visibility: hidden; }
+        #commentsModal.show { transform: translateY(0); visibility: visible; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -183,7 +178,7 @@
                         <span class="font-bold text-lg">تسجيل موكب جديد</span>
                     </button>
 
-                    <!-- الخدمات (تم إرجاعها) -->
+                    <!-- الخدمات -->
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="font-extrabold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-star text-green-600 text-sm"></i> الخدمات المتوفرة</h2>
                     </div>
@@ -233,43 +228,34 @@
                 </div>
             </div>
 
-            <!-- 2. صفحة الريلز -->
-            <div id="page-reels" class="page bg-black">
-                <button onclick="openAddReelModal()" class="absolute top-4 left-4 z-50 bg-white/20 backdrop-blur-md text-white w-10 h-10 rounded-full flex items-center justify-center click-effect">
-                    <i class="fa-solid fa-plus text-lg"></i>
-                </button>
-                <div class="reel-container hide-scrollbar" id="reelsContainer">
-                    <!-- الفيديوهات -->
-                </div>
-            </div>
-
-            <!-- 3. صفحة الدردشات -->
-            <div id="page-chats" class="page bg-white">
-                <div class="bg-white px-4 py-3 shadow-sm flex justify-between items-center sticky top-0 z-20 border-b border-gray-100">
-                    <h2 class="font-black text-[#2E7D32] text-xl">الدردشات</h2>
+            <!-- 2. صفحة المنشورات (مع القصص) -->
+            <div id="page-posts" class="page bg-[#F0F2F5]">
+                <div class="bg-white px-4 py-3 shadow-sm flex justify-between items-center sticky top-0 z-20">
+                    <button onclick="openPostModal()" class="w-10 h-10 bg-[#2E7D32] text-white rounded-full flex items-center justify-center shadow-md click-effect"><i class="fa-solid fa-plus text-lg"></i></button>
+                    <h2 class="font-black text-[#2E7D32] text-2xl">المنشورات</h2>
                     <button onclick="toggleSettings()" class="w-10 h-10 text-gray-600 flex items-center justify-center"><i class="fa-solid fa-bars text-xl"></i></button>
                 </div>
-                <div id="chatsList" class="pb-10"></div>
-            </div>
 
-            <!-- 4. صفحة الإشعارات -->
-            <div id="page-notifications" class="page bg-gray-50">
-                <div class="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-20 border-b border-gray-100">
-                    <h2 class="font-black text-[#2E7D32] text-xl">الإشعارات</h2>
+                <div class="p-3">
+                    <!-- قصص (Stories) -->
+                    <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-3" id="storiesContainer">
+                        <!-- سيتم توليد القصص هنا -->
+                    </div>
+
+                    <!-- إنشاء منشور -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-4">
+                        <div class="flex items-center gap-3 mb-3 cursor-pointer" onclick="openPostModal()">
+                            <img src="" id="createPostAvatar" class="w-10 h-10 rounded-full object-cover border border-gray-200">
+                            <div class="flex-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-full px-4 py-2.5 text-gray-500 text-sm transition">بم تفكر الآن؟</div>
+                            <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600"><i class="fa-regular fa-image"></i></div>
+                        </div>
+                    </div>
+                    
+                    <div id="postsContainer" class="pb-10"></div>
                 </div>
-                <div id="notificationsList" class="p-3 space-y-3 pb-10"></div>
             </div>
 
-            <!-- 5. صفحة البحث -->
-            <div id="page-search" class="page bg-gray-50">
-                <div class="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-20 border-b border-gray-100">
-                    <button onclick="switchTab('home')" class="w-8 h-8 flex items-center justify-center text-gray-600"><i class="fa-solid fa-arrow-right"></i></button>
-                    <h2 class="font-bold text-gray-800 text-lg">نتائج البحث</h2>
-                </div>
-                <div id="searchResultsList" class="p-3 space-y-3 pb-10"></div>
-            </div>
-
-            <!-- 6. صفحة الخريطة الرئيسية -->
+            <!-- 3. صفحة الخريطة الرئيسية -->
             <div id="page-map" class="page relative bg-gray-100 !p-0">
                 <button onclick="switchTab('home')" class="absolute top-6 right-4 z-[500] bg-white text-gray-800 w-10 h-10 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 click-effect">
                     <i class="fa-solid fa-arrow-right"></i>
@@ -280,7 +266,24 @@
                 </button>
             </div>
 
-            <!-- 7. صفحة إضافة / تعديل موكب -->
+            <!-- 4. صفحة الإشعارات -->
+            <div id="page-notifications" class="page bg-gray-50">
+                <div class="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-20 border-b border-gray-100">
+                    <h2 class="font-black text-[#2E7D32] text-xl">الإشعارات</h2>
+                </div>
+                <div id="notificationsList" class="p-3 space-y-3 pb-10"></div>
+            </div>
+
+            <!-- 5. صفحة البحث / الخدمات -->
+            <div id="page-search" class="page bg-gray-50">
+                <div class="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-20 border-b border-gray-100">
+                    <button onclick="switchTab('home')" class="w-8 h-8 flex items-center justify-center text-gray-600"><i class="fa-solid fa-arrow-right"></i></button>
+                    <h2 class="font-bold text-gray-800 text-lg">نتائج البحث</h2>
+                </div>
+                <div id="searchResultsList" class="p-3 space-y-3 pb-10"></div>
+            </div>
+
+            <!-- 6. صفحة إضافة / تعديل موكب -->
             <div id="page-add" class="page p-5 bg-white">
                 <div class="flex items-center justify-between mb-6 mt-2">
                     <div class="flex items-center gap-3">
@@ -322,7 +325,7 @@
                 </form>
             </div>
 
-            <!-- 8. الصفحة الشخصية -->
+            <!-- 7. الصفحة الشخصية -->
             <div id="page-account" class="page bg-white">
                 <div class="relative h-48 bg-gray-300">
                     <img src="https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=800" class="w-full h-full object-cover">
@@ -359,11 +362,11 @@
             <div class="nav-btn active" id="nav-home" onclick="switchTab('home')">
                 <i class="fa-solid fa-house"></i><span>الرئيسية</span>
             </div>
-            <div class="nav-btn" id="nav-reels" onclick="switchTab('reels')">
-                <i class="fa-solid fa-clapperboard"></i><span>ريلز</span>
+            <div class="nav-btn" id="nav-posts" onclick="switchTab('posts')">
+                <i class="fa-solid fa-bullhorn text-xl"></i><span>المنشورات</span>
             </div>
-            <div class="nav-btn" id="nav-chats" onclick="switchTab('chats')">
-                <i class="fa-solid fa-comments text-xl"></i><span>الدردشات</span>
+            <div class="nav-btn" id="nav-add" onclick="switchTab('add')">
+                <i class="fa-regular fa-square-plus text-2xl"></i><span>تسجيل موكب</span>
             </div>
             <div class="nav-btn" id="nav-notifications" onclick="switchTab('notifications')">
                 <i class="fa-regular fa-bell text-xl"></i><span>الإشعارات</span>
@@ -374,49 +377,25 @@
         </nav>
     </div>
 
-    <!-- ================= شاشة المحادثة (Chat Room) ================= -->
-    <div id="chatRoomModal" class="fixed inset-0 bg-[#efeae2] z-[10002] flex flex-col w-full h-[100dvh]">
-        <div class="bg-[#2E7D32] text-white px-4 py-3 flex items-center justify-between shadow-md">
-            <div class="flex items-center gap-3">
-                <button onclick="closeChatRoom()" class="text-xl"><i class="fa-solid fa-arrow-right"></i></button>
-                <img id="chatHeaderAvatar" src="" class="w-10 h-10 rounded-full object-cover border-2 border-white/30">
-                <div>
-                    <h3 id="chatHeaderName" class="font-bold text-sm">اسم الموكب</h3>
-                    <p class="text-[10px] text-green-200">متصل الآن</p>
-                </div>
+    <!-- ================= نافذة عرض الستوري ================= -->
+    <div id="storyModal" class="fixed inset-0 bg-black z-[10001] hidden flex-col">
+        <div class="p-4 flex gap-1 z-50 absolute top-0 w-full">
+            <div class="story-progress-bar"><div class="story-progress-fill" id="storyProgress"></div></div>
+        </div>
+        <div class="absolute top-10 left-4 right-4 flex items-center gap-2 z-50 px-4">
+            <div class="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-gray-500">
+                <img id="storyAvatar" src="" class="w-full h-full object-cover">
             </div>
-            <div class="flex gap-4 text-lg">
-                <button onclick="simulateCall('voice')"><i class="fa-solid fa-phone"></i></button>
-                <button onclick="simulateCall('video')"><i class="fa-solid fa-video"></i></button>
+            <div class="text-white">
+                <span id="storyAuthor" class="font-bold text-sm block"></span>
+                <span class="text-xs text-gray-300">الآن</span>
             </div>
+            <button onclick="closeStory()" class="text-white text-3xl mr-auto pb-4"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
-        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 flex flex-col hide-scrollbar" style="background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-size: cover; background-blend-mode: overlay;"></div>
-
-        <div class="bg-[#f0f0f0] p-2 flex items-center gap-2 pb-safe">
-            <button class="text-gray-500 text-xl px-2"><i class="fa-regular fa-face-smile"></i></button>
-            
-            <label class="text-gray-500 text-xl px-2 cursor-pointer">
-                <i class="fa-solid fa-paperclip"></i>
-                <input type="file" accept="image/*" class="hidden" onchange="sendChatMedia(event)">
-            </label>
-
-            <input type="text" id="chatInput" onkeypress="if(event.key === 'Enter') sendChatMessage()" placeholder="اكتب رسالة..." class="flex-1 rounded-full px-4 py-2 text-sm focus:outline-none border border-gray-200 shadow-sm">
-
-            <button onclick="sendChatMessage()" class="w-10 h-10 bg-[#2E7D32] text-white rounded-full flex items-center justify-center shadow-md click-effect">
-                <i class="fa-solid fa-paper-plane text-sm"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- ================= نافذة الاتصال ================= -->
-    <div id="callModal" class="fixed inset-0 z-[10005] hidden flex-col items-center justify-center text-white" style="backdrop-filter: blur(15px); background: rgba(0,0,0,0.85);">
-        <img id="callAvatar" src="" class="w-32 h-32 rounded-full object-cover border-4 border-white/20 mb-4 shadow-2xl">
-        <h2 id="callName" class="text-2xl font-bold mb-2">اسم الموكب</h2>
-        <p class="text-gray-300 mb-10">جاري الاتصال...</p>
-        <div class="flex gap-6">
-            <button onclick="endCall()" class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg click-effect"><i class="fa-solid fa-phone-slash"></i></button>
-        </div>
+        <img id="storyImage" src="" class="w-full h-full object-contain pointer-events-none">
+        
+        <div class="absolute inset-y-0 right-0 w-1/3 z-40" onclick="prevStory()"></div>
+        <div class="absolute inset-y-0 left-0 w-1/3 z-40" onclick="nextStory()"></div>
     </div>
 
     <!-- ================= القائمة الجانبية (الإعدادات) ================= -->
@@ -438,7 +417,78 @@
         </ul>
     </div>
 
-    <!-- ================= نافذة تعديل الملف الشخصي ================= -->
+    <!-- ================= نافذة إنشاء / تعديل منشور ================= -->
+    <div id="postModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-md p-4 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="postModalTitle" class="text-lg font-bold text-gray-800">إنشاء منشور</h2>
+                <button onclick="closePostModal()" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <textarea id="postText" rows="4" placeholder="بم تفكر الآن؟..." class="w-full border-none focus:outline-none text-base bg-transparent mb-2 resize-none" style="font-family: 'Cairo', sans-serif;"></textarea>
+            <img id="postImagePreview" class="hidden w-full h-auto max-h-48 object-cover rounded-lg mb-3 border border-gray-100 bg-gray-50">
+            <div class="flex items-center justify-between border border-gray-200 rounded-xl p-3 mb-4 bg-gray-50 cursor-pointer" onclick="openGalleryModal()">
+                <span class="text-sm font-bold text-gray-700">إضافة صورة للمنشور</span>
+                <i class="fa-solid fa-images text-green-500 text-xl"></i>
+            </div>
+            <button id="submitPostBtn" onclick="submitPost()" class="w-full bg-[#1B5E20] text-white font-bold py-2.5 rounded-lg shadow-md click-effect hover:bg-green-900 transition">نشر</button>
+        </div>
+    </div>
+
+    <!-- نافذة المعرض المخصصة -->
+    <div id="galleryModal" class="fixed inset-0 bg-black/80 z-[10000] hidden flex flex-col justify-end">
+        <div class="bg-white w-full rounded-t-3xl p-5 shadow-2xl h-[60vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-gray-800">اختر صورة</h2>
+                <button onclick="closeGalleryModal()" class="text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto hide-scrollbar">
+                <p class="text-sm font-bold text-gray-500 mb-2">الصور المقترحة</p>
+                <div class="grid grid-cols-3 gap-2 mb-6">
+                    <img src="https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=400" class="gallery-img" onclick="selectGalleryImage(this.src)">
+                    <img src="https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" class="gallery-img" onclick="selectGalleryImage(this.src)">
+                    <img src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400" class="gallery-img" onclick="selectGalleryImage(this.src)">
+                    <img src="https://images.unsplash.com/photo-1590075865416-4c5c5e4f8e7d?q=80&w=400" class="gallery-img" onclick="selectGalleryImage(this.src)">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400" class="gallery-img" onclick="selectGalleryImage(this.src)">
+                    <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=400" class="gallery-img" onclick="selectGalleryImage(this.src)">
+                </div>
+                <div class="text-center pb-4">
+                    <label class="bg-[#2E7D32] text-white px-6 py-3 rounded-xl font-bold cursor-pointer inline-block shadow-md">
+                        <i class="fa-solid fa-upload ml-2"></i> رفع من هاتفك
+                        <input type="file" accept="image/*" class="hidden" onchange="previewPostImage(event)">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة خيارات المنشور -->
+    <div id="actionModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-end justify-center backdrop-blur-sm" onclick="closeActionModal(event)">
+        <div class="bg-white w-full max-w-md rounded-t-3xl p-4 shadow-2xl pb-8" onclick="event.stopPropagation()">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            <button onclick="editCurrentPost()" class="w-full text-right py-3 px-4 text-gray-800 font-bold border-b border-gray-100 flex items-center gap-3"><i class="fa-solid fa-pen text-blue-500"></i> تعديل المنشور</button>
+            <button onclick="deleteCurrentPost()" class="w-full text-right py-3 px-4 text-red-500 font-bold flex items-center gap-3"><i class="fa-solid fa-trash"></i> حذف المنشور</button>
+        </div>
+    </div>
+
+    <!-- نافذة التعليقات -->
+    <div id="commentsModal" class="fixed inset-0 bg-black/60 z-[9999] flex flex-col justify-end" onclick="closeCommentsModal()">
+        <div class="bg-white w-full rounded-t-2xl h-[75vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
+            <div class="p-3 border-b border-gray-200 flex justify-between items-center bg-white rounded-t-2xl">
+                <div class="w-8 h-1 bg-gray-300 rounded-full mx-auto absolute left-1/2 transform -translate-x-1/2 top-2"></div>
+                <div class="w-8"></div>
+                <h2 class="font-bold text-gray-800 text-base">التعليقات</h2>
+                <button onclick="closeCommentsModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="commentsList" class="flex-1 overflow-y-auto p-3 space-y-4 hide-scrollbar bg-gray-50"></div>
+            <div class="p-3 border-t border-gray-200 bg-white flex gap-2 items-center pb-6">
+                <img id="commentUserAvatar" src="" class="w-9 h-9 rounded-full object-cover border border-gray-200">
+                <input type="text" id="modalCommentInput" onkeypress="if(event.key === 'Enter') submitModalComment()" placeholder="اكتب تعليقاً..." class="flex-1 bg-gray-100 border-none rounded-full px-4 py-2 text-sm focus:outline-none">
+                <button onclick="submitModalComment()" class="text-[#2E7D32] text-xl px-1"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل الملف الشخصي -->
     <div id="editProfileModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             <h2 class="text-xl font-bold text-gray-800 mb-4">تعديل الملف الشخصي</h2>
@@ -451,7 +501,7 @@
         </div>
     </div>
 
-    <!-- ================= نافذة تفاصيل الموكب ================= -->
+    <!-- نافذة تفاصيل الموكب -->
     <div id="mawkibDetailsModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-end justify-center backdrop-blur-sm" onclick="closeMawkibDetails(event)">
         <div class="bg-white w-full max-w-md rounded-t-3xl p-5 shadow-2xl pb-8 max-h-[85vh] overflow-y-auto hide-scrollbar" onclick="event.stopPropagation()">
             <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
@@ -464,40 +514,6 @@
 
             <button id="detailsDirectionsBtn" class="w-full bg-[#2E7D32] text-white font-bold py-3.5 rounded-xl shadow-md click-effect mb-3"><i class="fa-solid fa-diamond-turn-right ml-2"></i> الاتجاهات إلى الموكب</button>
             <button onclick="closeMawkibDetails()" class="w-full bg-gray-100 text-gray-700 font-bold py-3 rounded-xl click-effect">إغلاق</button>
-        </div>
-    </div>
-
-    <!-- ================= نافذة تعليقات الريلز ================= -->
-    <div id="reelCommentsModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-end justify-center backdrop-blur-sm" onclick="closeReelComments(event)">
-        <div class="bg-white w-full max-w-md rounded-t-3xl p-5 shadow-2xl h-[60vh] flex flex-col" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-gray-800">التعليقات</h2>
-                <button onclick="closeReelComments()" class="text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <div id="reelCommentsList" class="flex-1 overflow-y-auto space-y-3 hide-scrollbar mb-4"></div>
-            <div class="flex gap-2">
-                <input type="text" id="reelCommentInput" placeholder="أضف تعليقاً..." class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none">
-                <button onclick="submitReelComment()" class="bg-[#2E7D32] text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md"><i class="fa-solid fa-paper-plane text-sm"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= نافذة إضافة ريلز جديد ================= -->
-    <div id="addReelModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">إضافة ريلز جديد</h2>
-            
-            <label class="block text-sm font-bold text-gray-700 mb-2">اختر فيديو</label>
-            <input type="file" id="reelVideoInput" accept="video/*" class="w-full border border-gray-200 rounded-xl p-2 text-sm bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4">
-            
-            <label class="block text-sm font-bold text-gray-700 mb-2">وصف الفيديو</label>
-            <input type="text" id="reelDescInput" placeholder="اكتب وصفاً قصيراً..." class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-green-600 text-sm bg-gray-50 mb-6">
-            
-            <div class="flex gap-2">
-                <button onclick="uploadReel()" class="flex-1 bg-[#2E7D32] text-white font-bold py-3 rounded-xl shadow-md">نشر الريلز</button>
-                <button onclick="document.getElementById('addReelModal').classList.add('hidden')" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">إلغاء</button>
-            </div>
-            <p class="text-[10px] text-gray-400 mt-2 text-center">* ملاحظة: الفيديو سيعمل بشكل مؤقت (للتجربة). التخزين الدائم يحتاج لخدمة سحابية.</p>
         </div>
     </div>
 
@@ -537,7 +553,7 @@
         }
 
         // ==========================================
-        // 2. البيانات والتخزين (تم إضافة حفظ الريلز)
+        // 2. البيانات والتخزين
         // ==========================================
         const dummyMawkibs = [
             { id: 1, name: "موكب العباس (ع)", lat: 32.6160, lng: 44.0249, services: "طعام, ماء, مبيت", address: "شارع العباس", img: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" },
@@ -545,39 +561,63 @@
             { id: 3, name: "موكب قمر بني هاشم", lat: 32.6130, lng: 44.0220, services: "إسعاف, مياه, طعام", address: "باب القبلة", img: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400" }
         ];
 
+        const defaultPosts = [
+            { 
+                id: 1, 
+                text: "خدمة زوار الإمام الحسين شرف لنا 💚", 
+                img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=800", 
+                time: Date.now() - 3600000, 
+                author: "موكب شباب الحسين", 
+                avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100",
+                verified: true,
+                likes: 2300, 
+                isLiked: false, 
+                comments: []
+            }
+        ];
+
+        const defaultStories = [
+            { id: 1, author: "موكب العباس", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=400", avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100" },
+            { id: 2, author: "خدام الزائرين", img: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400", avatar: "https://images.unsplash.com/photo-1590075865416-4c5c5e4f8e7d?q=80&w=100" }
+        ];
+
         const db = {
             users: JSON.parse(localStorage.getItem('karbalaUsers')) || [],
             currentUser: JSON.parse(localStorage.getItem('karbalaCurrentUser')) || null,
             mawkibs: JSON.parse(localStorage.getItem('karbalaMawkibs')) || [...dummyMawkibs],
-            chats: JSON.parse(localStorage.getItem('karbalaChats')) || [
-                { id: 1, name: "موكب العباس", avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100", messages: [{text: "أهلاً بك في موكب العباس", isMe: false, time: "10:00"}] }
-            ],
-            // تم إزالة المتابعة، وإبقاء الإشعارات فقط
+            posts: JSON.parse(localStorage.getItem('karbalaPosts')) || [...defaultPosts],
+            stories: JSON.parse(localStorage.getItem('karbalaStories')) || [...defaultStories],
             notifications: JSON.parse(localStorage.getItem('karbalaNotifs')) || [
-                { id: 1, title: "أهلاً بك", text: "مرحباً بك في دليل مواكب كربلاء. يمكنك تصفح المواكب وإضافة موكبك الخاص.", time: "الآن" },
-                { id: 2, title: "تم التحقق", text: "تم التحقق من بيانات موكب العباس (ع).", time: "منذ ساعتين" }
-            ],
-            reels: JSON.parse(localStorage.getItem('karbalaReels')) || [
-                { id: 1, video: "https://www.w3schools.com/html/mov_bbb.mp4", author: "موكب شباب الحسين", desc: "خدمة زوار الإمام الحسين (ع) #كربلاء", likes: 0, isLiked: false, comments: [] },
-                { id: 2, video: "https://www.w3schools.com/html/mov_bbb.mp4", author: "خدام الزائرين", desc: "توزيع الوجبات الساخنة", likes: 0, isLiked: false, comments: [] }
+                { id: 1, title: "أهلاً بك", text: "مرحباً بك في دليل مواكب كربلاء. يمكنك تصفح المواكب وإضافة موكبك الخاص.", time: "الآن" }
             ]
         };
 
         let profile = { name: "", img: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200" };
         let isSignupMode = false;
-        let activeChatId = null;
-        let currentReelId = null;
+        let editingPostId = null;
+        let postImageBase64 = null;
+        let activeCommentPostId = null;
+        let currentPostOptionsId = null;
+        let currentStoryIndex = 0;
+        let storyTimeout = null;
 
         function saveData() {
             try {
                 localStorage.setItem('karbalaUsers', JSON.stringify(db.users));
                 localStorage.setItem('karbalaCurrentUser', JSON.stringify(db.currentUser));
                 localStorage.setItem('karbalaMawkibs', JSON.stringify(db.mawkibs));
-                localStorage.setItem('karbalaChats', JSON.stringify(db.chats));
+                localStorage.setItem('karbalaPosts', JSON.stringify(db.posts));
+                localStorage.setItem('karbalaStories', JSON.stringify(db.stories));
                 localStorage.setItem('karbalaNotifs', JSON.stringify(db.notifications));
-                localStorage.setItem('karbalaReels', JSON.stringify(db.reels));
             } catch (e) {
-                alert("تحذير: مساحة التخزين ممتلئة. قد لا يتم حفظ بعض التغييرات الجديدة.");
+                console.error(e);
+                if(db.posts.length > 10) {
+                    alert("مساحة التخزين ممتلئة، سيتم حذف أقدم المنشورات تلقائياً.");
+                    db.posts = db.posts.slice(0, 10); 
+                    saveData(); 
+                } else {
+                    alert("مساحة التخزين ممتلئة جداً. يرجى حذف بعض الصور.");
+                }
             }
         }
 
@@ -678,10 +718,6 @@
             if (pageId === 'map' && mainMap) setTimeout(() => mainMap.invalidateSize(), 200);
             if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 200);
             if (pageId === 'home' && previewMap) setTimeout(() => previewMap.invalidateSize(), 200);
-            
-            if (pageId !== 'reels') {
-                document.querySelectorAll('video').forEach(v => v.pause());
-            }
         }
 
         function toggleSettings() {
@@ -698,6 +734,8 @@
             document.getElementById('profilePhoneDisplay').innerText = db.currentUser ? db.currentUser.phone : "";
             document.getElementById('settingsName').innerText = profile.name;
             document.getElementById('settingsAvatar').src = profile.img;
+            document.getElementById('commentUserAvatar').src = profile.img;
+            document.getElementById('createPostAvatar').src = profile.img;
         }
 
         function updateProfilePic(event) {
@@ -708,6 +746,7 @@
                     db.currentUser.img = base64;
                     saveData();
                     renderProfile();
+                    renderPosts(); 
                 });
             }
         }
@@ -963,246 +1002,332 @@
         }
 
         // ==========================================
-        // 7. الدردشات
+        // 7. المنشورات والقصص (تم إرجاعها)
         // ==========================================
-        function renderChats() {
-            const list = document.getElementById('chatsList');
-            list.innerHTML = '';
-            db.chats.forEach(c => {
-                const lastMsg = c.messages.length > 0 ? c.messages[c.messages.length - 1] : { text: "لا توجد رسائل", time: "" };
-                const displayMsg = lastMsg.img ? "📷 صورة" : escapeHTML(lastMsg.text);
-                
-                list.innerHTML += `
-                    <div class="flex items-center p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer click-effect" onclick="openChatRoom(${c.id})">
-                        <img src="${c.avatar}" class="w-12 h-12 rounded-full object-cover ml-3">
-                        <div class="flex-1">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-sm text-gray-800">${escapeHTML(c.name)}</span>
-                                <span class="text-[10px] text-gray-400">${lastMsg.time || ""}</span>
-                            </div>
-                            <span class="text-xs text-gray-500 block mt-1 truncate max-w-[200px]">${displayMsg}</span>
-                        </div>
+        function formatCount(num) {
+            if (num >= 1000) return (num / 1000).toFixed(1) + ' ألف';
+            return num;
+        }
+
+        function renderStories() {
+            const container = document.getElementById('storiesContainer');
+            container.innerHTML = `
+                <input type="file" id="storyUpload" accept="image/*" class="hidden" onchange="handleStoryUpload(event)">
+                <div class="min-w-[100px] h-[160px] bg-white rounded-xl shadow-sm border border-gray-200 relative overflow-hidden cursor-pointer flex flex-col click-effect" onclick="document.getElementById('storyUpload').click()">
+                    <img src="${profile.img}" class="w-full h-[110px] object-cover">
+                    <div class="flex-1 flex items-end justify-center pb-2"><span class="text-[11px] font-bold text-gray-700">إنشاء قصة</span></div>
+                    <div class="absolute bottom-[40px] left-1/2 transform -translate-x-1/2 bg-white rounded-full p-1 border-2 border-white">
+                        <div class="w-7 h-7 bg-[#1877F2] text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
                     </div>
-                `;
-            });
-        }
+                </div>
+            `;
 
-        function openChatRoom(id) {
-            activeChatId = id;
-            const chat = db.chats.find(c => c.id === id);
-            if(!chat) return;
-            
-            document.getElementById('chatHeaderName').innerText = chat.name;
-            document.getElementById('chatHeaderAvatar').src = chat.avatar;
-            
-            renderChatMessages(chat);
-            document.getElementById('chatRoomModal').classList.add('show');
-        }
-
-        function closeChatRoom() {
-            document.getElementById('chatRoomModal').classList.remove('show');
-            activeChatId = null;
-        }
-
-        function renderChatMessages(chat) {
-            const container = document.getElementById('chatMessages');
-            container.innerHTML = '';
-            chat.messages.forEach(m => {
-                let imgHtml = m.img ? `<img src="${m.img}" class="w-full max-h-48 object-cover rounded-lg mb-1">` : '';
-                let safeText = escapeHTML(m.text);
-                
+            db.stories.forEach((s, index) => {
                 container.innerHTML += `
-                    <div class="msg-bubble ${m.isMe ? 'msg-sent' : 'msg-received'}">
-                        ${imgHtml}
-                        <span>${safeText}</span>
-                        <span class="msg-time">${m.time} ${m.isMe ? '<i class="fa-solid fa-check-double text-blue-500 ml-1"></i>' : ''}</span>
+                    <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center click-effect" style="background-image: url('${s.img}');" onclick="viewStory(${index})">
+                        <div class="absolute inset-0 bg-black/30"></div>
+                        <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
+                            <img src="${s.avatar || profile.img}" class="w-full h-full object-cover">
+                        </div>
+                        <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold">${escapeHTML(s.author)}</span>
                     </div>
                 `;
             });
-            container.scrollTop = container.scrollHeight;
         }
 
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            if(!text || !activeChatId) return;
-            
-            const chat = db.chats.find(c => c.id === activeChatId);
-            const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-            
-            chat.messages.push({ text: text, isMe: true, time: timeStr });
-            input.value = '';
-            saveData();
-            renderChatMessages(chat);
-            renderChats();
-        }
-
-        function sendChatMedia(event) {
+        function handleStoryUpload(event) {
             const file = event.target.files[0];
-            if(!file || !activeChatId) return;
+            if (file) {
+                compressImage(file, function(compressedBase64) {
+                    const newStory = { id: Date.now(), author: profile.name, img: compressedBase64, avatar: profile.img };
+                    db.stories.unshift(newStory);
+                    saveData();
+                    renderStories();
+                    viewStory(0);
+                });
+            }
+        }
+
+        function viewStory(index) {
+            if(index < 0 || index >= db.stories.length) { closeStory(); return; }
+            currentStoryIndex = index;
+            const story = db.stories[index];
+
+            document.getElementById('storyImage').src = story.img;
+            document.getElementById('storyAuthor').innerText = story.author;
+            document.getElementById('storyAvatar').src = story.avatar || profile.img;
             
-            compressImage(file, function(base64) {
-                const chat = db.chats.find(c => c.id === activeChatId);
-                const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-                
-                chat.messages.push({ text: "", img: base64, isMe: true, time: timeStr });
-                saveData();
-                renderChatMessages(chat);
-                renderChats();
+            const modal = document.getElementById('storyModal');
+            const progress = document.getElementById('storyProgress');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            progress.style.transition = 'none';
+            progress.style.width = '0%';
+
+            setTimeout(() => {
+                progress.style.transition = 'width 5s linear';
+                progress.style.width = '100%';
+            }, 50);
+
+            clearTimeout(storyTimeout);
+            storyTimeout = setTimeout(() => { nextStory(); }, 5000);
+        }
+
+        function nextStory() {
+            clearTimeout(storyTimeout);
+            if(currentStoryIndex < db.stories.length - 1) {
+                viewStory(currentStoryIndex + 1);
+            } else {
+                closeStory();
+            }
+        }
+
+        function prevStory() {
+            clearTimeout(storyTimeout);
+            if(currentStoryIndex > 0) {
+                viewStory(currentStoryIndex - 1);
+            } else {
+                viewStory(0); 
+            }
+        }
+
+        function closeStory() {
+            const modal = document.getElementById('storyModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            clearTimeout(storyTimeout);
+        }
+
+        // Swipe support for Story
+        let touchStartX = 0;
+        document.getElementById('storyModal').addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        document.getElementById('storyModal').addEventListener('touchend', e => {
+            let touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX < touchStartX - 50) nextStory(); 
+            if (touchEndX > touchStartX + 50) prevStory(); 
+        }, false);
+
+        function renderPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+            
+            db.posts.forEach(p => {
+                const timeString = p.time ? new Date(p.time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : 'الآن';
+                const likesCount = p.likes || 0;
+                const commentsCount = p.comments ? p.comments.length : 0;
+                const sharesCount = Math.floor(likesCount / 100);
+                let imgHtml = p.img ? `<img src="${p.img}" class="post-image">` : '';
+                let verifiedHtml = p.verified ? `<i class="fa-solid fa-circle-check text-blue-500 text-sm mr-1"></i>` : '';
+                let avatarSrc = p.author === profile.name ? profile.img : (p.avatar || profile.img);
+                let likeBtnClass = p.isLiked ? 'text-[#1877F2]' : 'text-gray-600';
+                let likeIcon = p.isLiked ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up';
+
+                let card = document.createElement('div');
+                card.id = `post-${p.id}`;
+                card.className = 'post-card';
+                card.innerHTML = `
+                    <div class="p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="${avatarSrc}" class="w-10 h-10 rounded-full object-cover">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="font-bold text-sm text-gray-900">${escapeHTML(p.author)}</span>
+                                    ${verifiedHtml}
+                                </div>
+                                <div class="flex items-center gap-1 text-[11px] text-gray-500">
+                                    <span>${timeString}</span><span>·</span><i class="fa-solid fa-earth-asia"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openActionModal(${p.id})" class="text-gray-500 w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center"><i class="fa-solid fa-ellipsis"></i></button>
+                    </div>
+                    <p class="text-[15px] text-gray-800 px-3 pb-3 leading-relaxed whitespace-pre-wrap">${escapeHTML(p.text)}</p>
+                    ${imgHtml}
+                    <div class="px-3 py-2 flex justify-between items-center text-sm text-gray-500 border-b border-gray-100">
+                        <div class="flex items-center gap-1">
+                            <div class="flex -space-x-1 space-x-reverse">
+                                <div class="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border border-white z-10"><i class="fa-solid fa-thumbs-up text-white text-[10px]"></i></div>
+                                <div class="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border border-white z-0"><i class="fa-solid fa-heart text-white text-[10px]"></i></div>
+                            </div>
+                            <span>${formatCount(likesCount)}</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <span>${commentsCount} تعليق</span>
+                            <span>${sharesCount} مشاركة</span>
+                        </div>
+                    </div>
+                    <div class="px-2 py-1 flex justify-between border-t border-gray-100">
+                        <button onclick="toggleLike(${p.id})" class="flex items-center gap-2 py-2 px-3 text-sm ${likeBtnClass} hover:bg-gray-50 rounded-lg flex-1 justify-center transition">
+                            <i class="${likeIcon} text-lg"></i><span class="font-bold">أعجبني</span>
+                        </button>
+                        <button onclick="openCommentsModal(${p.id})" class="flex items-center gap-2 py-2 px-3 text-sm text-gray-600 hover:bg-gray-50 rounded-lg flex-1 justify-center transition">
+                            <i class="fa-regular fa-comment text-lg"></i><span class="font-bold">تعليق</span>
+                        </button>
+                        <button onclick="sharePost('${p.text.replace(/'/g, "\\'")}')" class="flex items-center gap-2 py-2 px-3 text-sm text-gray-600 hover:bg-gray-50 rounded-lg flex-1 justify-center transition">
+                            <i class="fa-solid fa-share text-lg"></i><span class="font-bold">مشاركة</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
             });
         }
 
-        function simulateCall(type) {
-            const chat = db.chats.find(c => c.id === activeChatId);
-            if(!chat) return;
-            
-            document.getElementById('callName').innerText = chat.name;
-            document.getElementById('callAvatar').src = chat.avatar;
-            
-            document.getElementById('callModal').classList.remove('hidden');
-            document.getElementById('callModal').classList.add('flex');
+        function toggleLike(id) {
+            const post = db.posts.find(p => p.id === id);
+            if (post.isLiked) { post.likes--; post.isLiked = false; } else { post.likes++; post.isLiked = true; }
+            saveData(); renderPosts();
         }
 
-        function endCall() {
-            document.getElementById('callModal').classList.add('hidden');
-            document.getElementById('callModal').classList.remove('flex');
+        async function sharePost(text) {
+            if (navigator.share) {
+                try { await navigator.share({ title: 'دليل مواكب كربلاء', text: text, url: window.location.href }); } catch (e) {}
+            } else {
+                navigator.clipboard.writeText(text);
+                alert('تم نسخ النص');
+            }
         }
 
-        // ==========================================
-        // 8. الريلز
-        // ==========================================
-        function renderReels() {
-            const container = document.getElementById('reelsContainer');
-            container.innerHTML = '';
-            db.reels.forEach(r => {
-                container.innerHTML += `
-                    <div class="reel-card">
-                        <video src="${r.video}" class="reel-video" loop muted playsinline></video>
-                        <div class="reel-overlay">
-                            <div class="text-white mb-4">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <div class="w-8 h-8 bg-[#2E7D32] rounded-full flex items-center justify-center"><i class="fa-solid fa-mosque text-xs"></i></div>
-                                    <span class="font-bold text-sm">${escapeHTML(r.author)}</span>
-                                </div>
-                                <p class="text-xs text-gray-200">${escapeHTML(r.desc)}</p>
-                            </div>
-                            <div class="flex flex-col items-center gap-4 text-white mb-4">
-                                <button onclick="toggleReelLike(${r.id})" class="flex flex-col items-center ${r.isLiked ? 'text-red-500' : ''}">
-                                    <i class="${r.isLiked ? 'fa-solid' : 'fa-regular'} fa-heart text-2xl mb-1"></i>
-                                    <span class="text-xs">${r.likes}</span>
-                                </button>
-                                <button onclick="openReelComments(${r.id})" class="flex flex-col items-center">
-                                    <i class="fa-solid fa-comment text-2xl mb-1"></i>
-                                    <span class="text-xs">${r.comments.length}</span>
-                                </button>
-                                <button class="flex flex-col items-center">
-                                    <i class="fa-solid fa-share text-2xl mb-1"></i>
-                                    <span class="text-xs">مشاركة</span>
-                                </button>
+        function openCommentsModal(postId) {
+            activeCommentPostId = postId;
+            renderCommentsList();
+            document.getElementById('commentsModal').classList.add('show');
+        }
+
+        function closeCommentsModal() {
+            document.getElementById('commentsModal').classList.remove('show');
+        }
+
+        function renderCommentsList() {
+            const post = db.posts.find(p => p.id === activeCommentPostId);
+            const list = document.getElementById('commentsList');
+            list.innerHTML = '';
+            
+            if (!post) {
+                list.innerHTML = '<div class="text-center text-gray-400 mt-10">المنشور لم يعد موجوداً.</div>';
+                return;
+            }
+            
+            if (!post.comments || post.comments.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-400 mt-10">لا توجد تعليقات بعد.</div>';
+                return;
+            }
+            post.comments.forEach(c => {
+                list.innerHTML += `
+                    <div class="flex gap-2">
+                        <img src="${c.avatar || profile.img}" class="w-9 h-9 rounded-full object-cover border border-gray-200">
+                        <div class="flex-1">
+                            <div class="bg-white rounded-2xl p-2.5 shadow-sm border border-gray-100">
+                                <span class="font-bold text-sm text-gray-900 block mb-1">${escapeHTML(c.author)}</span>
+                                <span class="text-sm text-gray-800">${escapeHTML(c.text)}</span>
                             </div>
                         </div>
                     </div>
                 `;
             });
-
-            const observer = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.querySelector('video').play().catch(()=>{});
-                    } else {
-                        entry.target.querySelector('video').pause();
-                    }
-                });
-            }, { threshold: 0.5 });
-
-            document.querySelectorAll('.reel-card').forEach(card => observer.observe(card));
         }
 
-        function openAddReelModal() {
-            document.getElementById('reelVideoInput').value = '';
-            document.getElementById('reelDescInput').value = '';
-            document.getElementById('addReelModal').classList.remove('hidden');
-        }
-
-        function uploadReel() {
-            const fileInput = document.getElementById('reelVideoInput');
-            const descInput = document.getElementById('reelDescInput');
-            const file = fileInput.files[0];
-            
-            if(!file) { alert('يرجى اختيار فيديو أولاً'); return; }
-            if(!descInput.value.trim()) { alert('يرجى إدخال وصف للفيديو'); return; }
-
-            const videoUrl = URL.createObjectURL(file);
-            
-            const newReel = {
-                id: Date.now(),
-                video: videoUrl,
-                author: profile.name,
-                desc: escapeHTML(descInput.value.trim()),
-                likes: 0,
-                isLiked: false,
-                comments: []
-            };
-
-            db.reels.unshift(newReel);
-            saveData(); // محاولة الحفظ
-            renderReels();
-            document.getElementById('addReelModal').classList.add('hidden');
-            alert('تمت إضافة الريلز! (ملاحظة: الفيديو قد لا يُحفظ بعد إغلاق التطبيق بسبب قيود مساحة المتصفح).');
-        }
-
-        function toggleReelLike(id) {
-            const reel = db.reels.find(r => r.id === id);
-            if(!reel) return;
-            
-            if(reel.isLiked) { reel.likes--; reel.isLiked = false; }
-            else { reel.likes++; reel.isLiked = true; }
-            
-            saveData();
-            renderReels();
-        }
-
-        function openReelComments(id) {
-            currentReelId = id;
-            const reel = db.reels.find(r => r.id === id);
-            const list = document.getElementById('reelCommentsList');
-            list.innerHTML = '';
-            
-            if(reel.comments.length === 0) {
-                list.innerHTML = '<div class="text-center text-gray-400 mt-5">لا توجد تعليقات</div>';
-            } else {
-                reel.comments.forEach(c => {
-                    list.innerHTML += `
-                        <div class="bg-gray-50 p-3 rounded-lg">
-                            <span class="font-bold text-xs text-green-700 block mb-1">${escapeHTML(c.author)}</span>
-                            <span class="text-sm text-gray-800">${escapeHTML(c.text)}</span>
-                        </div>
-                    `;
-                });
-            }
-            document.getElementById('reelCommentsModal').classList.remove('hidden');
-        }
-
-        function closeReelComments(e) {
-            if(!e || e.target.id === 'reelCommentsModal') {
-                document.getElementById('reelCommentsModal').classList.add('hidden');
-            }
-        }
-
-        function submitReelComment() {
-            const input = document.getElementById('reelCommentInput');
+        function submitModalComment() {
+            const input = document.getElementById('modalCommentInput');
             const text = input.value.trim();
-            if(!text || !currentReelId) return;
+            if(!text || !activeCommentPostId) return;
+            const post = db.posts.find(p => p.id === activeCommentPostId);
             
-            const reel = db.reels.find(r => r.id === currentReelId);
-            reel.comments.push({ author: profile.name, text: text });
+            if (!post) {
+                alert('عذراً، هذا المنشور لم يعد موجوداً.');
+                closeCommentsModal();
+                return;
+            }
+            if (!post.comments) post.comments = []; 
+            
+            post.comments.push({ author: profile.name, text: text, avatar: profile.img });
             input.value = '';
-            saveData();
-            openReelComments(currentReelId);
+            saveData(); renderPosts(); renderCommentsList();
+        }
+
+        function openActionModal(id) { 
+            currentPostOptionsId = id; 
+            if(db.posts.find(p=>p.id===id).author !== profile.name) { alert('لا يمكنك تعديل منشور ليس لك'); return; }
+            document.getElementById('actionModal').classList.remove('hidden'); 
+        }
+        function closeActionModal(e) { if(!e || e.target.id === 'actionModal') document.getElementById('actionModal').classList.add('hidden'); }
+        
+        function deleteCurrentPost() {
+            if(confirm('حذف هذا المنشور؟')) {
+                db.posts = db.posts.filter(p => p.id !== currentPostOptionsId);
+                saveData(); renderPosts(); closeActionModal();
+            }
+        }
+
+        function editCurrentPost() {
+            const p = db.posts.find(x => x.id === currentPostOptionsId);
+            if(!p) return;
+            editingPostId = p.id;
+            document.getElementById('postModalTitle').innerHTML = 'تعديل المنشور';
+            document.getElementById('submitPostBtn').innerText = 'تحديث';
+            document.getElementById('postText').value = p.text;
+            postImageBase64 = p.img;
+            if(p.img) { document.getElementById('postImagePreview').src = p.img; document.getElementById('postImagePreview').classList.remove('hidden'); } 
+            else { document.getElementById('postImagePreview').classList.add('hidden'); }
+            closeActionModal();
+            document.getElementById('postModal').classList.remove('hidden');
+        }
+
+        function openPostModal() {
+            editingPostId = null;
+            document.getElementById('postModalTitle').innerHTML = 'إنشاء منشور';
+            document.getElementById('submitPostBtn').innerText = 'نشر';
+            document.getElementById('postText').value = '';
+            postImageBase64 = null;
+            document.getElementById('postImagePreview').classList.add('hidden');
+            document.getElementById('postModal').classList.remove('hidden');
+        }
+        function closePostModal() { document.getElementById('postModal').classList.add('hidden'); }
+
+        function openGalleryModal() {
+            document.getElementById('galleryModal').classList.remove('hidden');
+        }
+        function closeGalleryModal() {
+            document.getElementById('galleryModal').classList.add('hidden');
+        }
+        
+        function selectGalleryImage(src) {
+            postImageBase64 = src;
+            document.getElementById('postImagePreview').src = src;
+            document.getElementById('postImagePreview').classList.remove('hidden');
+            closeGalleryModal();
+        }
+
+        function previewPostImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                compressImage(file, function(compressedBase64) {
+                    postImageBase64 = compressedBase64;
+                    document.getElementById('postImagePreview').src = postImageBase64;
+                    document.getElementById('postImagePreview').classList.remove('hidden');
+                    closeGalleryModal();
+                });
+            }
+        }
+
+        function submitPost() {
+            const text = document.getElementById('postText').value.trim();
+            if (!text && !postImageBase64) { alert('اكتب نصاً أو أضف صورة'); return; }
+            if (editingPostId) {
+                const p = db.posts.find(x => x.id === editingPostId);
+                p.text = text; p.img = postImageBase64;
+            } else {
+                db.posts.unshift({ id: Date.now(), text: text, img: postImageBase64, time: Date.now(), author: profile.name, avatar: profile.img, verified: false, likes: 0, isLiked: false, comments: [] });
+            }
+            saveData(); renderPosts(); closePostModal();
+            document.getElementById('page-posts').scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ==========================================
-        // 9. الإشعارات
+        // 8. الإشعارات
         // ==========================================
         function renderNotifications() {
             const list = document.getElementById('notificationsList');
@@ -1229,13 +1354,13 @@
         }
 
         // ==========================================
-        // 10. التشغيل
+        // 9. التشغيل
         // ==========================================
         function initApp() {
             initMaps();
             renderProfile();
-            renderChats();
-            renderReels();
+            renderPosts();
+            renderStories();
             renderNotifications();
         }
 
