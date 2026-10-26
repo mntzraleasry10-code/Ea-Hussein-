@@ -5,10 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>دليل مواكب كربلاء</title>
     
+    <!-- إعدادات الـ PWA (مدمجة هنا لتعمل بدون ملفات خارجية) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"دليل مواكب كربلاء","short_name":"مواكب كربلاء","start_url":"./index.html","display":"standalone","background_color":"#F8F6F0","theme_color":"#8B1A1A","icons":[{"src":"https://ui-avatars.com/api/?name=M&background=8B1A1A&color=D4AF37&size=192","sizes":"192x192","type":"image/png"},{"src":"https://ui-avatars.com/api/?name=M&background=8B1A1A&color=D4AF37&size=512","sizes":"512x512","type":"image/png"}]}'>
+    
+    <script>
+        // تسجيل Service Worker وهمي لتجاوز فحص المتصفح
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', function(e) { self.skipWaiting(); });
+                self.addEventListener('fetch', function(event) { });
+            `;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log(err));
+        }
+    </script>
+
+    <!-- مكتبات التصميم والخريطة -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -46,10 +61,8 @@
             background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));
             border-bottom: 2px solid var(--gold);
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            padding-top: 15px;
-            padding-bottom: 15px;
-            position: relative;
-            overflow: hidden;
+            padding-top: 15px; padding-bottom: 15px;
+            position: relative; overflow: hidden;
         }
         .header-luxury::after {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -62,12 +75,6 @@
             background-color: #F8F6F0;
             background-image: url('https://www.transparenttextures.com/patterns/white-marble.png');
             min-height: 100%;
-        }
-
-        /* أيقونة الشعار الكبيرة في الخلف */
-        .watermark-icon {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            opacity: 0.05; font-size: 150px; color: var(--gold); pointer-events: none; z-index: 0;
         }
 
         #homeMap { height: 220px; width: 100%; z-index: 1; }
@@ -103,7 +110,7 @@
         .nav-btn i { font-size: 22px; margin-bottom: 4px; }
         .nav-btn span { font-size: 10px; font-weight: 700; }
 
-        /* ================= تصميم قائمة الدردشات (مطابق للصورة) ================= */
+        /* تصميم قائمة الدردشات */
         .chat-item {
             display: flex; align-items: center; padding: 12px;
             background: white; border: 2px solid var(--gold); border-radius: 15px;
@@ -119,13 +126,6 @@
         .chat-time { font-size: 11px; color: #94a3b8; }
         .chat-message { font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
 
-        /* مؤشر التحميل */
-        .loader-dots { display: flex; justify-content: center; gap: 4px; }
-        .loader-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; animation: pulse 1.5s infinite; }
-        .loader-dot:nth-child(2) { animation-delay: 0.2s; }
-        .loader-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
-
         /* صفحة المكالمات */
         .call-item {
             display: flex; align-items: center; padding: 12px;
@@ -137,7 +137,7 @@
         .call-out { background: #E3F2FD; color: #1976D2; }
         .call-missed { background: #FFEBEE; color: #D32F2F; }
 
-        /* ================= شاشة الدردشة ================= */
+        /* شاشة الدردشة */
         #chatRoomModal { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(100%); }
         #chatRoomModal.show { transform: translateX(0); }
         
@@ -165,29 +165,19 @@
 
         .msg-time { font-size: 10px; color: #999; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
         
-        .typing-indicator {
-            background: white; padding: 8px 12px; border-radius: 10px; display: none;
-            align-self: flex-start; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        }
-        .typing-dot {
-            display: inline-block; width: 6px; height: 6px; background: #999;
-            border-radius: 50%; margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both;
-        }
+        .typing-indicator { background: white; padding: 8px 12px; border-radius: 10px; display: none; align-self: flex-start; margin-bottom: 10px; }
+        .typing-dot { display: inline-block; width: 6px; height: 6px; background: #999; border-radius: 50%; margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both; }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
         /* شاشة المكالمة */
         #callModal { backdrop-filter: blur(15px); background: rgba(17, 24, 39, 0.95); }
-        .record-btn { animation: pulse-red 1.5s infinite; }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <div id="storageWarning" class="bg-red-500 text-white text-center text-xs p-1 font-bold hidden">تنبيه: التخزين المحلي معطل.</div>
-
-    <!-- ================= 1. شاشة تسجيل الدخول ================= -->
+    <!-- شاشة تسجيل الدخول -->
     <div id="authScreen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-6" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
         <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl relative border-4 border-[var(--gold)]">
             <div class="text-center mb-6">
@@ -222,11 +212,11 @@
         <p class="text-white text-sm font-semibold">دليلك إلى المواكب والخدمات الحسينية</p>
     </div>
 
-    <!-- ================= التطبيق الرئيسي ================= -->
+    <!-- التطبيق الرئيسي -->
     <div id="app" class="hidden flex-col h-[100dvh]">
         <main class="flex-1 relative">
             
-            <!-- 1. الصفحة الرئيسية -->
+            <!-- الصفحة الرئيسية -->
             <div id="page-home" class="page active">
                 <div class="header-luxury px-4 rounded-b-2xl relative z-10">
                     <div class="flex justify-between items-center mb-3 relative z-10">
@@ -241,18 +231,14 @@
                         <i class="fa-solid fa-search absolute left-3 top-2.5 text-[var(--maroon)]"></i>
                     </div>
                 </div>
-
                 <div id="homeMap" class="w-full shadow-md relative z-0"></div>
-
                 <div class="px-4 mt-4 relative z-10">
                     <div class="grid grid-cols-2 gap-3 mb-6">
                         <button onclick="findClosestMawkib()" class="bg-[var(--maroon)] text-white p-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-[var(--gold)]">
-                            <i class="fa-solid fa-map-location text-[var(--gold)]"></i>
-                            <span class="font-bold text-sm">الأقرب إليك</span>
+                            <i class="fa-solid fa-map-location text-[var(--gold)]"></i><span class="font-bold text-sm">الأقرب إليك</span>
                         </button>
                         <button onclick="switchTab('add')" class="bg-[var(--gold)] text-[var(--maroon-dark)] p-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-[var(--maroon)]">
-                            <i class="fa-solid fa-plus-circle"></i>
-                            <span class="font-bold text-sm">تسجيل موكب</span>
+                            <i class="fa-solid fa-plus-circle"></i><span class="font-bold text-sm">تسجيل موكب</span>
                         </button>
                     </div>
                     <h2 class="font-extrabold text-[var(--maroon)] text-lg mb-3">الخدمات المتوفرة</h2>
@@ -267,7 +253,7 @@
                 </div>
             </div>
 
-            <!-- 2. صفحة الدردشات (مطابقة للصورة) -->
+            <!-- صفحة الدردشات -->
             <div id="page-chats" class="page marble-bg relative">
                 <div class="header-luxury px-4 flex justify-between items-center sticky top-0 z-20">
                     <h2 class="font-black text-[var(--gold)] text-xl">الدردشات</h2>
@@ -276,24 +262,19 @@
                         <i class="fa-solid fa-video"></i>
                     </div>
                 </div>
-                
-                <div class="p-3 relative z-10">
-                    <div id="chatsList" class="pb-10"></div>
-                </div>
+                <div class="p-3 relative z-10"><div id="chatsList" class="pb-10"></div></div>
             </div>
 
-            <!-- 3. صفحة المكالمات (جديدة) -->
+            <!-- صفحة المكالمات -->
             <div id="page-calls" class="page bg-[var(--bg-app)]">
                 <div class="header-luxury px-4 flex justify-between items-center sticky top-0 z-20">
                     <h2 class="font-black text-[var(--gold)] text-xl">المكالمات</h2>
                     <i class="fa-solid fa-phone text-[var(--gold)]"></i>
                 </div>
-                <div class="p-3">
-                    <div id="callsList" class="pb-10"></div>
-                </div>
+                <div class="p-3"><div id="callsList" class="pb-10"></div></div>
             </div>
 
-            <!-- 4. صفحة إضافة موكب -->
+            <!-- صفحة إضافة موكب -->
             <div id="page-add" class="page p-5 bg-[var(--bg-app)]">
                 <div class="flex items-center gap-3 mb-6 mt-4">
                     <button onclick="switchTab('home')" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-[var(--maroon)] border border-gray-200"><i class="fa-solid fa-arrow-right"></i></button>
@@ -330,15 +311,13 @@
                 </form>
             </div>
 
-            <!-- 5. صفحة الإشعارات -->
+            <!-- صفحة الإشعارات -->
             <div id="page-notifications" class="page bg-[var(--bg-app)]">
-                <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20">
-                    <h2 class="font-black text-[var(--gold)] text-xl">الإشعارات</h2>
-                </div>
+                <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20"><h2 class="font-black text-[var(--gold)] text-xl">الإشعارات</h2></div>
                 <div id="notificationsList" class="p-3 space-y-3 pb-10"></div>
             </div>
 
-            <!-- 6. صفحة البحث -->
+            <!-- صفحة البحث -->
             <div id="page-search" class="page bg-[var(--bg-app)]">
                 <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20">
                     <button onclick="switchTab('home')" class="w-8 h-8 flex items-center justify-center text-[var(--gold)]"><i class="fa-solid fa-arrow-right"></i></button>
@@ -346,30 +325,19 @@
                 </div>
                 <div id="searchResultsList" class="p-3 space-y-3 pb-10"></div>
             </div>
-
         </main>
 
         <!-- شريط التنقل السفلي -->
         <nav class="bottom-nav flex justify-around z-50 h-[70px] px-2 fixed bottom-0 w-full">
-            <div class="nav-btn active" id="nav-home" onclick="switchTab('home')">
-                <i class="fa-solid fa-house"></i><span>الرئيسية</span>
-            </div>
-            <div class="nav-btn" id="nav-chats" onclick="switchTab('chats')">
-                <i class="fa-solid fa-comments"></i><span>الدردشات</span>
-            </div>
-            <div class="nav-btn" id="nav-calls" onclick="switchTab('calls')">
-                <i class="fa-solid fa-phone"></i><span>المكالمات</span>
-            </div>
-            <div class="nav-btn" id="nav-add" onclick="switchTab('add')">
-                <i class="fa-solid fa-plus-square text-2xl"></i><span>إضافة</span>
-            </div>
-            <div class="nav-btn" id="nav-notifications" onclick="switchTab('notifications')">
-                <i class="fa-regular fa-bell"></i><span>الإشعارات</span>
-            </div>
+            <div class="nav-btn active" id="nav-home" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>الرئيسية</span></div>
+            <div class="nav-btn" id="nav-chats" onclick="switchTab('chats')"><i class="fa-solid fa-comments"></i><span>الدردشات</span></div>
+            <div class="nav-btn" id="nav-calls" onclick="switchTab('calls')"><i class="fa-solid fa-phone"></i><span>المكالمات</span></div>
+            <div class="nav-btn" id="nav-add" onclick="switchTab('add')"><i class="fa-solid fa-plus-square text-2xl"></i><span>إضافة</span></div>
+            <div class="nav-btn" id="nav-notifications" onclick="switchTab('notifications')"><i class="fa-regular fa-bell"></i><span>الإشعارات</span></div>
         </nav>
     </div>
 
-    <!-- ================= شاشة الدردشة ================= -->
+    <!-- شاشة الدردشة -->
     <div id="chatRoomModal" class="fixed inset-0 bg-[var(--chat-bg)] z-[10002] flex flex-col w-full h-[100dvh]">
         <div class="bg-[var(--maroon)] text-white px-4 py-3 flex items-center justify-between shadow-md border-b-2 border-[var(--gold)] z-20 pt-safe">
             <div class="flex items-center gap-3">
@@ -385,11 +353,9 @@
                 <button onclick="startCall('video')"><i class="fa-solid fa-video"></i></button>
             </div>
         </div>
-
         <div id="chatMessages" class="flex-1 overflow-y-auto p-4 flex flex-col hide-scrollbar chat-bg relative">
             <div id="typingIndicator" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
         </div>
-
         <div class="bg-[#F0F2F5] p-2 flex items-end gap-2 pb-safe z-20 border-t border-gray-300">
             <div class="flex-1 bg-white rounded-3xl flex items-center px-3 py-1 shadow-sm border border-gray-300">
                 <button class="text-gray-500 text-2xl px-1"><i class="fa-regular fa-face-smile"></i></button>
@@ -402,35 +368,24 @@
         </div>
     </div>
 
-    <!-- ================= شاشة المكالمة (مع زر التسجيل) ================= -->
+    <!-- شاشة المكالمة -->
     <div id="callModal" class="fixed inset-0 z-[10005] hidden flex-col items-center justify-center text-white" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
         <div class="absolute top-10 left-0 w-full text-center">
             <p class="text-[var(--gold)] text-sm font-bold" id="callStatusText">جاري الاتصال...</p>
         </div>
-        
         <img id="callAvatar" src="" class="w-32 h-32 rounded-full object-cover border-4 border-[var(--gold)] mb-4 shadow-2xl">
         <h2 id="callName" class="text-2xl font-bold mb-2 text-[var(--gold)]">اسم الموكب</h2>
         
-        <!-- أزرار التحكم -->
         <div class="flex gap-6 mt-12">
-            <!-- كتم الصوت -->
             <button class="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-microphone-slash"></i></button>
-            
-            <!-- تسجيل المكالمة (جديد) -->
             <button id="recordBtn" onclick="toggleRecord()" class="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center text-xl">
                 <i class="fa-solid fa-circle text-red-500 text-sm" id="recordIcon"></i>
             </button>
-            
-            <!-- انهاء المكالمة -->
             <button onclick="endCall()" class="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-red-600 transition">
                 <i class="fa-solid fa-phone-slash"></i>
             </button>
         </div>
-        
-        <!-- نص حالة التسجيل -->
-        <div id="recordStatus" class="mt-6 text-red-500 font-bold hidden animate-pulse">
-            <i class="fa-solid fa-circle text-xs ml-1"></i> جاري التسجيل...
-        </div>
+        <div id="recordStatus" class="mt-6 text-red-500 font-bold hidden animate-pulse"><i class="fa-solid fa-circle text-xs ml-1"></i> جاري التسجيل...</div>
     </div>
 
     <!-- نافذة تفاصيل الموكب -->
@@ -506,8 +461,7 @@
 
         const defaultCalls = [
             { id: 1, name: "موكب العباس", type: "incoming", time: "10:30 ص", duration: "2:15", avatar: "https://ui-avatars.com/api/?name=موكب+العباس&background=8B1A1A&color=fff&rounded=true" },
-            { id: 2, name: "خدام الزائرين", type: "outgoing", time: "أمس", duration: "0:45", avatar: "https://ui-avatars.com/api/?name=خدام+الزائرين&background=2E7D32&color=fff&rounded=true" },
-            { id: 3, name: "موكب شباب الحسين", type: "missed", time: "أمس", duration: "", avatar: "https://ui-avatars.com/api/?name=موكب+شباب+الحسين&background=1976D2&color=fff&rounded=true" }
+            { id: 2, name: "خدام الزائرين", type: "outgoing", time: "أمس", duration: "0:45", avatar: "https://ui-avatars.com/api/?name=خدام+الزائرين&background=2E7D32&color=fff&rounded=true" }
         ];
 
         let db = {
@@ -518,11 +472,6 @@
             calls: safeParse(localStorage.getItem('karbalaCalls'), [...defaultCalls])
         };
 
-        if (!Array.isArray(db.users)) db.users = [];
-        if (!Array.isArray(db.mawkibs)) db.mawkibs = [...defaultMawkibs];
-        if (!Array.isArray(db.chats)) db.chats = [...defaultChats];
-        if (!Array.isArray(db.calls)) db.calls = [...defaultCalls];
-
         let profile = { name: "", img: "https://ui-avatars.com/api/?name=User&background=111827&color=fff&rounded=true" };
         let isSignupMode = false;
         let activeChatId = null;
@@ -530,7 +479,6 @@
 
         function saveData() {
             try {
-                db.chats.forEach(c => { if (c.messages.length > 30) c.messages = c.messages.slice(c.messages.length - 30); });
                 localStorage.setItem('karbalaUsers', JSON.stringify(db.users));
                 localStorage.setItem('karbalaCurrentUser', JSON.stringify(db.currentUser));
                 localStorage.setItem('karbalaMawkibs', JSON.stringify(db.mawkibs));
@@ -816,7 +764,7 @@
         }
 
         // ==========================================
-        // 7. المكالمات (جديد)
+        // 7. المكالمات
         // ==========================================
         function renderCalls() {
             const list = document.getElementById('callsList');
@@ -891,7 +839,6 @@
             isRecording = false;
             document.getElementById('recordStatus').classList.add('hidden');
             
-            // إضافة المكالمة لسجل المكالمات
             const name = document.getElementById('callName').innerText;
             const avatar = document.getElementById('callAvatar').src;
             db.calls.unshift({ id: Date.now(), name, type: 'outgoing', time: 'الآن', duration: '0:15', avatar });
