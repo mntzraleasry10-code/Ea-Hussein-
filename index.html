@@ -27,11 +27,12 @@
             background-color: var(--bg-app); 
             overflow: hidden; 
             height: 100dvh; 
+            padding-top: env(safe-area-inset-top);
         }
 
         .page { 
             display: none; 
-            height: calc(100dvh - 70px); 
+            height: calc(100dvh - 70px - env(safe-area-inset-top)); 
             overflow-y: auto; 
             padding-bottom: 20px; 
         }
@@ -40,29 +41,46 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* الهيدر الفخم (زخرفة عنابية) */
         .header-luxury {
             background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));
             border-bottom: 2px solid var(--gold);
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            padding-top: 15px;
+            padding-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-luxury::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/arabesque.png');
+            opacity: 0.15; pointer-events: none;
+        }
+
+        /* خلفية الرخام للدردشات */
+        .marble-bg {
+            background-color: #F8F6F0;
+            background-image: url('https://www.transparenttextures.com/patterns/white-marble.png');
+            min-height: 100%;
+        }
+
+        /* أيقونة الشعار الكبيرة في الخلف */
+        .watermark-icon {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            opacity: 0.05; font-size: 150px; color: var(--gold); pointer-events: none; z-index: 0;
         }
 
         #homeMap { height: 220px; width: 100%; z-index: 1; }
         #pickMap { height: 200px; width: 100%; z-index: 1; border-radius: 15px; border: 2px solid var(--maroon); }
 
+        /* بطاقات الخدمات */
         .service-card {
-            background: white;
-            border: 1px solid #E2E8F0;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            transition: 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 12px;
-            cursor: pointer;
+            background: white; border: 1px solid #E2E8F0; border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 12px; cursor: pointer;
         }
-        .service-card:active { transform: scale(0.95); background: #f8fafc; }
+        .service-card:active { transform: scale(0.95); }
         .service-icon {
             width: 45px; height: 45px; border-radius: 12px;
             background: var(--gold-light); color: var(--maroon);
@@ -70,11 +88,12 @@
             font-size: 20px; margin-bottom: 8px; border: 1px solid #F5DEB3;
         }
 
+        /* شريط التنقل السفلي */
         .bottom-nav {
-            background: white;
-            border-top: 1px solid #E2E8F0;
+            background: white; border-top: 1px solid #E2E8F0;
             border-radius: 20px 20px 0 0;
             box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+            padding-bottom: env(safe-area-inset-bottom);
         }
         .nav-btn { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
@@ -84,7 +103,41 @@
         .nav-btn i { font-size: 22px; margin-bottom: 4px; }
         .nav-btn span { font-size: 10px; font-weight: 700; }
 
-        /* ================= الدردشة ================= */
+        /* ================= تصميم قائمة الدردشات (مطابق للصورة) ================= */
+        .chat-item {
+            display: flex; align-items: center; padding: 12px;
+            background: white; border: 2px solid var(--gold); border-radius: 15px;
+            margin-bottom: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative; z-index: 1;
+        }
+        .chat-avatar {
+            width: 55px; height: 55px; border-radius: 50%;
+            object-fit: cover; margin-left: 12px; border: 2px solid var(--maroon);
+            background: var(--gold-light);
+        }
+        .chat-name { font-weight: 700; font-size: 15px; color: var(--maroon); }
+        .chat-time { font-size: 11px; color: #94a3b8; }
+        .chat-message { font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+
+        /* مؤشر التحميل */
+        .loader-dots { display: flex; justify-content: center; gap: 4px; }
+        .loader-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; animation: pulse 1.5s infinite; }
+        .loader-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loader-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+
+        /* صفحة المكالمات */
+        .call-item {
+            display: flex; align-items: center; padding: 12px;
+            background: white; border: 1px solid #E2E8F0; border-radius: 12px;
+            margin-bottom: 10px; cursor: pointer;
+        }
+        .call-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 12px; }
+        .call-in { background: #E8F5E9; color: #2E7D32; }
+        .call-out { background: #E3F2FD; color: #1976D2; }
+        .call-missed { background: #FFEBEE; color: #D32F2F; }
+
+        /* ================= شاشة الدردشة ================= */
         #chatRoomModal { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(100%); }
         #chatRoomModal.show { transform: translateX(0); }
         
@@ -124,14 +177,15 @@
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-        .storage-warning {
-            background: #ef4444; color: white; text-align: center; font-size: 12px; padding: 4px; font-weight: bold; display: none;
-        }
+        /* شاشة المكالمة */
+        #callModal { backdrop-filter: blur(15px); background: rgba(17, 24, 39, 0.95); }
+        .record-btn { animation: pulse-red 1.5s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <div id="storageWarning" class="storage-warning">تنبيه: التخزين المحلي معطل في متصفحك. لن يتم حفظ البيانات!</div>
+    <div id="storageWarning" class="bg-red-500 text-white text-center text-xs p-1 font-bold hidden">تنبيه: التخزين المحلي معطل.</div>
 
     <!-- ================= 1. شاشة تسجيل الدخول ================= -->
     <div id="authScreen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-6" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
@@ -143,28 +197,19 @@
                 <h1 class="text-2xl font-black text-[var(--maroon)] mb-1">دليل مواكب كربلاء</h1>
                 <p class="text-gray-500 text-xs font-bold" id="authSubtitle">مرحباً بك، يرجى تسجيل الدخول</p>
             </div>
-
             <div class="space-y-3">
                 <div id="nameField" class="hidden">
                     <input type="text" id="authName" placeholder="الاسم الكامل" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
                 </div>
-                <div>
-                    <input type="tel" id="authPhone" placeholder="رقم الهاتف (07XXXXXXXXX)" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
-                </div>
-                <div>
-                    <input type="password" id="authPassword" placeholder="كلمة المرور" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
-                </div>
-                
-                <button onclick="handleAuth()" id="authBtn" class="w-full bg-[var(--maroon)] text-white font-bold py-3.5 rounded-xl shadow-md click-effect hover:bg-[var(--maroon-dark)] transition mt-2 border-2 border-[var(--gold)]">دخول</button>
+                <input type="tel" id="authPhone" placeholder="رقم الهاتف" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
+                <input type="password" id="authPassword" placeholder="كلمة المرور" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
+                <button onclick="handleAuth()" id="authBtn" class="w-full bg-[var(--maroon)] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[var(--maroon-dark)] transition mt-2 border-2 border-[var(--gold)]">دخول</button>
             </div>
-
             <div class="mt-4 flex flex-col gap-2 text-center">
-                <button onclick="toggleAuthMode()" id="toggleAuthBtn" class="text-[var(--maroon)] font-bold text-sm hover:underline">ليس لديك حساب؟ إنشاء حساب جديد</button>
+                <button onclick="toggleAuthMode()" id="toggleAuthBtn" class="text-[var(--maroon)] font-bold text-sm hover:underline">ليس لديك حساب؟ إنشاء حساب</button>
                 <button onclick="forgotPassword()" class="text-gray-500 text-xs hover:text-gray-800">نسيت كلمة المرور؟</button>
             </div>
-            
-            <!-- زر الطوارئ لمسح البيانات إذا علق التطبيق -->
-            <button onclick="clearAppData()" class="absolute -bottom-12 left-0 w-full text-center text-white/50 text-xs hover:text-white transition">مسح بيانات التطبيق (إعادة ضبط)</button>
+            <button onclick="clearAppData()" class="absolute -bottom-12 left-0 w-full text-center text-white/50 text-xs">مسح البيانات</button>
         </div>
     </div>
 
@@ -183,115 +228,109 @@
             
             <!-- 1. الصفحة الرئيسية -->
             <div id="page-home" class="page active">
-                <!-- الهيدر -->
-                <div class="header-luxury pt-10 pb-4 px-4 rounded-b-2xl relative z-10">
-                    <div class="flex justify-between items-center mb-3">
+                <div class="header-luxury px-4 rounded-b-2xl relative z-10">
+                    <div class="flex justify-between items-center mb-3 relative z-10">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-mosque text-[var(--gold)] text-2xl"></i>
                             <h1 class="text-[var(--gold)] text-lg font-black">دليل المواكب</h1>
                         </div>
                         <span class="text-white text-xs bg-black/20 px-3 py-1 rounded-full"><i class="fa-solid fa-user ml-1"></i> <span id="homeUserName">مستخدم</span></span>
                     </div>
-                    <div class="relative w-full">
+                    <div class="relative w-full z-10">
                         <input type="text" id="searchHome" oninput="searchMawkibs()" placeholder="ابحث عن موكب..." class="w-full bg-white/90 border-none rounded-xl py-2 px-4 text-sm focus:outline-none text-[var(--maroon)] placeholder-[var(--maroon)] font-bold shadow-inner">
                         <i class="fa-solid fa-search absolute left-3 top-2.5 text-[var(--maroon)]"></i>
                     </div>
                 </div>
 
-                <!-- الخريطة فوق مباشرة -->
                 <div id="homeMap" class="w-full shadow-md relative z-0"></div>
 
                 <div class="px-4 mt-4 relative z-10">
-                    <!-- أزرار سريعة -->
                     <div class="grid grid-cols-2 gap-3 mb-6">
-                        <button onclick="findClosestMawkib()" class="bg-[var(--maroon)] text-white p-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-[var(--gold)] click-effect">
+                        <button onclick="findClosestMawkib()" class="bg-[var(--maroon)] text-white p-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-[var(--gold)]">
                             <i class="fa-solid fa-map-location text-[var(--gold)]"></i>
                             <span class="font-bold text-sm">الأقرب إليك</span>
                         </button>
-                        <button onclick="switchTab('add')" class="bg-[var(--gold)] text-[var(--maroon-dark)] p-3 rounded-xl shadow-md flex items-center justify-center gap-2 click-effect border border-[var(--maroon)]">
+                        <button onclick="switchTab('add')" class="bg-[var(--gold)] text-[var(--maroon-dark)] p-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-[var(--maroon)]">
                             <i class="fa-solid fa-plus-circle"></i>
                             <span class="font-bold text-sm">تسجيل موكب</span>
                         </button>
                     </div>
-
-                    <!-- الخدمات -->
                     <h2 class="font-extrabold text-[var(--maroon)] text-lg mb-3">الخدمات المتوفرة</h2>
                     <div class="grid grid-cols-3 gap-3 mb-6">
-                        <div class="service-card" onclick="filterByService('طعام')">
-                            <div class="service-icon"><i class="fa-solid fa-utensils"></i></div>
-                            <span class="text-xs font-bold text-gray-700">الطعام</span>
-                        </div>
-                        <div class="service-card" onclick="filterByService('ماء')">
-                            <div class="service-icon"><i class="fa-solid fa-mug-hot"></i></div>
-                            <span class="text-xs font-bold text-gray-700">الماء والشاي</span>
-                        </div>
-                        <div class="service-card" onclick="filterByService('مبيت')">
-                            <div class="service-icon"><i class="fa-solid fa-bed"></i></div>
-                            <span class="text-xs font-bold text-gray-700">المبيت</span>
-                        </div>
-                        <div class="service-card" onclick="filterByService('إسعاف')">
-                            <div class="service-icon"><i class="fa-solid fa-kit-medical"></i></div>
-                            <span class="text-xs font-bold text-gray-700">الإسعافات</span>
-                        </div>
-                        <div class="service-card" onclick="filterByService('مياه')">
-                            <div class="service-icon text-lg font-black">WC</div>
-                            <span class="text-xs font-bold text-gray-700">دورات المياه</span>
-                        </div>
-                        <div class="service-card" onclick="filterByService('شحن')">
-                            <div class="service-icon"><i class="fa-solid fa-battery-full"></i></div>
-                            <span class="text-xs font-bold text-gray-700">شحن الهواتف</span>
-                        </div>
+                        <div class="service-card" onclick="filterByService('طعام')"><div class="service-icon"><i class="fa-solid fa-utensils"></i></div><span class="text-xs font-bold text-gray-700">الطعام</span></div>
+                        <div class="service-card" onclick="filterByService('ماء')"><div class="service-icon"><i class="fa-solid fa-mug-hot"></i></div><span class="text-xs font-bold text-gray-700">الماء والشاي</span></div>
+                        <div class="service-card" onclick="filterByService('مبيت')"><div class="service-icon"><i class="fa-solid fa-bed"></i></div><span class="text-xs font-bold text-gray-700">المبيت</span></div>
+                        <div class="service-card" onclick="filterByService('إسعاف')"><div class="service-icon"><i class="fa-solid fa-kit-medical"></i></div><span class="text-xs font-bold text-gray-700">الإسعافات</span></div>
+                        <div class="service-card" onclick="filterByService('مياه')"><div class="service-icon text-lg font-black">WC</div><span class="text-xs font-bold text-gray-700">دورات المياه</span></div>
+                        <div class="service-card" onclick="filterByService('شحن')"><div class="service-icon"><i class="fa-solid fa-battery-full"></i></div><span class="text-xs font-bold text-gray-700">شحن الهواتف</span></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. صفحة الدردشات -->
-            <div id="page-chats" class="page bg-white">
-                <div class="header-luxury px-4 py-4 flex justify-between items-center sticky top-0 z-20">
+            <!-- 2. صفحة الدردشات (مطابقة للصورة) -->
+            <div id="page-chats" class="page marble-bg relative">
+                <div class="header-luxury px-4 flex justify-between items-center sticky top-0 z-20">
                     <h2 class="font-black text-[var(--gold)] text-xl">الدردشات</h2>
+                    <div class="flex gap-4 text-[var(--gold)] text-xl relative z-10">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <i class="fa-solid fa-video"></i>
+                    </div>
                 </div>
-                <div id="chatsList" class="pb-10"></div>
+                
+                <div class="p-3 relative z-10">
+                    <div id="chatsList" class="pb-10"></div>
+                </div>
             </div>
 
-            <!-- 3. صفحة إضافة موكب -->
+            <!-- 3. صفحة المكالمات (جديدة) -->
+            <div id="page-calls" class="page bg-[var(--bg-app)]">
+                <div class="header-luxury px-4 flex justify-between items-center sticky top-0 z-20">
+                    <h2 class="font-black text-[var(--gold)] text-xl">المكالمات</h2>
+                    <i class="fa-solid fa-phone text-[var(--gold)]"></i>
+                </div>
+                <div class="p-3">
+                    <div id="callsList" class="pb-10"></div>
+                </div>
+            </div>
+
+            <!-- 4. صفحة إضافة موكب -->
             <div id="page-add" class="page p-5 bg-[var(--bg-app)]">
                 <div class="flex items-center gap-3 mb-6 mt-4">
-                    <button onclick="switchTab('home')" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-[var(--maroon)] click-effect border border-gray-200"><i class="fa-solid fa-arrow-right"></i></button>
+                    <button onclick="switchTab('home')" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-[var(--maroon)] border border-gray-200"><i class="fa-solid fa-arrow-right"></i></button>
                     <h2 class="text-xl font-bold text-[var(--maroon)]">تسجيل موكب جديد</h2>
                 </div>
-
                 <form id="addForm" onsubmit="handleSaveMawkib(event)" class="space-y-5">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">صورة الموكب</label>
                         <input type="file" id="mawkibImage" accept="image/*" onchange="previewImage(event)" class="w-full border border-gray-200 rounded-xl p-2 text-sm bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--maroon)] file:text-white">
-                        <img id="imagePreview" class="hidden w-full h-40 object-cover rounded-xl mt-3 border-2 border-[var(--maroon)] shadow-sm">
+                        <img id="imagePreview" class="hidden w-full h-40 object-cover rounded-xl mt-3 border-2 border-[var(--maroon)]">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">اسم الموكب</label>
-                        <input type="text" id="mawkibName" required maxlength="50" class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-white">
+                        <input type="text" id="mawkibName" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">العنوان</label>
-                        <input type="text" id="mawkibAddress" required maxlength="100" class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-white">
+                        <input type="text" id="mawkibAddress" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">الخدمات المتوفرة</label>
                         <div class="bg-gray-900 rounded-xl p-3 text-white space-y-2">
-                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="طعام" class="w-5 h-5 accent-green-500"> 🍲 طعام ووجبات</label>
-                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="ماء" class="w-5 h-5 accent-green-500"> 💧 ماء وشاي</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="طعام" class="w-5 h-5 accent-green-500"> 🍲 طعام</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="ماء" class="w-5 h-5 accent-green-500"> 💧 ماء</label>
                             <label class="flex items-center gap-3"><input type="checkbox" name="service" value="مبيت" class="w-5 h-5 accent-green-500"> 🛏️ مبيت</label>
-                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="إسعاف" class="w-5 h-5 accent-green-500"> 🩺 إسعافات</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="إسعاف" class="w-5 h-5 accent-green-500"> 🩺 إسعاف</label>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">الموقع على الخريطة</label>
                         <div id="pickMap"></div>
                     </div>
-                    <button type="submit" class="w-full bg-[var(--maroon)] text-white font-bold py-4 rounded-xl shadow-md mt-4 click-effect border border-[var(--gold)]">حفظ الموكب</button>
+                    <button type="submit" class="w-full bg-[var(--maroon)] text-white font-bold py-4 rounded-xl shadow-md mt-4 border border-[var(--gold)]">حفظ الموكب</button>
                 </form>
             </div>
 
-            <!-- 4. صفحة الإشعارات -->
+            <!-- 5. صفحة الإشعارات -->
             <div id="page-notifications" class="page bg-[var(--bg-app)]">
                 <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20">
                     <h2 class="font-black text-[var(--gold)] text-xl">الإشعارات</h2>
@@ -299,7 +338,7 @@
                 <div id="notificationsList" class="p-3 space-y-3 pb-10"></div>
             </div>
 
-            <!-- 5. صفحة البحث -->
+            <!-- 6. صفحة البحث -->
             <div id="page-search" class="page bg-[var(--bg-app)]">
                 <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20">
                     <button onclick="switchTab('home')" class="w-8 h-8 flex items-center justify-center text-[var(--gold)]"><i class="fa-solid fa-arrow-right"></i></button>
@@ -318,6 +357,9 @@
             <div class="nav-btn" id="nav-chats" onclick="switchTab('chats')">
                 <i class="fa-solid fa-comments"></i><span>الدردشات</span>
             </div>
+            <div class="nav-btn" id="nav-calls" onclick="switchTab('calls')">
+                <i class="fa-solid fa-phone"></i><span>المكالمات</span>
+            </div>
             <div class="nav-btn" id="nav-add" onclick="switchTab('add')">
                 <i class="fa-solid fa-plus-square text-2xl"></i><span>إضافة</span>
             </div>
@@ -327,9 +369,9 @@
         </nav>
     </div>
 
-    <!-- ================= شاشة الدردشة (احترافية) ================= -->
+    <!-- ================= شاشة الدردشة ================= -->
     <div id="chatRoomModal" class="fixed inset-0 bg-[var(--chat-bg)] z-[10002] flex flex-col w-full h-[100dvh]">
-        <div class="bg-[var(--maroon)] text-white px-4 py-3 flex items-center justify-between shadow-md border-b-2 border-[var(--gold)] z-20">
+        <div class="bg-[var(--maroon)] text-white px-4 py-3 flex items-center justify-between shadow-md border-b-2 border-[var(--gold)] z-20 pt-safe">
             <div class="flex items-center gap-3">
                 <button onclick="closeChatRoom()" class="text-xl text-[var(--gold)]"><i class="fa-solid fa-arrow-right"></i></button>
                 <img id="chatHeaderAvatar" src="" class="w-10 h-10 rounded-full object-cover border-2 border-[var(--gold)]">
@@ -339,29 +381,55 @@
                 </div>
             </div>
             <div class="flex gap-4 text-lg text-[var(--gold)]">
-                <button><i class="fa-solid fa-phone"></i></button>
-                <button><i class="fa-solid fa-video"></i></button>
+                <button onclick="startCall('voice')"><i class="fa-solid fa-phone"></i></button>
+                <button onclick="startCall('video')"><i class="fa-solid fa-video"></i></button>
             </div>
         </div>
 
         <div id="chatMessages" class="flex-1 overflow-y-auto p-4 flex flex-col hide-scrollbar chat-bg relative">
-            <div id="typingIndicator" class="typing-indicator">
-                <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
-            </div>
+            <div id="typingIndicator" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
         </div>
 
         <div class="bg-[#F0F2F5] p-2 flex items-end gap-2 pb-safe z-20 border-t border-gray-300">
             <div class="flex-1 bg-white rounded-3xl flex items-center px-3 py-1 shadow-sm border border-gray-300">
                 <button class="text-gray-500 text-2xl px-1"><i class="fa-regular fa-face-smile"></i></button>
                 <input type="text" id="chatInput" onkeypress="if(event.key === 'Enter') sendChatMessage()" placeholder="اكتب رسالة..." class="flex-1 px-2 py-2 text-sm focus:outline-none bg-transparent">
-                <label class="text-gray-500 text-xl px-2 cursor-pointer">
-                    <i class="fa-solid fa-paperclip"></i>
-                    <input type="file" accept="image/*" class="hidden" onchange="sendChatMedia(event)">
-                </label>
+                <label class="text-gray-500 text-xl px-2 cursor-pointer"><i class="fa-solid fa-paperclip"></i><input type="file" accept="image/*" class="hidden" onchange="sendChatMedia(event)"></label>
             </div>
-            <button onclick="sendChatMessage()" class="w-12 h-12 bg-[var(--maroon)] text-[var(--gold)] rounded-full flex items-center justify-center shadow-md click-effect">
+            <button onclick="sendChatMessage()" class="w-12 h-12 bg-[var(--maroon)] text-[var(--gold)] rounded-full flex items-center justify-center shadow-md">
                 <i class="fa-solid fa-paper-plane text-lg"></i>
             </button>
+        </div>
+    </div>
+
+    <!-- ================= شاشة المكالمة (مع زر التسجيل) ================= -->
+    <div id="callModal" class="fixed inset-0 z-[10005] hidden flex-col items-center justify-center text-white" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
+        <div class="absolute top-10 left-0 w-full text-center">
+            <p class="text-[var(--gold)] text-sm font-bold" id="callStatusText">جاري الاتصال...</p>
+        </div>
+        
+        <img id="callAvatar" src="" class="w-32 h-32 rounded-full object-cover border-4 border-[var(--gold)] mb-4 shadow-2xl">
+        <h2 id="callName" class="text-2xl font-bold mb-2 text-[var(--gold)]">اسم الموكب</h2>
+        
+        <!-- أزرار التحكم -->
+        <div class="flex gap-6 mt-12">
+            <!-- كتم الصوت -->
+            <button class="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-microphone-slash"></i></button>
+            
+            <!-- تسجيل المكالمة (جديد) -->
+            <button id="recordBtn" onclick="toggleRecord()" class="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center text-xl">
+                <i class="fa-solid fa-circle text-red-500 text-sm" id="recordIcon"></i>
+            </button>
+            
+            <!-- انهاء المكالمة -->
+            <button onclick="endCall()" class="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-red-600 transition">
+                <i class="fa-solid fa-phone-slash"></i>
+            </button>
+        </div>
+        
+        <!-- نص حالة التسجيل -->
+        <div id="recordStatus" class="mt-6 text-red-500 font-bold hidden animate-pulse">
+            <i class="fa-solid fa-circle text-xs ml-1"></i> جاري التسجيل...
         </div>
     </div>
 
@@ -374,8 +442,8 @@
             <p id="detailsAddress" class="text-gray-500 text-sm mb-4"><i class="fa-solid fa-location-dot text-green-600 ml-1"></i> العنوان</p>
             <h3 class="font-bold text-gray-800 mb-2">الخدمات المتوفرة:</h3>
             <div id="detailsServices" class="flex flex-wrap gap-2 mb-6"></div>
-            <button id="detailsDirectionsBtn" class="w-full bg-[var(--maroon)] text-white font-bold py-3.5 rounded-xl shadow-md click-effect mb-3">الاتجاهات إلى الموكب</button>
-            <button onclick="closeMawkibDetails()" class="w-full bg-gray-100 text-gray-700 font-bold py-3 rounded-xl click-effect">إغلاق</button>
+            <button id="detailsDirectionsBtn" class="w-full bg-[var(--maroon)] text-white font-bold py-3.5 rounded-xl shadow-md mb-3">الاتجاهات إلى الموكب</button>
+            <button onclick="closeMawkibDetails()" class="w-full bg-gray-100 text-gray-700 font-bold py-3 rounded-xl">إغلاق</button>
         </div>
     </div>
 
@@ -386,13 +454,11 @@
 
     <script>
         // ==========================================
-        // 1. أدوات مساعدة (الأمان والتخزين)
+        // 1. أدوات مساعدة
         // ==========================================
         function escapeHTML(str) {
             if (!str) return '';
-            return str.replace(/[&<>'"]/g, tag => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-            }[tag] || tag));
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
 
         function compressImage(file, callback) {
@@ -421,30 +487,12 @@
             setTimeout(() => toast.style.top = '-50px', 3000);
         }
 
-        // التحقق من عمل التخزين
-        function checkStorage() {
-            try {
-                localStorage.setItem('test', 'test');
-                localStorage.removeItem('test');
-                return true;
-            } catch (e) {
-                document.getElementById('storageWarning').style.display = 'block';
-                return false;
-            }
-        }
-        const storageWorks = checkStorage();
-
-        // دالة آمنة لقراءة JSON
         function safeParse(json, fallback) {
-            try {
-                if (!json) return fallback;
-                const parsed = JSON.parse(json);
-                return parsed !== null && parsed !== undefined ? parsed : fallback;
-            } catch (e) { return fallback; }
+            try { if (!json) return fallback; const parsed = JSON.parse(json); return parsed !== null && parsed !== undefined ? parsed : fallback; } catch (e) { return fallback; }
         }
 
         // ==========================================
-        // 2. قاعدة البيانات المحلية
+        // 2. البيانات
         // ==========================================
         const defaultMawkibs = [
             { id: 1, name: "موكب العباس (ع)", lat: 32.6160, lng: 44.0249, services: "طعام, ماء, مبيت", address: "شارع العباس", img: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" },
@@ -452,64 +500,55 @@
         ];
 
         const defaultChats = [
-            { 
-                id: 1, name: "موكب العباس", avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100", status: "متصل الآن",
-                messages: [{ id: 1, text: "أهلاً بك في موكب العباس. كيف يمكننا خدمتك؟", sender: 'them', time: "10:00", status: 'read' }] 
-            }
+            { id: 1, name: "موكب العباس", avatar: "https://ui-avatars.com/api/?name=موكب+العباس&background=8B1A1A&color=fff&rounded=true&bold=true", status: "متصل الآن", messages: [{ id: 1, text: "أهلاً بك في موكب العباس. كيف يمكننا خدمتك؟", sender: 'them', time: "10:00", status: 'read' }] },
+            { id: 2, name: "خدام الزائرين", avatar: "https://ui-avatars.com/api/?name=خدام+الزائرين&background=2E7D32&color=fff&rounded=true&bold=true", status: "آخر ظهور قبل ساعة", messages: [{ id: 1, text: "نحن في الخدمة دائماً.", sender: 'them', time: "أمس", status: 'read' }] }
+        ];
+
+        const defaultCalls = [
+            { id: 1, name: "موكب العباس", type: "incoming", time: "10:30 ص", duration: "2:15", avatar: "https://ui-avatars.com/api/?name=موكب+العباس&background=8B1A1A&color=fff&rounded=true" },
+            { id: 2, name: "خدام الزائرين", type: "outgoing", time: "أمس", duration: "0:45", avatar: "https://ui-avatars.com/api/?name=خدام+الزائرين&background=2E7D32&color=fff&rounded=true" },
+            { id: 3, name: "موكب شباب الحسين", type: "missed", time: "أمس", duration: "", avatar: "https://ui-avatars.com/api/?name=موكب+شباب+الحسين&background=1976D2&color=fff&rounded=true" }
         ];
 
         let db = {
             users: safeParse(localStorage.getItem('karbalaUsers'), []),
             currentUser: safeParse(localStorage.getItem('karbalaCurrentUser'), null),
             mawkibs: safeParse(localStorage.getItem('karbalaMawkibs'), [...defaultMawkibs]),
-            chats: safeParse(localStorage.getItem('karbalaChats'), [...defaultChats])
+            chats: safeParse(localStorage.getItem('karbalaChats'), [...defaultChats]),
+            calls: safeParse(localStorage.getItem('karbalaCalls'), [...defaultCalls])
         };
 
-        // التأكد من أن المصفوفات سليمة (لمنع انهيار التطبيق)
         if (!Array.isArray(db.users)) db.users = [];
         if (!Array.isArray(db.mawkibs)) db.mawkibs = [...defaultMawkibs];
         if (!Array.isArray(db.chats)) db.chats = [...defaultChats];
+        if (!Array.isArray(db.calls)) db.calls = [...defaultCalls];
 
-        let profile = { name: "", img: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200" };
+        let profile = { name: "", img: "https://ui-avatars.com/api/?name=User&background=111827&color=fff&rounded=true" };
         let isSignupMode = false;
         let activeChatId = null;
+        let isRecording = false;
 
-        // الحفظ مع الحماية من الامتلاء
         function saveData() {
-            if (!storageWorks) return;
             try {
-                // تقليم الدردشات لمنع امتلاء الذاكرة (حفظ آخر 30 رسالة فقط)
-                db.chats.forEach(c => {
-                    if (c.messages.length > 30) c.messages = c.messages.slice(c.messages.length - 30);
-                });
-
+                db.chats.forEach(c => { if (c.messages.length > 30) c.messages = c.messages.slice(c.messages.length - 30); });
                 localStorage.setItem('karbalaUsers', JSON.stringify(db.users));
                 localStorage.setItem('karbalaCurrentUser', JSON.stringify(db.currentUser));
                 localStorage.setItem('karbalaMawkibs', JSON.stringify(db.mawkibs));
                 localStorage.setItem('karbalaChats', JSON.stringify(db.chats));
-            } catch (e) {
-                console.error("Storage Error", e);
-                // محاولة حفظ الحساب فقط إذا كانت الصور هي المشكلة
-                try {
-                    localStorage.setItem('karbalaUsers', JSON.stringify(db.users));
-                    localStorage.setItem('karbalaCurrentUser', JSON.stringify(db.currentUser));
-                } catch (err) {
-                    alert("مساحة التخزين ممتلئة جداً! يرجى مسح بيانات التطبيق من إعدادات المتصفح.");
-                }
-            }
+                localStorage.setItem('karbalaCalls', JSON.stringify(db.calls));
+            } catch (e) { console.error("Storage Error", e); }
         }
 
         // ==========================================
-        // 3. نظام الحسابات (تم إصلاحه)
+        // 3. الحسابات
         // ==========================================
         function checkAuth() {
             if (db.currentUser && db.users.find(u => u.phone === db.currentUser.phone)) {
                 profile.name = db.currentUser.name;
-                profile.img = db.currentUser.img || profile.img;
                 document.getElementById('homeUserName').innerText = profile.name;
                 showApp();
             } else {
-                db.currentUser = null; // تصفير إذا كان الحساب غير موجود
+                db.currentUser = null; 
                 document.getElementById('authScreen').style.display = 'flex';
                 document.getElementById('app').style.display = 'none';
                 document.getElementById('splash').style.display = 'none';
@@ -550,57 +589,32 @@
             const name = document.getElementById('authName').value.trim();
             const phone = document.getElementById('authPhone').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
-
             if (!phone || !pass) { showToast('أدخل الهاتف وكلمة المرور'); return; }
 
             if (isSignupMode) {
                 if (!name) { showToast('أدخل الاسم'); return; }
-                
-                // التحقق من وجود الحساب مسبقاً
-                if (db.users.find(u => u.phone === phone)) { 
-                    if(confirm('هذا الرقم مسجل مسبقاً! هل تريد تسجيل الدخول بدلاً من ذلك؟')) {
-                        toggleAuthMode();
-                        document.getElementById('authName').value = "";
-                    }
-                    return; 
-                }
-                
+                if (db.users.find(u => u.phone === phone)) { showToast('الرقم مسجل مسبقاً!'); return; }
                 const newUser = { id: Date.now(), name, phone, pass, img: "" };
                 db.users.push(newUser);
                 db.currentUser = newUser;
-                saveData();
-                showToast('تم إنشاء الحساب بنجاح!');
-                checkAuth(); 
+                saveData(); showToast('تم إنشاء الحساب!'); checkAuth(); 
             } else {
                 const user = db.users.find(u => u.phone === phone && u.pass === pass);
                 if (user) {
-                    db.currentUser = user;
-                    saveData();
-                    showToast('تم تسجيل الدخول بنجاح');
-                    checkAuth(); 
-                } else {
-                    showToast('البيانات غير صحيحة، تأكد من الرقم وكلمة المرور');
-                }
+                    db.currentUser = user; saveData(); showToast('تم تسجيل الدخول'); checkAuth(); 
+                } else { showToast('البيانات غير صحيحة'); }
             }
         }
 
         function forgotPassword() {
-            const phone = prompt("أدخل رقم الهاتف لاستعادة كلمة المرور:");
+            const phone = prompt("أدخل رقم الهاتف:");
             if (!phone) return;
             const user = db.users.find(u => u.phone === phone.trim());
-            if (user) {
-                alert(`كلمة المرور الخاصة بك هي: ${user.pass}`);
-            } else {
-                alert("رقم الهاتف غير مسجل.");
-            }
+            if (user) alert(`كلمة المرور: ${user.pass}`);
+            else alert("الرقم غير مسجل.");
         }
 
-        function clearAppData() {
-            if (confirm('هل أنت متأكد من مسح جميع البيانات (الحسابات، المواكب) للبدء من جديد؟')) {
-                localStorage.clear();
-                window.location.reload();
-            }
-        }
+        function clearAppData() { if (confirm('مسح جميع البيانات؟')) { localStorage.clear(); window.location.reload(); } }
 
         // ==========================================
         // 4. التنقل
@@ -608,9 +622,9 @@
         function switchTab(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            
             document.getElementById(`page-${pageId}`).classList.add('active');
-            document.getElementById(`nav-${pageId}`).classList.add('active');
+            const navBtn = document.getElementById(`nav-${pageId}`);
+            if (navBtn) navBtn.classList.add('active');
 
             if (pageId === 'home' && homeMap) setTimeout(() => homeMap.invalidateSize(), 200);
             if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 200);
@@ -626,7 +640,6 @@
 
         function initMaps() {
             const osmTile = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-            
             homeMap = L.map('homeMap', { zoomControl: false }).setView([32.6160, 44.0249], 14);
             L.tileLayer(osmTile, { maxZoom: 19 }).addTo(homeMap);
             markerGroup = L.layerGroup().addTo(homeMap);
@@ -668,15 +681,10 @@
             const address = document.getElementById('mawkibAddress').value.trim();
             const services = Array.from(document.querySelectorAll('input[name="service"]:checked')).map(cb => cb.value).join(', ');
             if (!services) { showToast('اختر خدمة واحدة على الأقل'); return; }
-
             db.mawkibs.push({ id: Date.now(), name, address, services, lat: pickedLat, lng: pickedLng, img: pickedImageBase64 || "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" });
-            saveData();
-            renderMarkers();
-            document.getElementById('addForm').reset();
-            document.getElementById('imagePreview').classList.add('hidden');
-            pickedImageBase64 = null;
-            showToast('تم تسجيل الموكب بنجاح!');
-            switchTab('home');
+            saveData(); renderMarkers();
+            document.getElementById('addForm').reset(); document.getElementById('imagePreview').classList.add('hidden'); pickedImageBase64 = null;
+            showToast('تم تسجيل الموكب بنجاح!'); switchTab('home');
         }
 
         function openMawkibDetails(id) {
@@ -692,19 +700,14 @@
             document.getElementById('mawkibDetailsModal').classList.remove('hidden');
         }
 
-        function closeMawkibDetails(e) {
-            if(!e || e.target.id === 'mawkibDetailsModal') document.getElementById('mawkibDetailsModal').classList.add('hidden');
-        }
+        function closeMawkibDetails(e) { if(!e || e.target.id === 'mawkibDetailsModal') document.getElementById('mawkibDetailsModal').classList.add('hidden'); }
 
         function locateUser() {
             if (!navigator.geolocation) { showToast('المتصفح لا يدعم الموقع'); return; }
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    homeMap.setView([pos.coords.latitude, pos.coords.longitude], 16);
-                    L.circleMarker([pos.coords.latitude, pos.coords.longitude], { color: '#2196F3', fillColor: '#2196F3', radius: 8 }).addTo(homeMap).bindPopup("أنت هنا").openPopup();
-                },
-                () => showToast('يرجى السماح بالوصول للموقع.')
-            );
+            navigator.geolocation.getCurrentPosition((pos) => {
+                homeMap.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                L.circleMarker([pos.coords.latitude, pos.coords.longitude], { color: '#2196F3', fillColor: '#2196F3', radius: 8 }).addTo(homeMap).bindPopup("أنت هنا").openPopup();
+            }, () => showToast('يرجى السماح بالوصول للموقع.'));
         }
 
         function findClosestMawkib() {
@@ -716,23 +719,27 @@
         }
 
         // ==========================================
-        // 6. الدردشة (تصميم جديد ومستقر)
+        // 6. الدردشات
         // ==========================================
         function renderChats() {
             const list = document.getElementById('chatsList');
             list.innerHTML = '';
+            if(db.chats.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-500 mt-10">لا توجد محادثات</div>';
+                return;
+            }
             db.chats.forEach(c => {
                 const lastMsg = c.messages.length > 0 ? c.messages[c.messages.length - 1] : { text: "لا توجد رسائل", time: "" };
                 const displayMsg = lastMsg.img ? "📷 صورة" : escapeHTML(lastMsg.text);
                 list.innerHTML += `
-                    <div class="flex items-center p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer" onclick="openChatRoom(${c.id})">
-                        <img src="${c.avatar}" class="w-14 h-14 rounded-full object-cover ml-3 border border-gray-200 shadow-sm">
+                    <div class="chat-item" onclick="openChatRoom(${c.id})">
+                        <img src="${c.avatar}" class="chat-avatar">
                         <div class="flex-1">
                             <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-[15px] text-gray-800">${escapeHTML(c.name)}</span>
-                                <span class="text-[11px] text-gray-400">${lastMsg.time || ""}</span>
+                                <span class="chat-name">${escapeHTML(c.name)}</span>
+                                <span class="chat-time">${lastMsg.time || ""}</span>
                             </div>
-                            <span class="text-xs text-gray-500 block truncate max-w-[200px]">${displayMsg}</span>
+                            <span class="chat-message">${displayMsg}</span>
                         </div>
                     </div>
                 `;
@@ -745,47 +752,30 @@
             if(!chat) return;
             document.getElementById('chatHeaderName').innerText = chat.name;
             document.getElementById('chatHeaderAvatar').src = chat.avatar;
+            document.getElementById('chatStatusText').innerText = chat.status || "متصل الآن";
             renderChatMessages(chat);
             document.getElementById('chatRoomModal').classList.add('show');
         }
 
-        function closeChatRoom() {
-            document.getElementById('chatRoomModal').classList.remove('show');
-            activeChatId = null;
-            const typing = document.getElementById('typingIndicator');
-            if(typing) typing.style.display = 'none';
-        }
+        function closeChatRoom() { document.getElementById('chatRoomModal').classList.remove('show'); activeChatId = null; }
 
         function renderChatMessages(chat) {
             const container = document.getElementById('chatMessages');
             container.innerHTML = '<div id="typingIndicator" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-            
             chat.messages.forEach(m => {
                 let isMe = m.sender === 'me';
                 let msgClass = isMe ? 'msg-sent' : 'msg-received';
-                
                 let contentHtml = '';
                 if(m.text) contentHtml += `<span>${escapeHTML(m.text)}</span>`;
                 if(m.img) contentHtml += `<img src="${m.img}" class="w-full max-h-48 object-cover rounded-lg mt-1 mb-1">`;
-                
                 let statusIcon = '';
                 if(isMe) {
                     if(m.status === 'sent') statusIcon = '<i class="fa-solid fa-check text-gray-400 text-[10px]"></i>';
                     else if(m.status === 'read') statusIcon = '<i class="fa-solid fa-check-double text-blue-500 text-[10px]"></i>';
                 }
-
-                container.innerHTML += `
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full">
-                        <div class="msg-bubble ${msgClass}">
-                            ${contentHtml}
-                            <div class="msg-time">${m.time} ${statusIcon}</div>
-                        </div>
-                    </div>
-                `;
+                container.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full"><div class="msg-bubble ${msgClass}">${contentHtml}<div class="msg-time">${m.time} ${statusIcon}</div></div></div>`;
             });
-            
             container.innerHTML += '<div id="typingIndicator" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-            
             chat.messages.forEach(m => { if(m.sender === 'them') m.status = 'read'; });
             saveData();
             setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
@@ -795,30 +785,21 @@
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if(!text || !activeChatId) return;
-            
             const chat = db.chats.find(c => c.id === activeChatId);
             const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-            
             chat.messages.push({ id: Date.now(), text: text, sender: 'me', time: timeStr, status: 'sent' });
-            input.value = '';
-            saveData();
-            renderChatMessages(chat);
+            input.value = ''; saveData(); renderChatMessages(chat);
             
             setTimeout(() => {
                 if(activeChatId !== chat.id) return;
                 const typing = document.getElementById('typingIndicator');
                 if(typing) typing.style.display = 'flex';
-                
                 setTimeout(() => {
                     if(activeChatId !== chat.id) return;
                     const timeStr2 = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
                     const replies = ["أهلاً وسهلاً بك، كيف يمكننا خدمتك؟", "نحن في الخدمة دائماً.", "الموكب مفتوح الآن، تفضل بزيارتنا."];
-                    const randomReply = replies[Math.floor(Math.random() * replies.length)];
-                    
-                    chat.messages.push({ id: Date.now(), text: randomReply, sender: 'them', time: timeStr2, status: 'read' });
-                    saveData();
-                    renderChatMessages(chat);
-                    renderChats();
+                    chat.messages.push({ id: Date.now(), text: replies[Math.floor(Math.random() * replies.length)], sender: 'them', time: timeStr2, status: 'read' });
+                    saveData(); renderChatMessages(chat); renderChats();
                 }, 2000);
             }, 1000);
         }
@@ -830,33 +811,109 @@
                 const chat = db.chats.find(c => c.id === activeChatId);
                 const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
                 chat.messages.push({ id: Date.now(), img: base64, sender: 'me', time: timeStr, status: 'sent' });
-                saveData();
-                renderChatMessages(chat);
+                saveData(); renderChatMessages(chat);
             });
         }
 
         // ==========================================
-        // 7. الإشعارات والتشغيل
+        // 7. المكالمات (جديد)
+        // ==========================================
+        function renderCalls() {
+            const list = document.getElementById('callsList');
+            list.innerHTML = '';
+            if(db.calls.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-500 mt-10">لا توجد مكالمات حديثاً</div>';
+                return;
+            }
+            db.calls.forEach(c => {
+                let iconClass = '';
+                let iconHtml = '';
+                let colorClass = 'text-gray-500';
+
+                if(c.type === 'incoming') { iconClass = 'call-in'; iconHtml = '<i class="fa-solid fa-phone-arrow-down-left"></i>'; colorClass = 'text-green-600'; }
+                else if(c.type === 'outgoing') { iconClass = 'call-out'; iconHtml = '<i class="fa-solid fa-phone-arrow-up-right"></i>'; colorClass = 'text-blue-600'; }
+                else { iconClass = 'call-missed'; iconHtml = '<i class="fa-solid fa-phone-slash"></i>'; colorClass = 'text-red-600'; }
+
+                list.innerHTML += `
+                    <div class="call-item" onclick="startCallFromList('${escapeHTML(c.name)}', '${c.avatar}')">
+                        <div class="call-icon ${iconClass}">${iconHtml}</div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm text-gray-800">${escapeHTML(c.name)}</h3>
+                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                <span>${c.time}</span>
+                                ${c.duration ? `<span>· ${c.duration}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="${colorClass} text-lg">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function startCallFromList(name, avatar) {
+            document.getElementById('callName').innerText = name;
+            document.getElementById('callAvatar').src = avatar;
+            document.getElementById('callStatusText').innerText = "جاري الاتصال...";
+            document.getElementById('callModal').classList.remove('hidden');
+            document.getElementById('callModal').classList.add('flex');
+        }
+
+        function startCall(type) {
+            const chat = db.chats.find(c => c.id === activeChatId);
+            if(!chat) return;
+            document.getElementById('callName').innerText = chat.name;
+            document.getElementById('callAvatar').src = chat.avatar;
+            document.getElementById('callStatusText').innerText = type === 'video' ? "مكالمة فيديو..." : "جاري الاتصال...";
+            document.getElementById('callModal').classList.remove('hidden');
+            document.getElementById('callModal').classList.add('flex');
+        }
+
+        function toggleRecord() {
+            isRecording = !isRecording;
+            const status = document.getElementById('recordStatus');
+            const icon = document.getElementById('recordIcon');
+            if(isRecording) {
+                status.classList.remove('hidden');
+                icon.classList.add('animate-pulse');
+                showToast('بدأ تسجيل المكالمة...');
+            } else {
+                status.classList.add('hidden');
+                icon.classList.remove('animate-pulse');
+                showToast('تم حفظ التسجيل.');
+            }
+        }
+
+        function endCall() {
+            document.getElementById('callModal').classList.add('hidden');
+            document.getElementById('callModal').classList.remove('flex');
+            isRecording = false;
+            document.getElementById('recordStatus').classList.add('hidden');
+            
+            // إضافة المكالمة لسجل المكالمات
+            const name = document.getElementById('callName').innerText;
+            const avatar = document.getElementById('callAvatar').src;
+            db.calls.unshift({ id: Date.now(), name, type: 'outgoing', time: 'الآن', duration: '0:15', avatar });
+            saveData();
+            renderCalls();
+        }
+
+        // ==========================================
+        // 8. الإشعارات والتشغيل
         // ==========================================
         function renderNotifications() {
             const list = document.getElementById('notificationsList');
             list.innerHTML = `
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3 border-r-4 border-[var(--maroon)]">
-                    <div class="w-10 h-10 bg-[var(--maroon)] text-white rounded-full flex items-center justify-center">
-                        <i class="fa-solid fa-bell"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-[var(--maroon)]">مرحباً بك</p>
-                        <p class="text-xs text-gray-500 mt-1">في دليل مواكب كربلاء. يمكنك تصفح المواكب وإضافة موكبك.</p>
-                    </div>
+                    <div class="w-10 h-10 bg-[var(--maroon)] text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-bell"></i></div>
+                    <div class="flex-1"><p class="text-sm font-bold text-[var(--maroon)]">مرحباً بك</p><p class="text-xs text-gray-500 mt-1">في دليل مواكب كربلاء.</p></div>
                 </div>
             `;
         }
 
         function initApp() {
-            initMaps();
-            renderChats();
-            renderNotifications();
+            initMaps(); renderChats(); renderCalls(); renderNotifications();
         }
 
         window.onload = checkAuth;
