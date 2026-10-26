@@ -1,340 +1,329 @@
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import java.text.SimpleDateFormat
-import java.util.*
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام المنشورات الاحترافي</title>
+    <style>
+        /* =========================================
+           1. التصميم (CSS) - مشابه لفيسبوك وعصري
+        ========================================= */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-// ==========================================
-// 1. نموذج البيانات (Data Model)
-// ==========================================
-data class PostData(
-    val id: String,
-    val userId: String,
-    val userName: String,
-    val userAvatar: String,
-    val text: String,
-    val imageUri: Uri? = null,
-    val timestamp: Long = System.currentTimeMillis(),
-    val likesCount: Int = 0,
-    var isLiked: Boolean = false
-)
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
 
-// ==========================================
-// 2. الشاشة الرئيسية (Main Screen)
-// ==========================================
-@Composable
-fun PostSystemScreen(
-    // تمرر هنا بيانات المستخدم الحالي من نظامك
-    currentUserId: String = "user_123", 
-    currentUserName: String = "أحمد محمد",
-    currentUserAvatar: String = ""
-) {
-    // فرض اتجاه اللغة العربية (من اليمين لليسار)
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        var posts by remember { mutableStateOf(listOf<PostData>()) }
-        var showCreateDialog by remember { mutableStateOf(false) }
-        var postToEdit by remember { mutableStateOf<PostData?>(null) }
+        /* زر إنشاء منشور */
+        .create-post-btn {
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+        }
+        .create-post-btn:hover { background-color: #166fe5; }
+
+        /* بطاقة المنشور */
+        .post-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .user-info { display: flex; align-items: center; }
+        .user-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-left: 10px;
+            object-fit: cover;
+        }
+        .user-name { font-weight: bold; font-size: 15px; display: block; }
+        .post-time { font-size: 12px; color: #65676b; }
+
+        /* قائمة الخيارات (تعديل/حذف) */
+        .options-btn {
+            background: none; border: none;
+            font-size: 20px; cursor: pointer; color: #65676b;
+        }
+        .dropdown {
+            position: relative; display: inline-block;
+        }
+        .dropdown-content {
+            display: none; position: absolute; left: 0; top: 100%;
+            background-color: white; min-width: 120px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 8px; z-index: 1;
+        }
+        .dropdown-content button {
+            width: 100%; padding: 10px; border: none;
+            background: none; text-align: right; cursor: pointer;
+        }
+        .dropdown-content button:hover { background-color: #f0f2f5; }
+        .dropdown:hover .dropdown-content { display: block; }
+
+        /* محتوى المنشور */
+        .post-text { font-size: 15px; margin-bottom: 12px; line-height: 1.5; }
+        .post-image {
+            width: 100%; border-radius: 8px; margin-bottom: 12px;
+            max-height: 400px; object-fit: cover;
+        }
+
+        /* أزرار التفاعل */
+        .post-actions {
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #e4e6eb;
+            padding-top: 10px;
+        }
+        .action-btn {
+            background: none; border: none; cursor: pointer;
+            display: flex; align-items: center; gap: 5px;
+            font-size: 14px; color: #65676b; font-weight: bold;
+            padding: 8px 12px; border-radius: 6px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .action-btn:hover { background-color: #f0f2f5; }
+        .action-btn.liked { color: #1877f2; } /* لون الإعجاب */
+
+        /* نافذة إنشاء/تعديل منشور */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background: white; padding: 20px; border-radius: 12px;
+            width: 90%; max-width: 500px;
+        }
+        .modal textarea {
+            width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc;
+            border-radius: 8px; resize: none; margin-bottom: 10px;
+            font-family: inherit;
+        }
+        .modal input[type="file"] { margin-bottom: 15px; }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-save { background: #1877f2; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        .btn-cancel { background: #e4e6eb; color: black; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- زر إنشاء منشور -->
+        <button class="create-post-btn" onclick="openModal()">إنشاء منشور</button>
         
-        // هنا تقوم بجلب البيانات الحقيقية من قاعدة البيانات (Firebase/SQL)
-        // LaunchedEffect(Unit) { posts = database.getAllPosts() }
+        <!-- حاوية المنشورات -->
+        <div id="posts-container"></div>
+    </div>
 
-        Scaffold(
-            floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    onClick = { showCreateDialog = true },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("إنشاء منشور") },
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+    <!-- نافذة الإنشاء والتعديل -->
+    <div class="modal" id="postModal">
+        <div class="modal-content">
+            <h3 id="modal-title">إنشاء منشور</h3>
+            <textarea id="post-text" placeholder="بماذا تفكر؟"></textarea>
+            <input type="file" id="post-image" accept="image/*">
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+                <button class="btn-save" onclick="savePost()">حفظ ونشر</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           2. الوظائف (JavaScript)
+        ========================================= */
+        
+        // بيانات تجريبية (يتم استبدالها بقاعدة البيانات لاحقاً)
+        let posts = [
+            {
+                id: "1",
+                userId: "current_user", // معرف المستخدم الحالي
+                userName: "أحمد محمد",
+                userAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                text: "مرحباً بالجميع! هذا أول منشور لي في النظام الجديد.",
+                image: null,
+                timestamp: Date.now() - 3600000, // منذ ساعة
+                likes: 12,
+                isLiked: false
             }
-        ) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(Color(0xFFF0F2F5)), // خلفية رمادية فاتحة مثل فيسبوك
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(posts, key = { it.id }) { post ->
-                    PostCard(
-                        post = post,
-                        isOwner = post.userId == currentUserId,
-                        onLikeClick = {
-                            // تحديث الإعجاب في الواجهة وفي قاعدة البيانات
-                            posts = posts.map {
-                                if (it.id == post.id) {
-                                    it.copy(
-                                        isLiked = !it.isLiked,
-                                        likesCount = if (it.isLiked) it.likesCount - 1 else it.likesCount + 1
-                                    )
-                                } else it
-                            }
-                            // TODO: أرسل التحديث لقاعدة البيانات هنا
-                        },
-                        onEditClick = { postToEdit = it },
-                        onDeleteClick = { 
-                            // حذف من الواجهة (يمكنك إضافة رسالة تأكيد هنا)
-                            posts = posts.filter { it.id != post.id }
-                            // TODO: احذف من قاعدة البيانات هنا
-                        }
-                    )
-                }
-            }
+        ];
+
+        const currentUserId = "current_user"; // المستخدم الحالي (يجب ربطه بنظام تسجيل الدخول)
+        let editingPostId = null;
+
+        // دالة تنسيق الوقت
+        function timeAgo(timestamp) {
+            const diff = Math.floor((Date.now() - timestamp) / 1000);
+            if (diff < 60) return "الآن";
+            if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
+            if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
+            return `منذ ${Math.floor(diff / 86400)} يوم`;
         }
 
-        // نافذة إنشاء أو تعديل منشور
-        if (showCreateDialog || postToEdit != null) {
-            CreateEditPostDialog(
-                existingPost = postToEdit,
-                onDismiss = { 
-                    showCreateDialog = false 
-                    postToEdit = null
-                },
-                onSave = { text, imageUri ->
-                    if (postToEdit != null) {
-                        // تعديل منشور موجود
-                        posts = posts.map {
-                            if (it.id == postToEdit!!.id) it.copy(text = text, imageUri = imageUri) else it
-                        }
-                        // TODO: حدث قاعدة البيانات هنا
-                    } else {
-                        // إنشاء منشور جديد
-                        val newPost = PostData(
-                            id = UUID.randomUUID().toString(),
-                            userId = currentUserId,
-                            userName = currentUserName,
-                            userAvatar = currentUserAvatar,
-                            text = text,
-                            imageUri = imageUri
-                        )
-                        posts = listOf(newPost) + posts
-                        // TODO: احفظ في قاعدة البيانات هنا
-                    }
-                    showCreateDialog = false
-                    postToEdit = null
-                }
-            )
-        }
-    }
-}
+        // دالة عرض المنشورات
+        function renderPosts() {
+            const container = document.getElementById('posts-container');
+            container.innerHTML = ''; // مسح المنشورات القديمة
 
-// ==========================================
-// 3. بطاقة المنشور (Post Card UI)
-// ==========================================
-@Composable
-fun PostCard(
-    post: PostData,
-    isOwner: Boolean,
-    onLikeClick: () -> Unit,
-    onEditClick: (PostData) -> Unit,
-    onDeleteClick: (PostData) -> Unit
-) {
-    var showMenu by remember { mutableStateOf(false) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            // رأس المنشور (الصورة والاسم والتاريخ)
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                AsyncImage(
-                    model = if (post.userAvatar.isEmpty()) "https://cdn-icons-png.flaticon.com/512/149/149071.png" else post.userAvatar,
-                    contentDescription = "Avatar",
-                    modifier = Modifier.size(40.dp).clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(post.userName, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    Text(formatDate(post.timestamp), fontSize = 11.sp, color = Color.Gray)
-                }
+            posts.forEach(post => {
+                const isOwner = post.userId === currentUserId;
                 
-                // قائمة الخيارات (تظهر لصاحب المنشور فقط)
-                if (isOwner) {
-                    Box {
-                        IconButton(onClick = { showMenu = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "خيارات", tint = Color.Gray)
-                        }
-                        DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                            DropdownMenuItem(
-                                text = { Text("تعديل المنشور") },
-                                onClick = { showMenu = false; onEditClick(post) },
-                                leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("حذف المنشور", color = Color.Red) },
-                                onClick = { showMenu = false; showDeleteConfirm = true },
-                                leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red) }
-                            )
-                        }
-                    }
-                }
-            }
+                // إنشاء عنصر المنشور
+                const postElement = document.createElement('div');
+                postElement.className = 'post-card';
+                
+                postElement.innerHTML = `
+                    <div class="post-header">
+                        <div class="user-info">
+                            <img src="${post.userAvatar}" class="user-avatar" alt="User">
+                            <div>
+                                <span class="user-name">${post.userName}</span>
+                                <span class="post-time">${timeAgo(post.timestamp)}</span>
+                            </div>
+                        </div>
+                        ${isOwner ? `
+                        <div class="dropdown">
+                            <button class="options-btn">⋮</button>
+                            <div class="dropdown-content">
+                                <button onclick="editPost('${post.id}')">تعديل</button>
+                                <button onclick="deletePost('${post.id}')" style="color:red;">حذف</button>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="post-text">${post.text}</div>
+                    ${post.image ? `<img src="${post.image}" class="post-image">` : ''}
+                    <div class="post-actions">
+                        <button class="action-btn ${post.isLiked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
+                            👍 إعجاب (${post.likes})
+                        </button>
+                        <button class="action-btn">💬 تعليق</button>
+                        <button class="action-btn">↗️ مشاركة</button>
+                    </div>
+                `;
+                container.appendChild(postElement);
+            });
+        }
 
-            // نص المنشور
-            if (post.text.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(post.text, fontSize = 14.sp, color = Color.Black)
-            }
-
-            // صورة المنشور
-            post.imageUri?.let { uri ->
-                Spacer(modifier = Modifier.height(8.dp))
-                val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-                AsyncImage(
-                    model = uri,
-                    contentDescription = "Post Image",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 400.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.FillWidth
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Divider(color = Color.LightGray, thickness = 1.dp)
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // أزرار التفاعل (إعجاب، تعليق، مشاركة)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                // زر الإعجاب مع تغيير اللون
-                val likeColor by animateColorAsState(
-                    targetValue = if (post.isLiked) Color.Blue else Color.Gray,
-                    label = "LikeColor"
-                )
-                Row(
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { onLikeClick() }.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.ThumbUp, contentDescription = "إعجاب", tint = likeColor, modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("${post.likesCount} إعجاب", color = likeColor, fontSize = 13.sp)
-                }
-
-                // زر التعليق (يحتاج لربطه بشاشة التعليقات)
-                Row(
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { /* TODO: فتح التعليقات */ }.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.Comment, contentDescription = "تعليق", tint = Color.Gray, modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("تعليق", color = Color.Gray, fontSize = 13.sp)
-                }
+        // دالة الإعجاب
+        function toggleLike(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.isLiked = !post.isLiked;
+                post.likes += post.isLiked ? 1 : -1;
+                renderPosts(); // إعادة رسم الواجهة
+                
+                // TODO: هنا تربط مع قاعدة البيانات
+                // fetch(`/api/posts/${postId}/like`, { method: 'POST' });
             }
         }
-    }
 
-    // نافذة تأكيد الحذف
-    if (showDeleteConfirm) {
-        AlertDialog(
-            onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("تأكيد الحذف") },
-            text = { Text("هل أنت متأكد أنك تريد حذف هذا المنشور؟") },
-            confirmButton = {
-                TextButton(onClick = { showDeleteConfirm = false; onDeleteClick(post) }) {
-                    Text("حذف", color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("إلغاء")
-                }
-            }
-        )
-    }
-}
-
-// ==========================================
-// 4. نافذة الإنشاء والتعديل (Create/Edit Dialog)
-// ==========================================
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CreateEditPostDialog(
-    existingPost: PostData? = null,
-    onDismiss: () -> Unit,
-    onSave: (String, Uri?) -> Unit
-) {
-    var text by remember { mutableStateOf(existingPost?.text ?: "") }
-    var imageUri by remember { mutableStateOf(existingPost?.imageUri) }
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri != null) imageUri = uri
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (existingPost == null) "إنشاء منشور" else "تعديل المنشور") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    label = { Text("بماذا تفكر؟") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                IconButton(onClick = { imagePickerLauncher.launch("image/*") }) {
-                    Icon(Icons.Default.Photo, contentDescription = "إضافة صورة", tint = MaterialTheme.colorScheme.primary)
-                }
-                if (imageUri != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    AsyncImage(
-                        model = imageUri,
-                        contentDescription = "Preview",
-                        modifier = Modifier.size(100.dp).clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(onClick = { if (text.isNotBlank()) onSave(text, imageUri) }) {
-                Text("حفظ ونشر")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("إلغاء") }
+        // دوال فتح وإغلاق النافذة
+        function openModal() {
+            editingPostId = null;
+            document.getElementById('modal-title').innerText = "إنشاء منشور";
+            document.getElementById('post-text').value = '';
+            document.getElementById('post-image').value = '';
+            document.getElementById('postModal').style.display = 'flex';
         }
-    )
-}
 
-// دالة مساعدة لتنسيق التاريخ
-fun formatDate(timestamp: Long): String {
-    val sdf = SimpleDateFormat("dd MMM, hh:mm a", Locale("ar"))
-    return sdf.format(Date(timestamp))
-}
+        function closeModal() {
+            document.getElementById('postModal').style.display = 'none';
+        }
+
+        // دالة حفظ المنشور (إنشاء أو تعديل)
+        function savePost() {
+            const text = document.getElementById('post-text').value;
+            const imageInput = document.getElementById('post-image');
+            
+            if (!text && !imageInput.files[0]) {
+                alert("الرجاء كتابة نص أو اختيار صورة!");
+                return;
+            }
+
+            // محاكاة رفع الصورة (في الواقع تقوم برفعها للسيرفر وتأخذ الرابط)
+            const imageUrl = imageInput.files[0] ? URL.createObjectURL(imageInput.files[0]) : null;
+
+            if (editingPostId) {
+                // وضع التعديل
+                const post = posts.find(p => p.id === editingPostId);
+                if (post) {
+                    post.text = text;
+                    if (imageUrl) post.image = imageUrl;
+                }
+                // TODO: إرسال طلب تحديث لقاعدة البيانات
+            } else {
+                // وضع الإنشاء الجديد
+                const newPost = {
+                    id: Date.now().toString(),
+                    userId: currentUserId,
+                    userName: "أحمد محمد", // يفضل جلبها من بيانات المستخدم المسجل
+                    userAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                    text: text,
+                    image: imageUrl,
+                    timestamp: Date.now(),
+                    likes: 0,
+                    isLiked: false
+                };
+                posts.unshift(newPost); // إضافة للمقدمة
+                // TODO: إرسال طلب حفظ لقاعدة البيانات
+            }
+
+            closeModal();
+            renderPosts();
+        }
+
+        // دالة التعديل
+        function editPost(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                editingPostId = postId;
+                document.getElementById('modal-title').innerText = "تعديل المنشور";
+                document.getElementById('post-text').value = post.text;
+                document.getElementById('postModal').style.display = 'flex';
+            }
+        }
+
+        // دالة الحذف
+        function deletePost(postId) {
+            if (confirm("هل أنت متأكد من حذف هذا المنشور؟")) {
+                posts = posts.filter(p => p.id !== postId);
+                renderPosts();
+                // TODO: إرسال طلب حذف لقاعدة البيانات
+            }
+        }
+
+        // تشغيل العرض عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPosts();
+        });
+    </script>
+</body>
+</html>
