@@ -5,14 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>دليل مواكب كربلاء</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- خط Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- أيقونات FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- خريطة Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -27,7 +23,6 @@
             font-family: 'Cairo', sans-serif; 
             background-color: #F0F2F5; 
             overflow: hidden; 
-            /* استخدام dvh للتوافق مع شاشات الموبايل */
             height: 100dvh; 
         }
 
@@ -38,8 +33,9 @@
             padding-bottom: 20px; 
         }
         .page.active { display: block; }
+        
+        #page-reels { overflow: hidden; padding: 0; height: calc(100dvh - 70px); }
 
-        /* إخفاء شريط التمرير */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -49,12 +45,10 @@
             background-size: cover; background-position: center top;
         }
 
-        /* الخرائط */
         #mainMap, #pickMap, #previewMap { width: 100%; z-index: 1; }
         #mainMap { height: 100%; }
         .leaflet-popup-content { font-family: 'Cairo', sans-serif; text-align: right; margin: 10px; }
         
-        /* تأثير الضغط */
         .click-effect:active { transform: scale(0.96); transition: 0.1s; }
         
         /* شريط التنقل السفلي */
@@ -66,7 +60,6 @@
         .nav-btn i { font-size: 22px; margin-bottom: 4px; }
         .nav-btn span { font-size: 10px; font-weight: 700; }
 
-        /* قائمة الخدمات في نموذج التسجيل */
         .service-list { background: #1a1a1a; border-radius: 15px; overflow: hidden; margin-top: 10px; }
         .service-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #333; color: white; cursor: pointer; }
         .service-item:last-child { border-bottom: none; }
@@ -75,12 +68,11 @@
         .service-checkbox:checked::after { content: ''; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; }
         .service-name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-        /* أزرار التعديل والحذف */
         .action-btn { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .btn-edit { background: #E3F2FD; color: #1976D2; }
         .btn-delete { background: #FFEBEE; color: #D32F2F; }
 
-        /* تصميم الدردشة (شبيه بالواتساب) */
+        /* تصميم الدردشة */
         #chatRoomModal { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
         #chatRoomModal.show { transform: translateX(0); }
         .msg-bubble { max-width: 80%; padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; position: relative; word-wrap: break-word; }
@@ -94,11 +86,9 @@
         .reel-video { width: 100%; height: 100%; object-fit: cover; }
         .reel-overlay { position: absolute; bottom: 20px; right: 15px; left: 15px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 10; }
 
-        /* المودالات */
         .modal { transition: opacity 0.3s; }
         .modal.hidden { opacity: 0; pointer-events: none; }
         
-        /* القائمة الجانبية */
         #settingsSidebar { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
         #settingsSidebar.show { transform: translateX(0); }
     </style>
@@ -174,7 +164,6 @@
                 </div>
 
                 <div class="px-5 -mt-6 relative z-10">
-                    <!-- قسم أقرب المواكب -->
                     <button onclick="findClosestMawkib()" class="w-full glass-panel text-white p-4 rounded-2xl shadow-xl flex items-center justify-between mb-6 click-effect overflow-hidden relative">
                         <div class="absolute inset-0 opacity-10 flex items-center justify-center text-6xl font-black pointer-events-none" style="font-family: serif;">يا حسين</div>
                         <div class="flex items-center gap-3 relative z-10">
@@ -189,11 +178,48 @@
                         <i class="fa-solid fa-chevron-left text-gray-400 relative z-10"></i>
                     </button>
 
-                    <!-- زر تسجيل موكب جديد -->
                     <button onclick="prepareAddNew()" class="w-full bg-[#2E7D32] text-white p-3.5 rounded-2xl shadow-lg flex items-center justify-center gap-3 click-effect hover:bg-green-800 transition mb-6">
                         <i class="fa-solid fa-plus text-lg"></i>
                         <span class="font-bold text-lg">تسجيل موكب جديد</span>
                     </button>
+
+                    <!-- الخدمات (تم إرجاعها) -->
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-extrabold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-star text-green-600 text-sm"></i> الخدمات المتوفرة</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer click-effect" onclick="filterByService('طعام')">
+                            <i class="fa-solid fa-utensils text-2xl text-black mb-2"></i>
+                            <span class="text-[11px] font-bold text-gray-800 text-center">الطعام</span>
+                            <span class="text-[10px] text-gray-400 mt-1" id="count-food">0</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer click-effect" onclick="filterByService('ماء')">
+                            <i class="fa-solid fa-mug-hot text-2xl text-black mb-2"></i>
+                            <span class="text-[11px] font-bold text-gray-800 text-center">الماء والشاي</span>
+                            <span class="text-[10px] text-gray-400 mt-1" id="count-water">0</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer click-effect" onclick="filterByService('مبيت')">
+                            <i class="fa-solid fa-bed text-2xl text-black mb-2"></i>
+                            <span class="text-[11px] font-bold text-gray-800 text-center">المبيت</span>
+                            <span class="text-[10px] text-gray-400 mt-1" id="count-bed">0</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer click-effect" onclick="filterByService('شحن')">
+                            <i class="fa-solid fa-battery-full text-2xl text-green-600 mb-2"></i>
+                            <span class="text-[11px] font-bold text-gray-800 text-center">شحن الهواتف</span>
+                            <span class="text-[10px] text-gray-400 mt-1" id="count-charge">0</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer click-effect" onclick="filterByService('مياه')">
+                            <span class="text-sm font-black text-white bg-[#2E7D32] px-2 py-0.5 rounded mb-2">WC</span>
+                            <span class="text-[11px] font-bold text-gray-800 text-center">دورات المياه</span>
+                            <span class="text-[10px] text-gray-400 mt-1" id="count-wc">0</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer click-effect" onclick="filterByService('إسعاف')">
+                            <i class="fa-solid fa-briefcase-medical text-2xl text-black mb-2"></i>
+                            <span class="text-[11px] font-bold text-gray-800 text-center">الإسعافات</span>
+                            <span class="text-[10px] text-gray-400 mt-1" id="count-med">0</span>
+                        </div>
+                    </div>
 
                     <!-- خريطة مصغرة -->
                     <div class="flex justify-between items-center mb-3">
@@ -209,8 +235,11 @@
 
             <!-- 2. صفحة الريلز -->
             <div id="page-reels" class="page bg-black">
+                <button onclick="openAddReelModal()" class="absolute top-4 left-4 z-50 bg-white/20 backdrop-blur-md text-white w-10 h-10 rounded-full flex items-center justify-center click-effect">
+                    <i class="fa-solid fa-plus text-lg"></i>
+                </button>
                 <div class="reel-container hide-scrollbar" id="reelsContainer">
-                    <!-- يتم توليد الفيديوهات هنا -->
+                    <!-- الفيديوهات -->
                 </div>
             </div>
 
@@ -220,30 +249,24 @@
                     <h2 class="font-black text-[#2E7D32] text-xl">الدردشات</h2>
                     <button onclick="toggleSettings()" class="w-10 h-10 text-gray-600 flex items-center justify-center"><i class="fa-solid fa-bars text-xl"></i></button>
                 </div>
-                <div id="chatsList" class="pb-10">
-                    <!-- يتم توليد المحادثات هنا -->
-                </div>
+                <div id="chatsList" class="pb-10"></div>
             </div>
 
-            <!-- 4. صفحة المتابعات -->
-            <div id="page-follows" class="page bg-gray-50">
+            <!-- 4. صفحة الإشعارات -->
+            <div id="page-notifications" class="page bg-gray-50">
                 <div class="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-20 border-b border-gray-100">
-                    <h2 class="font-black text-[#2E7D32] text-xl">المتابعات</h2>
+                    <h2 class="font-black text-[#2E7D32] text-xl">الإشعارات</h2>
                 </div>
-                <div id="followsList" class="p-3 space-y-3 pb-10">
-                    <!-- يتم توليد المتابعات هنا -->
-                </div>
+                <div id="notificationsList" class="p-3 space-y-3 pb-10"></div>
             </div>
 
-            <!-- 5. صفحة البحث / الخدمات -->
+            <!-- 5. صفحة البحث -->
             <div id="page-search" class="page bg-gray-50">
                 <div class="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-20 border-b border-gray-100">
                     <button onclick="switchTab('home')" class="w-8 h-8 flex items-center justify-center text-gray-600"><i class="fa-solid fa-arrow-right"></i></button>
                     <h2 class="font-bold text-gray-800 text-lg">نتائج البحث</h2>
                 </div>
-                <div id="searchResultsList" class="p-3 space-y-3 pb-10">
-                    <!-- يتم عرض المواكب المطابقة هنا -->
-                </div>
+                <div id="searchResultsList" class="p-3 space-y-3 pb-10"></div>
             </div>
 
             <!-- 6. صفحة الخريطة الرئيسية -->
@@ -342,8 +365,8 @@
             <div class="nav-btn" id="nav-chats" onclick="switchTab('chats')">
                 <i class="fa-solid fa-comments text-xl"></i><span>الدردشات</span>
             </div>
-            <div class="nav-btn" id="nav-follows" onclick="switchTab('follows')">
-                <i class="fa-solid fa-user-plus text-xl"></i><span>المتابعات</span>
+            <div class="nav-btn" id="nav-notifications" onclick="switchTab('notifications')">
+                <i class="fa-regular fa-bell text-xl"></i><span>الإشعارات</span>
             </div>
             <div class="nav-btn" id="nav-account" onclick="switchTab('account')">
                 <i class="fa-regular fa-user"></i><span>حسابي</span>
@@ -368,9 +391,7 @@
             </div>
         </div>
 
-        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 flex flex-col hide-scrollbar" style="background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-size: cover; background-blend-mode: overlay;">
-            <!-- الرسائل -->
-        </div>
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 flex flex-col hide-scrollbar" style="background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-size: cover; background-blend-mode: overlay;"></div>
 
         <div class="bg-[#f0f0f0] p-2 flex items-center gap-2 pb-safe">
             <button class="text-gray-500 text-xl px-2"><i class="fa-regular fa-face-smile"></i></button>
@@ -393,7 +414,6 @@
         <img id="callAvatar" src="" class="w-32 h-32 rounded-full object-cover border-4 border-white/20 mb-4 shadow-2xl">
         <h2 id="callName" class="text-2xl font-bold mb-2">اسم الموكب</h2>
         <p class="text-gray-300 mb-10">جاري الاتصال...</p>
-        
         <div class="flex gap-6">
             <button onclick="endCall()" class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg click-effect"><i class="fa-solid fa-phone-slash"></i></button>
         </div>
@@ -440,9 +460,7 @@
             <p id="detailsAddress" class="text-gray-500 text-sm mb-4"><i class="fa-solid fa-location-dot text-green-600 ml-1"></i> العنوان</p>
             
             <h3 class="font-bold text-gray-800 mb-2">الخدمات المتوفرة:</h3>
-            <div id="detailsServices" class="flex flex-wrap gap-2 mb-6">
-                <!-- الخدمات -->
-            </div>
+            <div id="detailsServices" class="flex flex-wrap gap-2 mb-6"></div>
 
             <button id="detailsDirectionsBtn" class="w-full bg-[#2E7D32] text-white font-bold py-3.5 rounded-xl shadow-md click-effect mb-3"><i class="fa-solid fa-diamond-turn-right ml-2"></i> الاتجاهات إلى الموكب</button>
             <button onclick="closeMawkibDetails()" class="w-full bg-gray-100 text-gray-700 font-bold py-3 rounded-xl click-effect">إغلاق</button>
@@ -456,9 +474,7 @@
                 <h2 class="text-lg font-bold text-gray-800">التعليقات</h2>
                 <button onclick="closeReelComments()" class="text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div id="reelCommentsList" class="flex-1 overflow-y-auto space-y-3 hide-scrollbar mb-4">
-                <!-- التعليقات -->
-            </div>
+            <div id="reelCommentsList" class="flex-1 overflow-y-auto space-y-3 hide-scrollbar mb-4"></div>
             <div class="flex gap-2">
                 <input type="text" id="reelCommentInput" placeholder="أضف تعليقاً..." class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none">
                 <button onclick="submitReelComment()" class="bg-[#2E7D32] text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md"><i class="fa-solid fa-paper-plane text-sm"></i></button>
@@ -466,11 +482,29 @@
         </div>
     </div>
 
+    <!-- ================= نافذة إضافة ريلز جديد ================= -->
+    <div id="addReelModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">إضافة ريلز جديد</h2>
+            
+            <label class="block text-sm font-bold text-gray-700 mb-2">اختر فيديو</label>
+            <input type="file" id="reelVideoInput" accept="video/*" class="w-full border border-gray-200 rounded-xl p-2 text-sm bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4">
+            
+            <label class="block text-sm font-bold text-gray-700 mb-2">وصف الفيديو</label>
+            <input type="text" id="reelDescInput" placeholder="اكتب وصفاً قصيراً..." class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-green-600 text-sm bg-gray-50 mb-6">
+            
+            <div class="flex gap-2">
+                <button onclick="uploadReel()" class="flex-1 bg-[#2E7D32] text-white font-bold py-3 rounded-xl shadow-md">نشر الريلز</button>
+                <button onclick="document.getElementById('addReelModal').classList.add('hidden')" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">إلغاء</button>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-2 text-center">* ملاحظة: الفيديو سيعمل بشكل مؤقت (للتجربة). التخزين الدائم يحتاج لخدمة سحابية.</p>
+        </div>
+    </div>
+
     <script>
         // ==========================================
-        // 1. أدوات مساعدة وأمان (Security Utils)
+        // 1. أدوات مساعدة وأمان
         // ==========================================
-        // دالة لمنع ثغرات XSS عند إدراج نصوص المستخدمين
         function escapeHTML(str) {
             if (!str) return '';
             return str.replace(/[&<>'"]/g, tag => ({
@@ -478,7 +512,6 @@
             }[tag] || tag));
         }
 
-        // دالة لضغط الصور (لتجنب امتلاء مساحة التخزين)
         function compressImage(file, callback) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -504,20 +537,27 @@
         }
 
         // ==========================================
-        // 2. البيانات والتخزين (Data Layer)
+        // 2. البيانات والتخزين (تم إضافة حفظ الريلز)
         // ==========================================
+        const dummyMawkibs = [
+            { id: 1, name: "موكب العباس (ع)", lat: 32.6160, lng: 44.0249, services: "طعام, ماء, مبيت", address: "شارع العباس", img: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" },
+            { id: 2, name: "موكب شباب الحسين", lat: 32.6180, lng: 44.0280, services: "ماء, شحن", address: "حي الحسين", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=400" },
+            { id: 3, name: "موكب قمر بني هاشم", lat: 32.6130, lng: 44.0220, services: "إسعاف, مياه, طعام", address: "باب القبلة", img: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400" }
+        ];
+
         const db = {
             users: JSON.parse(localStorage.getItem('karbalaUsers')) || [],
             currentUser: JSON.parse(localStorage.getItem('karbalaCurrentUser')) || null,
-            mawkibs: JSON.parse(localStorage.getItem('karbalaMawkibs')) || [],
+            mawkibs: JSON.parse(localStorage.getItem('karbalaMawkibs')) || [...dummyMawkibs],
             chats: JSON.parse(localStorage.getItem('karbalaChats')) || [
                 { id: 1, name: "موكب العباس", avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100", messages: [{text: "أهلاً بك في موكب العباس", isMe: false, time: "10:00"}] }
             ],
-            follows: JSON.parse(localStorage.getItem('karbalaFollows')) || [
-                { id: 1, name: "محمد", text: "بدأ بمتابعتك", time: "منذ ساعة", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100", isFollowing: false },
-                { id: 2, name: "علي", text: "أعجب بموكبك", time: "منذ 3 ساعات", avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100", isFollowing: true }
+            // تم إزالة المتابعة، وإبقاء الإشعارات فقط
+            notifications: JSON.parse(localStorage.getItem('karbalaNotifs')) || [
+                { id: 1, title: "أهلاً بك", text: "مرحباً بك في دليل مواكب كربلاء. يمكنك تصفح المواكب وإضافة موكبك الخاص.", time: "الآن" },
+                { id: 2, title: "تم التحقق", text: "تم التحقق من بيانات موكب العباس (ع).", time: "منذ ساعتين" }
             ],
-            reels: [
+            reels: JSON.parse(localStorage.getItem('karbalaReels')) || [
                 { id: 1, video: "https://www.w3schools.com/html/mov_bbb.mp4", author: "موكب شباب الحسين", desc: "خدمة زوار الإمام الحسين (ع) #كربلاء", likes: 0, isLiked: false, comments: [] },
                 { id: 2, video: "https://www.w3schools.com/html/mov_bbb.mp4", author: "خدام الزائرين", desc: "توزيع الوجبات الساخنة", likes: 0, isLiked: false, comments: [] }
             ]
@@ -534,14 +574,15 @@
                 localStorage.setItem('karbalaCurrentUser', JSON.stringify(db.currentUser));
                 localStorage.setItem('karbalaMawkibs', JSON.stringify(db.mawkibs));
                 localStorage.setItem('karbalaChats', JSON.stringify(db.chats));
-                localStorage.setItem('karbalaFollows', JSON.stringify(db.follows));
+                localStorage.setItem('karbalaNotifs', JSON.stringify(db.notifications));
+                localStorage.setItem('karbalaReels', JSON.stringify(db.reels));
             } catch (e) {
                 alert("تحذير: مساحة التخزين ممتلئة. قد لا يتم حفظ بعض التغييرات الجديدة.");
             }
         }
 
         // ==========================================
-        // 3. نظام الحسابات (Auth)
+        // 3. نظام الحسابات
         // ==========================================
         function checkAuth() {
             if (db.currentUser) {
@@ -624,7 +665,7 @@
         }
 
         // ==========================================
-        // 4. التنقل (Navigation)
+        // 4. التنقل
         // ==========================================
         function switchTab(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -634,12 +675,10 @@
             const navBtn = document.getElementById(`nav-${pageId}`);
             if (navBtn) navBtn.classList.add('active');
 
-            // إصلاح مشكلة حجم الخرائط
             if (pageId === 'map' && mainMap) setTimeout(() => mainMap.invalidateSize(), 200);
             if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 200);
             if (pageId === 'home' && previewMap) setTimeout(() => previewMap.invalidateSize(), 200);
             
-            // إيقاف فيديوهات الريلز إذا خرجنا من الصفحة
             if (pageId !== 'reels') {
                 document.querySelectorAll('video').forEach(v => v.pause());
             }
@@ -651,7 +690,7 @@
         }
 
         // ==========================================
-        // 5. الملف الشخصي (Profile)
+        // 5. الملف الشخصي
         // ==========================================
         function renderProfile() {
             document.getElementById('profilePicDisplay').src = profile.img;
@@ -690,7 +729,7 @@
         }
 
         // ==========================================
-        // 6. المواكب (Mawkibs)
+        // 6. المواكب
         // ==========================================
         let mainMap, pickMap, previewMap;
         let pickMarker = null;
@@ -700,8 +739,7 @@
 
         function initMaps() {
             const osmTile = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-            const mawkibIcon = L.divIcon({ className: 'custom-icon', html: '<div style="background-color: #2E7D32; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"><i class="fa-solid fa-mosque"></i></div>', iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16] });
-
+            
             previewMap = L.map('previewMap', { zoomControl: false, dragging: false, scrollWheelZoom: false }).setView([32.6160, 44.0249], 14);
             L.tileLayer(osmTile, { maxZoom: 19 }).addTo(previewMap);
 
@@ -715,12 +753,12 @@
             pickMarker.on('dragend', function(e) { let pos = pickMarker.getLatLng(); pickedLat = pos.lat; pickedLng = pos.lng; });
 
             renderMapMarkers();
+            updateServiceCounts();
         }
 
         function renderMapMarkers() {
             if (!mainMap) return;
             
-            // مسح العلامات القديمة (نستخدم طبقة جديدة لتجنب التكرار)
             mainMap.eachLayer(layer => {
                 if (layer instanceof L.Marker && !layer.options.isUser) mainMap.removeLayer(layer);
             });
@@ -728,18 +766,60 @@
                 if (layer instanceof L.Marker) previewMap.removeLayer(layer);
             });
 
-            const mawkibIcon = L.divIcon({ className: 'custom-icon', html: '<div style="background-color: #2E7D32; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"><i class="fa-solid fa-mosque"></i></div>', iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15] });
+            const mawkibIcon = L.divIcon({ className: 'custom-icon', html: '<div style="background-color: #2E7D32; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"><i class="fa-solid fa-mosque"></i></div>', iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16] });
 
             db.mawkibs.forEach(m => {
                 const safeName = escapeHTML(m.name);
-                const safeImg = m.img || "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400";
                 
-                // إضافة للخريطة الرئيسية
                 const marker = L.marker([m.lat, m.lng], {icon: mawkibIcon}).addTo(mainMap);
                 marker.on('click', () => openMawkibDetails(m.id));
-
-                // إضافة للخريطة المصغرة
                 L.marker([m.lat, m.lng], {icon: mawkibIcon}).addTo(previewMap);
+            });
+        }
+
+        function updateServiceCounts() {
+            const counts = { food: 0, water: 0, bed: 0, charge: 0, wc: 0, med: 0 };
+            db.mawkibs.forEach(m => {
+                const s = m.services || '';
+                if (s.includes('طعام')) counts.food++;
+                if (s.includes('ماء')) counts.water++;
+                if (s.includes('مبيت')) counts.bed++;
+                if (s.includes('شحن')) counts.charge++;
+                if (s.includes('مياه')) counts.wc++;
+                if (s.includes('إسعاف')) counts.med++;
+            });
+            document.getElementById('count-food').textContent = counts.food;
+            document.getElementById('count-water').textContent = counts.water;
+            document.getElementById('count-bed').textContent = counts.bed;
+            document.getElementById('count-charge').textContent = counts.charge;
+            document.getElementById('count-wc').textContent = counts.wc;
+            document.getElementById('count-med').textContent = counts.med;
+        }
+
+        function filterByService(service) {
+            const q = service;
+            const resultsDiv = document.getElementById('searchResultsList');
+            resultsDiv.innerHTML = '';
+            
+            switchTab('search');
+            
+            const filtered = db.mawkibs.filter(m => m.services.includes(q));
+
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد مواكب تقدم هذه الخدمة</div>';
+                return;
+            }
+
+            filtered.forEach(m => {
+                resultsDiv.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center cursor-pointer click-effect" onclick="openMawkibDetails(${m.id})">
+                        <img src="${m.img}" class="w-16 h-16 rounded-lg object-cover ml-3 border border-gray-100">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm text-gray-800">${escapeHTML(m.name)}</h3>
+                            <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-location-dot ml-1 text-green-600"></i>${escapeHTML(m.address)}</p>
+                        </div>
+                    </div>
+                `;
             });
         }
 
@@ -784,6 +864,7 @@
             
             saveData();
             renderMapMarkers();
+            updateServiceCounts();
             switchTab('home');
         }
 
@@ -841,7 +922,6 @@
                         <div class="flex-1">
                             <h3 class="font-bold text-sm text-gray-800">${escapeHTML(m.name)}</h3>
                             <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-location-dot ml-1 text-green-600"></i>${escapeHTML(m.address)}</p>
-                            <span class="text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded mt-1 inline-block">${escapeHTML(m.services)}</span>
                         </div>
                     </div>
                 `;
@@ -858,13 +938,11 @@
                     
                     if(db.mawkibs.length === 0) { alert('لا توجد مواكب مسجلة حالياً.'); return; }
 
-                    // حساب المسافة وترتيب المواكب
                     const sorted = db.mawkibs.map(m => {
                         const dist = L.latLng(userLat, userLng).distanceTo(L.latLng(m.lat, m.lng));
                         return { ...m, dist };
                     }).sort((a, b) => a.dist - b.dist);
 
-                    // عرض أقرب موكب
                     const closest = sorted[0];
                     alert(`أقرب موكب إليك هو: ${closest.name} (يبعد عنك ${(closest.dist / 1000).toFixed(1)} كم)`);
                     openMawkibDetails(closest.id);
@@ -885,7 +963,7 @@
         }
 
         // ==========================================
-        // 7. الدردشات (Chats)
+        // 7. الدردشات
         // ==========================================
         function renderChats() {
             const list = document.getElementById('chatsList');
@@ -991,7 +1069,7 @@
         }
 
         // ==========================================
-        // 8. الريلز (Reels)
+        // 8. الريلز
         // ==========================================
         function renderReels() {
             const container = document.getElementById('reelsContainer');
@@ -1027,7 +1105,6 @@
                 `;
             });
 
-            // مراقبة الفيديوهات لتشغيلها عند ظهورها
             const observer = new IntersectionObserver(entries => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -1041,6 +1118,39 @@
             document.querySelectorAll('.reel-card').forEach(card => observer.observe(card));
         }
 
+        function openAddReelModal() {
+            document.getElementById('reelVideoInput').value = '';
+            document.getElementById('reelDescInput').value = '';
+            document.getElementById('addReelModal').classList.remove('hidden');
+        }
+
+        function uploadReel() {
+            const fileInput = document.getElementById('reelVideoInput');
+            const descInput = document.getElementById('reelDescInput');
+            const file = fileInput.files[0];
+            
+            if(!file) { alert('يرجى اختيار فيديو أولاً'); return; }
+            if(!descInput.value.trim()) { alert('يرجى إدخال وصف للفيديو'); return; }
+
+            const videoUrl = URL.createObjectURL(file);
+            
+            const newReel = {
+                id: Date.now(),
+                video: videoUrl,
+                author: profile.name,
+                desc: escapeHTML(descInput.value.trim()),
+                likes: 0,
+                isLiked: false,
+                comments: []
+            };
+
+            db.reels.unshift(newReel);
+            saveData(); // محاولة الحفظ
+            renderReels();
+            document.getElementById('addReelModal').classList.add('hidden');
+            alert('تمت إضافة الريلز! (ملاحظة: الفيديو قد لا يُحفظ بعد إغلاق التطبيق بسبب قيود مساحة المتصفح).');
+        }
+
         function toggleReelLike(id) {
             const reel = db.reels.find(r => r.id === id);
             if(!reel) return;
@@ -1048,7 +1158,8 @@
             if(reel.isLiked) { reel.likes--; reel.isLiked = false; }
             else { reel.likes++; reel.isLiked = true; }
             
-            renderReels(); // إعادة رندر لتحديث الأيقونة
+            saveData();
+            renderReels();
         }
 
         function openReelComments(id) {
@@ -1086,53 +1197,48 @@
             const reel = db.reels.find(r => r.id === currentReelId);
             reel.comments.push({ author: profile.name, text: text });
             input.value = '';
-            openReelComments(currentReelId); // إعادة تحميل القائمة
+            saveData();
+            openReelComments(currentReelId);
         }
 
         // ==========================================
-        // 9. المتابعات (Follows)
+        // 9. الإشعارات
         // ==========================================
-        function renderFollows() {
-            const list = document.getElementById('followsList');
+        function renderNotifications() {
+            const list = document.getElementById('notificationsList');
             list.innerHTML = '';
-            db.follows.forEach(f => {
+            if(db.notifications.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد إشعارات حالياً</div>';
+                return;
+            }
+            
+            db.notifications.forEach(n => {
                 list.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <img src="${f.avatar}" class="w-12 h-12 rounded-full border border-gray-200">
-                            <div>
-                                <p class="text-sm font-bold text-gray-800"><span class="text-[#2E7D32]">${escapeHTML(f.name)}</span> ${escapeHTML(f.text)}</p>
-                                <span class="text-xs text-gray-400">${f.time}</span>
-                            </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-bell"></i>
                         </div>
-                        <button onclick="toggleFollow(${f.id})" class="px-4 py-1.5 rounded-lg text-sm font-bold ${f.isFollowing ? 'bg-gray-100 text-gray-600' : 'bg-[#E8F5E9] text-[#2E7D32]'}">
-                            ${f.isFollowing ? 'إلغاء المتابعة' : 'متابعة'}
-                        </button>
+                        <div class="flex-1">
+                            <p class="text-sm font-bold text-gray-800">${escapeHTML(n.title)}</p>
+                            <p class="text-xs text-gray-500 mt-1">${escapeHTML(n.text)}</p>
+                            <span class="text-[10px] text-gray-400 mt-1 block">${n.time}</span>
+                        </div>
                     </div>
                 `;
             });
         }
 
-        function toggleFollow(id) {
-            const f = db.follows.find(x => x.id === id);
-            if(!f) return;
-            f.isFollowing = !f.isFollowing;
-            saveData();
-            renderFollows();
-        }
-
         // ==========================================
-        // 10. التشغيل (Initialization)
+        // 10. التشغيل
         // ==========================================
         function initApp() {
             initMaps();
             renderProfile();
             renderChats();
             renderReels();
-            renderFollows();
+            renderNotifications();
         }
 
-        // بدء التطبيق
         window.onload = checkAuth;
     </script>
 </body>
