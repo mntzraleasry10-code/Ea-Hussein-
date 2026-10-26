@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>دليل مواكب كربلاء</title>
     
-    <!-- إعدادات الـ PWA (مدمجة هنا لتعمل بدون ملفات خارجية) -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"دليل مواكب كربلاء","short_name":"مواكب كربلاء","start_url":"./index.html","display":"standalone","background_color":"#F8F6F0","theme_color":"#8B1A1A","icons":[{"src":"https://ui-avatars.com/api/?name=M&background=8B1A1A&color=D4AF37&size=192","sizes":"192x192","type":"image/png"},{"src":"https://ui-avatars.com/api/?name=M&background=8B1A1A&color=D4AF37&size=512","sizes":"512x512","type":"image/png"}]}'>
+    <!-- إعدادات PWA -->
+    <meta name="theme-color" content="#8B1A1A">
+    <meta name="description" content="Directory of Hussaini processions in Karbala">
+    <link rel="manifest" href='data:application/manifest+json,{"background_color":"%23ffffff","display":"standalone","name":"MawkibKarbala","orientation":"any","scope":"/","short_name":"MawkibKarbala","start_url":"/","theme_color":"%23ffffff","id":"com.mawkib.karbala","description":"Directory of Hussaini processions in Karbala"}'>
     
     <script>
-        // تسجيل Service Worker وهمي لتجاوز فحص المتصفح
+        // تسجيل Service Worker وهمي لتجاوز الفحص
         if ('serviceWorker' in navigator) {
             const swCode = `
                 self.addEventListener('install', function(e) { self.skipWaiting(); });
@@ -20,10 +22,10 @@
         }
     </script>
 
-    <!-- مكتبات التصميم والخريطة -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -56,7 +58,6 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* الهيدر الفخم (زخرفة عنابية) */
         .header-luxury {
             background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));
             border-bottom: 2px solid var(--gold);
@@ -70,7 +71,6 @@
             opacity: 0.15; pointer-events: none;
         }
 
-        /* خلفية الرخام للدردشات */
         .marble-bg {
             background-color: #F8F6F0;
             background-image: url('https://www.transparenttextures.com/patterns/white-marble.png');
@@ -80,7 +80,6 @@
         #homeMap { height: 220px; width: 100%; z-index: 1; }
         #pickMap { height: 200px; width: 100%; z-index: 1; border-radius: 15px; border: 2px solid var(--maroon); }
 
-        /* بطاقات الخدمات */
         .service-card {
             background: white; border: 1px solid #E2E8F0; border-radius: 16px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: 0.2s;
@@ -95,7 +94,6 @@
             font-size: 20px; margin-bottom: 8px; border: 1px solid #F5DEB3;
         }
 
-        /* شريط التنقل السفلي */
         .bottom-nav {
             background: white; border-top: 1px solid #E2E8F0;
             border-radius: 20px 20px 0 0;
@@ -110,7 +108,6 @@
         .nav-btn i { font-size: 22px; margin-bottom: 4px; }
         .nav-btn span { font-size: 10px; font-weight: 700; }
 
-        /* تصميم قائمة الدردشات */
         .chat-item {
             display: flex; align-items: center; padding: 12px;
             background: white; border: 2px solid var(--gold); border-radius: 15px;
@@ -126,7 +123,6 @@
         .chat-time { font-size: 11px; color: #94a3b8; }
         .chat-message { font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
 
-        /* صفحة المكالمات */
         .call-item {
             display: flex; align-items: center; padding: 12px;
             background: white; border: 1px solid #E2E8F0; border-radius: 12px;
@@ -137,7 +133,6 @@
         .call-out { background: #E3F2FD; color: #1976D2; }
         .call-missed { background: #FFEBEE; color: #D32F2F; }
 
-        /* شاشة الدردشة */
         #chatRoomModal { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(100%); }
         #chatRoomModal.show { transform: translateX(0); }
         
@@ -171,13 +166,11 @@
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-        /* شاشة المكالمة */
         #callModal { backdrop-filter: blur(15px); background: rgba(17, 24, 39, 0.95); }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <!-- شاشة تسجيل الدخول -->
     <div id="authScreen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-6" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
         <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl relative border-4 border-[var(--gold)]">
             <div class="text-center mb-6">
@@ -203,7 +196,6 @@
         </div>
     </div>
 
-    <!-- شاشة الترحيب -->
     <div id="splash" class="fixed inset-0 z-[9999] hidden flex-col items-center justify-center" style="background: linear-gradient(to bottom, var(--maroon-dark), var(--maroon));">
         <div class="w-32 h-32 mb-4 flex items-center justify-center bg-white rounded-full border-4 border-[var(--gold)] shadow-[0_0_30px_rgba(212,175,55,0.5)]">
             <i class="fa-solid fa-mosque text-6xl text-[var(--maroon)]"></i>
@@ -212,11 +204,9 @@
         <p class="text-white text-sm font-semibold">دليلك إلى المواكب والخدمات الحسينية</p>
     </div>
 
-    <!-- التطبيق الرئيسي -->
     <div id="app" class="hidden flex-col h-[100dvh]">
         <main class="flex-1 relative">
             
-            <!-- الصفحة الرئيسية -->
             <div id="page-home" class="page active">
                 <div class="header-luxury px-4 rounded-b-2xl relative z-10">
                     <div class="flex justify-between items-center mb-3 relative z-10">
@@ -253,7 +243,6 @@
                 </div>
             </div>
 
-            <!-- صفحة الدردشات -->
             <div id="page-chats" class="page marble-bg relative">
                 <div class="header-luxury px-4 flex justify-between items-center sticky top-0 z-20">
                     <h2 class="font-black text-[var(--gold)] text-xl">الدردشات</h2>
@@ -265,7 +254,6 @@
                 <div class="p-3 relative z-10"><div id="chatsList" class="pb-10"></div></div>
             </div>
 
-            <!-- صفحة المكالمات -->
             <div id="page-calls" class="page bg-[var(--bg-app)]">
                 <div class="header-luxury px-4 flex justify-between items-center sticky top-0 z-20">
                     <h2 class="font-black text-[var(--gold)] text-xl">المكالمات</h2>
@@ -274,7 +262,6 @@
                 <div class="p-3"><div id="callsList" class="pb-10"></div></div>
             </div>
 
-            <!-- صفحة إضافة موكب -->
             <div id="page-add" class="page p-5 bg-[var(--bg-app)]">
                 <div class="flex items-center gap-3 mb-6 mt-4">
                     <button onclick="switchTab('home')" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-[var(--maroon)] border border-gray-200"><i class="fa-solid fa-arrow-right"></i></button>
@@ -311,13 +298,11 @@
                 </form>
             </div>
 
-            <!-- صفحة الإشعارات -->
             <div id="page-notifications" class="page bg-[var(--bg-app)]">
                 <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20"><h2 class="font-black text-[var(--gold)] text-xl">الإشعارات</h2></div>
                 <div id="notificationsList" class="p-3 space-y-3 pb-10"></div>
             </div>
 
-            <!-- صفحة البحث -->
             <div id="page-search" class="page bg-[var(--bg-app)]">
                 <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20">
                     <button onclick="switchTab('home')" class="w-8 h-8 flex items-center justify-center text-[var(--gold)]"><i class="fa-solid fa-arrow-right"></i></button>
@@ -327,7 +312,6 @@
             </div>
         </main>
 
-        <!-- شريط التنقل السفلي -->
         <nav class="bottom-nav flex justify-around z-50 h-[70px] px-2 fixed bottom-0 w-full">
             <div class="nav-btn active" id="nav-home" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>الرئيسية</span></div>
             <div class="nav-btn" id="nav-chats" onclick="switchTab('chats')"><i class="fa-solid fa-comments"></i><span>الدردشات</span></div>
@@ -337,7 +321,6 @@
         </nav>
     </div>
 
-    <!-- شاشة الدردشة -->
     <div id="chatRoomModal" class="fixed inset-0 bg-[var(--chat-bg)] z-[10002] flex flex-col w-full h-[100dvh]">
         <div class="bg-[var(--maroon)] text-white px-4 py-3 flex items-center justify-between shadow-md border-b-2 border-[var(--gold)] z-20 pt-safe">
             <div class="flex items-center gap-3">
@@ -368,7 +351,6 @@
         </div>
     </div>
 
-    <!-- شاشة المكالمة -->
     <div id="callModal" class="fixed inset-0 z-[10005] hidden flex-col items-center justify-center text-white" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
         <div class="absolute top-10 left-0 w-full text-center">
             <p class="text-[var(--gold)] text-sm font-bold" id="callStatusText">جاري الاتصال...</p>
@@ -388,7 +370,6 @@
         <div id="recordStatus" class="mt-6 text-red-500 font-bold hidden animate-pulse"><i class="fa-solid fa-circle text-xs ml-1"></i> جاري التسجيل...</div>
     </div>
 
-    <!-- نافذة تفاصيل الموكب -->
     <div id="mawkibDetailsModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-end justify-center backdrop-blur-sm" onclick="closeMawkibDetails(event)">
         <div class="bg-white w-full max-w-md rounded-t-3xl p-5 shadow-2xl pb-8 max-h-[85vh] overflow-y-auto hide-scrollbar border-t-4 border-[var(--maroon)]" onclick="event.stopPropagation()">
             <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
@@ -408,462 +389,9 @@
     </div>
 
     <script>
-        // ==========================================
-        // 1. أدوات مساعدة
-        // ==========================================
-        function escapeHTML(str) {
-            if (!str) return '';
-            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
-        }
+        function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
+        function compressImage(file, callback) { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = function(event) { const img = new Image(); img.src = event.target.result; img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 600; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/jpeg', 0.6)); }; }; }
+        function showToast(msg) { const toast = document.getElementById('toast'); document.getElementById('toastText').innerText = msg; toast.style.top = '20px'; setTimeout(() => toast.style.top = '-50px', 3000); }
+        function safeParse(json, fallback) { try { if (!json) return fallback; const parsed = JSON.parse(json); return parsed !== null && parsed !== undefined ? parsed : fallback; } catch (e) { return fallback; } }
 
-        function compressImage(file, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function(event) {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 600; 
-                    let width = img.width; let height = img.height;
-                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
-                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
-                    canvas.width = width; canvas.height = height;
-                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', 0.6));
-                };
-            };
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastText').innerText = msg;
-            toast.style.top = '20px';
-            setTimeout(() => toast.style.top = '-50px', 3000);
-        }
-
-        function safeParse(json, fallback) {
-            try { if (!json) return fallback; const parsed = JSON.parse(json); return parsed !== null && parsed !== undefined ? parsed : fallback; } catch (e) { return fallback; }
-        }
-
-        // ==========================================
-        // 2. البيانات
-        // ==========================================
-        const defaultMawkibs = [
-            { id: 1, name: "موكب العباس (ع)", lat: 32.6160, lng: 44.0249, services: "طعام, ماء, مبيت", address: "شارع العباس", img: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" },
-            { id: 2, name: "موكب شباب الحسين", lat: 32.6180, lng: 44.0280, services: "ماء, شحن", address: "حي الحسين", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=400" }
-        ];
-
-        const defaultChats = [
-            { id: 1, name: "موكب العباس", avatar: "https://ui-avatars.com/api/?name=موكب+العباس&background=8B1A1A&color=fff&rounded=true&bold=true", status: "متصل الآن", messages: [{ id: 1, text: "أهلاً بك في موكب العباس. كيف يمكننا خدمتك؟", sender: 'them', time: "10:00", status: 'read' }] },
-            { id: 2, name: "خدام الزائرين", avatar: "https://ui-avatars.com/api/?name=خدام+الزائرين&background=2E7D32&color=fff&rounded=true&bold=true", status: "آخر ظهور قبل ساعة", messages: [{ id: 1, text: "نحن في الخدمة دائماً.", sender: 'them', time: "أمس", status: 'read' }] }
-        ];
-
-        const defaultCalls = [
-            { id: 1, name: "موكب العباس", type: "incoming", time: "10:30 ص", duration: "2:15", avatar: "https://ui-avatars.com/api/?name=موكب+العباس&background=8B1A1A&color=fff&rounded=true" },
-            { id: 2, name: "خدام الزائرين", type: "outgoing", time: "أمس", duration: "0:45", avatar: "https://ui-avatars.com/api/?name=خدام+الزائرين&background=2E7D32&color=fff&rounded=true" }
-        ];
-
-        let db = {
-            users: safeParse(localStorage.getItem('karbalaUsers'), []),
-            currentUser: safeParse(localStorage.getItem('karbalaCurrentUser'), null),
-            mawkibs: safeParse(localStorage.getItem('karbalaMawkibs'), [...defaultMawkibs]),
-            chats: safeParse(localStorage.getItem('karbalaChats'), [...defaultChats]),
-            calls: safeParse(localStorage.getItem('karbalaCalls'), [...defaultCalls])
-        };
-
-        let profile = { name: "", img: "https://ui-avatars.com/api/?name=User&background=111827&color=fff&rounded=true" };
-        let isSignupMode = false;
-        let activeChatId = null;
-        let isRecording = false;
-
-        function saveData() {
-            try {
-                localStorage.setItem('karbalaUsers', JSON.stringify(db.users));
-                localStorage.setItem('karbalaCurrentUser', JSON.stringify(db.currentUser));
-                localStorage.setItem('karbalaMawkibs', JSON.stringify(db.mawkibs));
-                localStorage.setItem('karbalaChats', JSON.stringify(db.chats));
-                localStorage.setItem('karbalaCalls', JSON.stringify(db.calls));
-            } catch (e) { console.error("Storage Error", e); }
-        }
-
-        // ==========================================
-        // 3. الحسابات
-        // ==========================================
-        function checkAuth() {
-            if (db.currentUser && db.users.find(u => u.phone === db.currentUser.phone)) {
-                profile.name = db.currentUser.name;
-                document.getElementById('homeUserName').innerText = profile.name;
-                showApp();
-            } else {
-                db.currentUser = null; 
-                document.getElementById('authScreen').style.display = 'flex';
-                document.getElementById('app').style.display = 'none';
-                document.getElementById('splash').style.display = 'none';
-            }
-        }
-
-        function showApp() {
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('splash').classList.remove('hidden');
-            document.getElementById('splash').classList.add('flex');
-            setTimeout(() => {
-                document.getElementById('splash').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splash').style.display = 'none';
-                    document.getElementById('app').style.display = 'flex';
-                    initApp();
-                }, 500);
-            }, 1000);
-        }
-
-        function toggleAuthMode() {
-            isSignupMode = !isSignupMode;
-            const nameField = document.getElementById('nameField');
-            if (isSignupMode) {
-                nameField.classList.remove('hidden');
-                document.getElementById('authSubtitle').innerText = "أنشئ حسابك";
-                document.getElementById('authBtn').innerText = "إنشاء الحساب";
-                document.getElementById('toggleAuthBtn').innerText = "لديك حساب؟ تسجيل الدخول";
-            } else {
-                nameField.classList.add('hidden');
-                document.getElementById('authSubtitle').innerText = "مرحباً بك، يرجى تسجيل الدخول";
-                document.getElementById('authBtn').innerText = "دخول";
-                document.getElementById('toggleAuthBtn').innerText = "ليس لديك حساب؟ إنشاء حساب";
-            }
-        }
-
-        function handleAuth() {
-            const name = document.getElementById('authName').value.trim();
-            const phone = document.getElementById('authPhone').value.trim();
-            const pass = document.getElementById('authPassword').value.trim();
-            if (!phone || !pass) { showToast('أدخل الهاتف وكلمة المرور'); return; }
-
-            if (isSignupMode) {
-                if (!name) { showToast('أدخل الاسم'); return; }
-                if (db.users.find(u => u.phone === phone)) { showToast('الرقم مسجل مسبقاً!'); return; }
-                const newUser = { id: Date.now(), name, phone, pass, img: "" };
-                db.users.push(newUser);
-                db.currentUser = newUser;
-                saveData(); showToast('تم إنشاء الحساب!'); checkAuth(); 
-            } else {
-                const user = db.users.find(u => u.phone === phone && u.pass === pass);
-                if (user) {
-                    db.currentUser = user; saveData(); showToast('تم تسجيل الدخول'); checkAuth(); 
-                } else { showToast('البيانات غير صحيحة'); }
-            }
-        }
-
-        function forgotPassword() {
-            const phone = prompt("أدخل رقم الهاتف:");
-            if (!phone) return;
-            const user = db.users.find(u => u.phone === phone.trim());
-            if (user) alert(`كلمة المرور: ${user.pass}`);
-            else alert("الرقم غير مسجل.");
-        }
-
-        function clearAppData() { if (confirm('مسح جميع البيانات؟')) { localStorage.clear(); window.location.reload(); } }
-
-        // ==========================================
-        // 4. التنقل
-        // ==========================================
-        function switchTab(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`page-${pageId}`).classList.add('active');
-            const navBtn = document.getElementById(`nav-${pageId}`);
-            if (navBtn) navBtn.classList.add('active');
-
-            if (pageId === 'home' && homeMap) setTimeout(() => homeMap.invalidateSize(), 200);
-            if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 200);
-        }
-
-        // ==========================================
-        // 5. الخرائط
-        // ==========================================
-        let homeMap, pickMap, markerGroup;
-        let pickMarker = null;
-        let pickedLat = 32.6160, pickedLng = 44.0249;
-        let pickedImageBase64 = null;
-
-        function initMaps() {
-            const osmTile = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-            homeMap = L.map('homeMap', { zoomControl: false }).setView([32.6160, 44.0249], 14);
-            L.tileLayer(osmTile, { maxZoom: 19 }).addTo(homeMap);
-            markerGroup = L.layerGroup().addTo(homeMap);
-
-            pickMap = L.map('pickMap').setView([pickedLat, pickedLng], 14);
-            L.tileLayer(osmTile, { maxZoom: 19 }).addTo(pickMap);
-            pickMarker = L.marker([pickedLat, pickedLng], { draggable: true }).addTo(pickMap);
-            pickMap.on('click', function(e) { pickedLat = e.latlng.lat; pickedLng = e.latlng.lng; pickMarker.setLatLng([pickedLat, pickedLng]); });
-            pickMarker.on('dragend', function(e) { let pos = pickMarker.getLatLng(); pickedLat = pos.lat; pickedLng = pos.lng; });
-
-            renderMarkers();
-        }
-
-        function renderMarkers() {
-            if (!homeMap) return;
-            markerGroup.clearLayers();
-            const icon = L.divIcon({ className: 'custom-icon', html: '<div style="color: #8B1A1A; font-size: 35px; text-align: center; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"><i class="fa-solid fa-location-dot"></i></div>', iconSize: [35, 35], iconAnchor: [17, 35] });
-            db.mawkibs.forEach(m => {
-                const marker = L.marker([m.lat, m.lng], {icon: icon});
-                marker.on('click', () => openMawkibDetails(m.id));
-                markerGroup.addLayer(marker);
-            });
-        }
-
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                compressImage(file, function(base64) {
-                    document.getElementById('imagePreview').src = base64;
-                    document.getElementById('imagePreview').classList.remove('hidden');
-                    pickedImageBase64 = base64;
-                });
-            }
-        }
-
-        function handleSaveMawkib(e) {
-            e.preventDefault();
-            const name = document.getElementById('mawkibName').value.trim();
-            const address = document.getElementById('mawkibAddress').value.trim();
-            const services = Array.from(document.querySelectorAll('input[name="service"]:checked')).map(cb => cb.value).join(', ');
-            if (!services) { showToast('اختر خدمة واحدة على الأقل'); return; }
-            db.mawkibs.push({ id: Date.now(), name, address, services, lat: pickedLat, lng: pickedLng, img: pickedImageBase64 || "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" });
-            saveData(); renderMarkers();
-            document.getElementById('addForm').reset(); document.getElementById('imagePreview').classList.add('hidden'); pickedImageBase64 = null;
-            showToast('تم تسجيل الموكب بنجاح!'); switchTab('home');
-        }
-
-        function openMawkibDetails(id) {
-            const m = db.mawkibs.find(x => x.id === id);
-            if(!m) return;
-            document.getElementById('detailsImg').src = m.img;
-            document.getElementById('detailsName').innerText = m.name;
-            document.getElementById('detailsAddress').innerHTML = `<i class="fa-solid fa-location-dot text-green-600 ml-1"></i> ${escapeHTML(m.address)}`;
-            const sDiv = document.getElementById('detailsServices');
-            sDiv.innerHTML = '';
-            m.services.split(',').forEach(s => { sDiv.innerHTML += `<span class="bg-[var(--maroon)] text-white px-3 py-1 rounded-full text-xs font-bold">${escapeHTML(s.trim())}</span>`; });
-            document.getElementById('detailsDirectionsBtn').onclick = () => { window.open(`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}`, '_blank'); };
-            document.getElementById('mawkibDetailsModal').classList.remove('hidden');
-        }
-
-        function closeMawkibDetails(e) { if(!e || e.target.id === 'mawkibDetailsModal') document.getElementById('mawkibDetailsModal').classList.add('hidden'); }
-
-        function locateUser() {
-            if (!navigator.geolocation) { showToast('المتصفح لا يدعم الموقع'); return; }
-            navigator.geolocation.getCurrentPosition((pos) => {
-                homeMap.setView([pos.coords.latitude, pos.coords.longitude], 16);
-                L.circleMarker([pos.coords.latitude, pos.coords.longitude], { color: '#2196F3', fillColor: '#2196F3', radius: 8 }).addTo(homeMap).bindPopup("أنت هنا").openPopup();
-            }, () => showToast('يرجى السماح بالوصول للموقع.'));
-        }
-
-        function findClosestMawkib() {
-            if (!navigator.geolocation) { showToast('لا يدعم الموقع'); return; }
-            navigator.geolocation.getCurrentPosition((pos) => {
-                const sorted = db.mawkibs.map(m => { return { ...m, dist: L.latLng(pos.coords.latitude, pos.coords.longitude).distanceTo(L.latLng(m.lat, m.lng)) }; }).sort((a, b) => a.dist - b.dist);
-                if(sorted.length > 0) { showToast(`أقرب موكب: ${sorted[0].name}`); openMawkibDetails(sorted[0].id); }
-            });
-        }
-
-        // ==========================================
-        // 6. الدردشات
-        // ==========================================
-        function renderChats() {
-            const list = document.getElementById('chatsList');
-            list.innerHTML = '';
-            if(db.chats.length === 0) {
-                list.innerHTML = '<div class="text-center text-gray-500 mt-10">لا توجد محادثات</div>';
-                return;
-            }
-            db.chats.forEach(c => {
-                const lastMsg = c.messages.length > 0 ? c.messages[c.messages.length - 1] : { text: "لا توجد رسائل", time: "" };
-                const displayMsg = lastMsg.img ? "📷 صورة" : escapeHTML(lastMsg.text);
-                list.innerHTML += `
-                    <div class="chat-item" onclick="openChatRoom(${c.id})">
-                        <img src="${c.avatar}" class="chat-avatar">
-                        <div class="flex-1">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="chat-name">${escapeHTML(c.name)}</span>
-                                <span class="chat-time">${lastMsg.time || ""}</span>
-                            </div>
-                            <span class="chat-message">${displayMsg}</span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function openChatRoom(id) {
-            activeChatId = id;
-            const chat = db.chats.find(c => c.id === id);
-            if(!chat) return;
-            document.getElementById('chatHeaderName').innerText = chat.name;
-            document.getElementById('chatHeaderAvatar').src = chat.avatar;
-            document.getElementById('chatStatusText').innerText = chat.status || "متصل الآن";
-            renderChatMessages(chat);
-            document.getElementById('chatRoomModal').classList.add('show');
-        }
-
-        function closeChatRoom() { document.getElementById('chatRoomModal').classList.remove('show'); activeChatId = null; }
-
-        function renderChatMessages(chat) {
-            const container = document.getElementById('chatMessages');
-            container.innerHTML = '<div id="typingIndicator" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-            chat.messages.forEach(m => {
-                let isMe = m.sender === 'me';
-                let msgClass = isMe ? 'msg-sent' : 'msg-received';
-                let contentHtml = '';
-                if(m.text) contentHtml += `<span>${escapeHTML(m.text)}</span>`;
-                if(m.img) contentHtml += `<img src="${m.img}" class="w-full max-h-48 object-cover rounded-lg mt-1 mb-1">`;
-                let statusIcon = '';
-                if(isMe) {
-                    if(m.status === 'sent') statusIcon = '<i class="fa-solid fa-check text-gray-400 text-[10px]"></i>';
-                    else if(m.status === 'read') statusIcon = '<i class="fa-solid fa-check-double text-blue-500 text-[10px]"></i>';
-                }
-                container.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full"><div class="msg-bubble ${msgClass}">${contentHtml}<div class="msg-time">${m.time} ${statusIcon}</div></div></div>`;
-            });
-            container.innerHTML += '<div id="typingIndicator" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-            chat.messages.forEach(m => { if(m.sender === 'them') m.status = 'read'; });
-            saveData();
-            setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            if(!text || !activeChatId) return;
-            const chat = db.chats.find(c => c.id === activeChatId);
-            const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-            chat.messages.push({ id: Date.now(), text: text, sender: 'me', time: timeStr, status: 'sent' });
-            input.value = ''; saveData(); renderChatMessages(chat);
-            
-            setTimeout(() => {
-                if(activeChatId !== chat.id) return;
-                const typing = document.getElementById('typingIndicator');
-                if(typing) typing.style.display = 'flex';
-                setTimeout(() => {
-                    if(activeChatId !== chat.id) return;
-                    const timeStr2 = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-                    const replies = ["أهلاً وسهلاً بك، كيف يمكننا خدمتك؟", "نحن في الخدمة دائماً.", "الموكب مفتوح الآن، تفضل بزيارتنا."];
-                    chat.messages.push({ id: Date.now(), text: replies[Math.floor(Math.random() * replies.length)], sender: 'them', time: timeStr2, status: 'read' });
-                    saveData(); renderChatMessages(chat); renderChats();
-                }, 2000);
-            }, 1000);
-        }
-
-        function sendChatMedia(event) {
-            const file = event.target.files[0];
-            if(!file || !activeChatId) return;
-            compressImage(file, function(base64) {
-                const chat = db.chats.find(c => c.id === activeChatId);
-                const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-                chat.messages.push({ id: Date.now(), img: base64, sender: 'me', time: timeStr, status: 'sent' });
-                saveData(); renderChatMessages(chat);
-            });
-        }
-
-        // ==========================================
-        // 7. المكالمات
-        // ==========================================
-        function renderCalls() {
-            const list = document.getElementById('callsList');
-            list.innerHTML = '';
-            if(db.calls.length === 0) {
-                list.innerHTML = '<div class="text-center text-gray-500 mt-10">لا توجد مكالمات حديثاً</div>';
-                return;
-            }
-            db.calls.forEach(c => {
-                let iconClass = '';
-                let iconHtml = '';
-                let colorClass = 'text-gray-500';
-
-                if(c.type === 'incoming') { iconClass = 'call-in'; iconHtml = '<i class="fa-solid fa-phone-arrow-down-left"></i>'; colorClass = 'text-green-600'; }
-                else if(c.type === 'outgoing') { iconClass = 'call-out'; iconHtml = '<i class="fa-solid fa-phone-arrow-up-right"></i>'; colorClass = 'text-blue-600'; }
-                else { iconClass = 'call-missed'; iconHtml = '<i class="fa-solid fa-phone-slash"></i>'; colorClass = 'text-red-600'; }
-
-                list.innerHTML += `
-                    <div class="call-item" onclick="startCallFromList('${escapeHTML(c.name)}', '${c.avatar}')">
-                        <div class="call-icon ${iconClass}">${iconHtml}</div>
-                        <div class="flex-1">
-                            <h3 class="font-bold text-sm text-gray-800">${escapeHTML(c.name)}</h3>
-                            <div class="flex items-center gap-1 text-xs text-gray-500">
-                                <span>${c.time}</span>
-                                ${c.duration ? `<span>· ${c.duration}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="${colorClass} text-lg">
-                            <i class="fa-solid fa-phone"></i>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function startCallFromList(name, avatar) {
-            document.getElementById('callName').innerText = name;
-            document.getElementById('callAvatar').src = avatar;
-            document.getElementById('callStatusText').innerText = "جاري الاتصال...";
-            document.getElementById('callModal').classList.remove('hidden');
-            document.getElementById('callModal').classList.add('flex');
-        }
-
-        function startCall(type) {
-            const chat = db.chats.find(c => c.id === activeChatId);
-            if(!chat) return;
-            document.getElementById('callName').innerText = chat.name;
-            document.getElementById('callAvatar').src = chat.avatar;
-            document.getElementById('callStatusText').innerText = type === 'video' ? "مكالمة فيديو..." : "جاري الاتصال...";
-            document.getElementById('callModal').classList.remove('hidden');
-            document.getElementById('callModal').classList.add('flex');
-        }
-
-        function toggleRecord() {
-            isRecording = !isRecording;
-            const status = document.getElementById('recordStatus');
-            const icon = document.getElementById('recordIcon');
-            if(isRecording) {
-                status.classList.remove('hidden');
-                icon.classList.add('animate-pulse');
-                showToast('بدأ تسجيل المكالمة...');
-            } else {
-                status.classList.add('hidden');
-                icon.classList.remove('animate-pulse');
-                showToast('تم حفظ التسجيل.');
-            }
-        }
-
-        function endCall() {
-            document.getElementById('callModal').classList.add('hidden');
-            document.getElementById('callModal').classList.remove('flex');
-            isRecording = false;
-            document.getElementById('recordStatus').classList.add('hidden');
-            
-            const name = document.getElementById('callName').innerText;
-            const avatar = document.getElementById('callAvatar').src;
-            db.calls.unshift({ id: Date.now(), name, type: 'outgoing', time: 'الآن', duration: '0:15', avatar });
-            saveData();
-            renderCalls();
-        }
-
-        // ==========================================
-        // 8. الإشعارات والتشغيل
-        // ==========================================
-        function renderNotifications() {
-            const list = document.getElementById('notificationsList');
-            list.innerHTML = `
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3 border-r-4 border-[var(--maroon)]">
-                    <div class="w-10 h-10 bg-[var(--maroon)] text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-bell"></i></div>
-                    <div class="flex-1"><p class="text-sm font-bold text-[var(--maroon)]">مرحباً بك</p><p class="text-xs text-gray-500 mt-1">في دليل مواكب كربلاء.</p></div>
-                </div>
-            `;
-        }
-
-        function initApp() {
-            initMaps(); renderChats(); renderCalls(); renderNotifications();
-        }
-
-        window.onload = checkAuth;
-    </script>
-</body>
-</html>
+        const defaultMawkibs = [{ id: 1, name: "موكب العباس (ع)", lat: 32.6160, lng: 44.0249, services: "طعام, ماء, مبيت", address: "شارع العباس", img: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" },{ id: 2, name: "موكب شباب الحسين", lat: 32.6180, lng: 44.0280, services: "ماء, شحن", address: "حي الحسين", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&
