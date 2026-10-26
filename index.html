@@ -55,8 +55,10 @@
         .post-card { background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; overflow: hidden; border: 1px solid #f1f5f9; }
         .post-image { width: 100%; max-height: 400px; object-fit: cover; border-top: 1px solid #f0f2f5; border-bottom: 1px solid #f0f2f5; }
         
-        #commentsModal { transition: transform 0.3s ease-in-out; transform: translateY(100%); }
-        #commentsModal.show { transform: translateY(0); }
+        /* تصميم القصص (Stories) */
+        .story-item { min-w-[100px] h-[160px] rounded-xl relative overflow-hidden cursor-pointer bg-cover bg-center shadow-sm border border-gray-200; }
+        .story-progress-bar { height: 3px; background: rgba(255,255,255,0.3); flex: 1; border-radius: 10px; overflow: hidden; }
+        .story-progress-fill { height: 100%; background: white; width: 0%; transition: width 5s linear; }
 
         /* القائمة الجانبية */
         #settingsSidebar { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
@@ -119,7 +121,6 @@
             <!-- 1. الصفحة الرئيسية -->
             <div id="page-home" class="page active">
                 <div class="dark-header pb-10 px-5 pt-8 rounded-b-[40px] relative shadow-lg">
-                    <!-- الشريط العلوي -->
                     <div class="flex justify-between items-start mb-6">
                         <div class="flex items-center gap-3">
                             <button onclick="toggleSettings()" class="text-white text-xl w-10 h-10 rounded-full flex items-center justify-center click-effect bg-white/10 backdrop-blur-md">
@@ -209,7 +210,7 @@
                 </div>
             </div>
 
-            <!-- 2. صفحة المنشورات (تم تحسينها) -->
+            <!-- 2. صفحة المنشورات (مع الستوري) -->
             <div id="page-posts" class="page bg-[#F0F2F5]">
                 <div class="bg-white px-4 py-3 shadow-sm flex justify-between items-center sticky top-0 z-20">
                     <button onclick="openPostModal()" class="w-10 h-10 bg-[#2E7D32] text-white rounded-full flex items-center justify-center shadow-md click-effect"><i class="fa-solid fa-plus text-lg"></i></button>
@@ -218,6 +219,11 @@
                 </div>
 
                 <div class="p-3">
+                    <!-- قسم القصص (Stories) -->
+                    <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-3" id="storiesContainer">
+                        <!-- سيتم توليد القصص هنا عبر JS -->
+                    </div>
+
                     <!-- إنشاء منشور -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-4">
                         <div class="flex items-center gap-3 mb-3 cursor-pointer" onclick="openPostModal()">
@@ -362,6 +368,28 @@
         </nav>
     </div>
 
+    <!-- ================= شاشة عرض الستوري ================= -->
+    <div id="storyModal" class="fixed inset-0 bg-black z-[10001] hidden flex-col">
+        <div class="p-4 flex gap-1 z-50 absolute top-0 w-full">
+            <div class="story-progress-bar"><div class="story-progress-fill" id="storyProgress"></div></div>
+        </div>
+        <div class="absolute top-10 left-4 right-4 flex items-center gap-2 z-50 px-4">
+            <div class="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-gray-500">
+                <img id="storyAvatar" src="" class="w-full h-full object-cover">
+            </div>
+            <div class="text-white">
+                <span id="storyAuthor" class="font-bold text-sm block"></span>
+                <span class="text-xs text-gray-300">الآن</span>
+            </div>
+            <button onclick="closeStory()" class="text-white text-3xl mr-auto pb-4"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <img id="storyImage" src="" class="w-full h-full object-contain pointer-events-none">
+        
+        <!-- مناطق التنقل -->
+        <div class="absolute inset-y-0 right-0 w-1/3 z-40" onclick="prevStory()"></div>
+        <div class="absolute inset-y-0 left-0 w-1/3 z-40" onclick="nextStory()"></div>
+    </div>
+
     <!-- القائمة الجانبية (الإعدادات) -->
     <div id="settingsOverlay" class="fixed inset-0 bg-black/50 z-[9998] hidden" onclick="toggleSettings()"></div>
     <div id="settingsSidebar" class="fixed top-0 right-0 w-64 h-full bg-white z-[9999] shadow-2xl p-5 flex flex-col">
@@ -398,7 +426,7 @@
         </div>
     </div>
 
-    <!-- نافذة المعرض المخصصة -->
+    <!-- نافذة المعرض المخصصة (للمنشورات) -->
     <div id="galleryModal" class="fixed inset-0 bg-black/80 z-[10000] hidden flex flex-col justify-end">
         <div class="bg-white w-full rounded-t-3xl p-5 shadow-2xl h-[60vh] flex flex-col">
             <div class="flex justify-between items-center mb-4">
@@ -556,7 +584,10 @@
                 currentUser = null;
                 document.getElementById('app').style.display = 'none';
                 document.getElementById('authScreen').style.display = 'flex';
-                toggleSettings();
+                
+                // إصلاح: إغلاق القائمة الجانبية بدلاً من فتحها
+                document.getElementById('settingsSidebar').classList.remove('show');
+                document.getElementById('settingsOverlay').classList.add('hidden');
                 
                 document.getElementById('authPhone').value = '';
                 document.getElementById('authPassword').value = '';
@@ -606,17 +637,27 @@
             }
         ];
 
+        const defaultStories = [
+            { id: 1, author: "موكب العباس", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=400", avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100" },
+            { id: 2, author: "خدام الزائرين", img: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400", avatar: "https://images.unsplash.com/photo-1590075865416-4c5c5e4f8e7d?q=80&w=100" }
+        ];
+
         let mawkibs = JSON.parse(localStorage.getItem('karbalaMawkibs_v16')) || [...defaultMawkibs];
         let posts = JSON.parse(localStorage.getItem('karbalaPosts_v12')) || [...defaultPosts];
+        let stories = JSON.parse(localStorage.getItem('karbalaStories_v3')) || [...defaultStories];
         
         let editingPostId = null;
         let postImageBase64 = null;
         let activeCommentPostId = null;
+        let currentPostOptionsId = null; // تم إضافة المتغير المفقود هنا
+        let currentStoryIndex = 0;
+        let storyTimeout = null;
 
         function saveAll() {
             try {
                 localStorage.setItem('karbalaMawkibs_v16', JSON.stringify(mawkibs));
                 localStorage.setItem('karbalaPosts_v12', JSON.stringify(posts));
+                localStorage.setItem('karbalaStories_v3', JSON.stringify(stories));
                 
                 if(currentUser) {
                     currentUser.img = profile.img;
@@ -629,16 +670,15 @@
                     localStorage.setItem('karbalaCurrentUser', JSON.stringify(currentUser));
                 }
             } catch (e) { 
-                // إظهار التنبيه فقط إذا حدث خطأ فعلي
                 console.error(e);
                 alert("مساحة التخزين ممتلئة، سيتم حذف المنشورات القديمة تلقائياً.");
-                posts = posts.slice(0, 5); // الاحتفاظ بآخر 5 منشورات فقط
+                posts = posts.slice(0, 5); 
                 saveAll();
             }
         }
 
         // ==========================================
-        // 4. ضغط الصور (قوي جداً)
+        // 4. ضغط الصور
         // ==========================================
         function compressImage(file, callback) {
             const reader = new FileReader();
@@ -648,7 +688,7 @@
                 img.src = event.target.result;
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 500; // تصغير الأبعاد
+                    const MAX_SIZE = 500; 
                     let width = img.width;
                     let height = img.height;
 
@@ -675,6 +715,7 @@
             updateServiceCounts();
             renderServicesList();
             renderPosts();
+            renderStories();
             renderProfile();
         }
 
@@ -714,7 +755,112 @@
         }
 
         // ==========================================
-        // 6. المنشورات والتعليقات
+        // 6. الستوري (Stories)
+        // ==========================================
+        function renderStories() {
+            const container = document.getElementById('storiesContainer');
+            container.innerHTML = `
+                <input type="file" id="storyUpload" accept="image/*" class="hidden" onchange="handleStoryUpload(event)">
+                <div class="min-w-[100px] h-[160px] bg-white rounded-xl shadow-sm border border-gray-200 relative overflow-hidden cursor-pointer flex flex-col click-effect" onclick="document.getElementById('storyUpload').click()">
+                    <img src="${profile.img}" class="w-full h-[110px] object-cover">
+                    <div class="flex-1 flex items-end justify-center pb-2"><span class="text-[11px] font-bold text-gray-700">إنشاء قصة</span></div>
+                    <div class="absolute bottom-[40px] left-1/2 transform -translate-x-1/2 bg-white rounded-full p-1 border-2 border-white">
+                        <div class="w-7 h-7 bg-[#1877F2] text-white rounded-full flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
+                    </div>
+                </div>
+            `;
+
+            stories.forEach((s, index) => {
+                container.innerHTML += `
+                    <div class="min-w-[100px] h-[160px] rounded-xl shadow-sm relative overflow-hidden cursor-pointer bg-cover bg-center click-effect" style="background-image: url('${s.img}');" onclick="viewStory(${index})">
+                        <div class="absolute inset-0 bg-black/30"></div>
+                        <div class="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-green-500 overflow-hidden">
+                            <img src="${s.avatar || defaultImg}" class="w-full h-full object-cover">
+                        </div>
+                        <span class="absolute bottom-2 right-2 text-white text-[11px] font-bold">${s.author}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function handleStoryUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                compressImage(file, function(compressedBase64) {
+                    const newStory = { id: Date.now(), author: profile.name, img: compressedBase64, avatar: profile.img };
+                    stories.unshift(newStory);
+                    saveAll();
+                    renderStories();
+                    viewStory(0);
+                });
+            }
+        }
+
+        function viewStory(index) {
+            if(index < 0 || index >= stories.length) { closeStory(); return; }
+            currentStoryIndex = index;
+            const story = stories[index];
+
+            document.getElementById('storyImage').src = story.img;
+            document.getElementById('storyAuthor').innerText = story.author;
+            document.getElementById('storyAvatar').src = story.avatar || defaultImg;
+            
+            const modal = document.getElementById('storyModal');
+            const progress = document.getElementById('storyProgress');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            progress.style.transition = 'none';
+            progress.style.width = '0%';
+
+            setTimeout(() => {
+                progress.style.transition = 'width 5s linear';
+                progress.style.width = '100%';
+            }, 50);
+
+            clearTimeout(storyTimeout);
+            storyTimeout = setTimeout(() => { nextStory(); }, 5000);
+        }
+
+        function nextStory() {
+            clearTimeout(storyTimeout);
+            if(currentStoryIndex < stories.length - 1) {
+                viewStory(currentStoryIndex + 1);
+            } else {
+                closeStory();
+            }
+        }
+
+        function prevStory() {
+            clearTimeout(storyTimeout);
+            if(currentStoryIndex > 0) {
+                viewStory(currentStoryIndex - 1);
+            } else {
+                viewStory(0); 
+            }
+        }
+
+        function closeStory() {
+            const modal = document.getElementById('storyModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            clearTimeout(storyTimeout);
+        }
+
+        // Swipe support for Story
+        let touchStartX = 0;
+        document.getElementById('storyModal').addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        document.getElementById('storyModal').addEventListener('touchend', e => {
+            let touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX < touchStartX - 50) nextStory(); 
+            if (touchEndX > touchStartX + 50) prevStory(); 
+        }, false);
+
+        // ==========================================
+        // 7. المنشورات والتعليقات
         // ==========================================
         function formatCount(num) {
             if (num >= 1000) return (num / 1000).toFixed(1) + ' ألف';
@@ -923,7 +1069,7 @@
         }
 
         // ==========================================
-        // 7. التنقل
+        // 8. التنقل
         // ==========================================
         window.addEventListener('popstate', function (event) {
             if (!document.getElementById('page-home').classList.contains('active')) switchTab('home');
@@ -939,15 +1085,16 @@
             const navBtn = document.getElementById(`nav-${pageId}`);
             if (navBtn) navBtn.classList.add('active');
 
-            if (pageId === 'map' && mainMap) setTimeout(() => mainMap.invalidateSize(), 200);
-            if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 200);
-            if (pageId === 'home' && previewMap) setTimeout(() => previewMap.invalidateSize(), 200);
+            // تحديث حجم الخرائط
+            if (pageId === 'map' && mainMap) setTimeout(() => mainMap.invalidateSize(), 300);
+            if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 300);
+            if (pageId === 'home' && previewMap) setTimeout(() => previewMap.invalidateSize(), 300);
             
             if(pageId !== 'home') history.pushState({page: pageId}, '', '#' + pageId);
         }
 
         // ==========================================
-        // 8. الخرائط والمواكب
+        // 9. الخرائط والمواكب
         // ==========================================
         let mainMap, pickMap, previewMap;
         let mainMarkers = L.layerGroup();
