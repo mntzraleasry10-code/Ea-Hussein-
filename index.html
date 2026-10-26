@@ -17,13 +17,14 @@
             --maroon: #8B1A1A;
             --maroon-dark: #5E0B0B;
             --gold: #D4AF37;
-            --gold-light: #F3E5AB;
-            --bg-color: #F8F6F0;
+            --gold-light: #FDF5E6;
+            --bg-app: #F4F7F6;
+            --chat-bg: #EFEAE2;
         }
 
         body { 
             font-family: 'Cairo', sans-serif; 
-            background-color: var(--bg-color); 
+            background-color: var(--bg-app); 
             overflow: hidden; 
             height: 100dvh; 
         }
@@ -40,146 +41,135 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .header-luxury {
-            background: linear-gradient(to bottom, var(--maroon-dark), var(--maroon));
-            border-bottom: 3px solid var(--gold);
-            box-shadow: 0 4px 15px rgba(139, 26, 26, 0.3);
+            background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));
+            border-bottom: 2px solid var(--gold);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
-        .search-bar {
-            background: linear-gradient(to right, var(--gold), #FFDF73);
-            border: 2px solid var(--maroon);
-            border-radius: 20px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .btn-closest {
-            background: linear-gradient(to right, var(--maroon-dark), var(--maroon));
-            border: 2px solid var(--gold);
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
+        #homeMap { height: 220px; width: 100%; z-index: 1; }
+        #pickMap { height: 200px; width: 100%; z-index: 1; border-radius: 15px; border: 2px solid var(--maroon); }
 
         .service-card {
             background: white;
-            border: 2px solid var(--maroon);
-            border-radius: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             transition: 0.2s;
-        }
-        .service-card:active { transform: scale(0.95); }
-        .service-icon-circle {
-            background: white;
-            border: 2px solid var(--maroon);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 12px;
+            cursor: pointer;
+        }
+        .service-card:active { transform: scale(0.95); background: #f8fafc; }
+        .service-icon {
+            width: 45px; height: 45px; border-radius: 12px;
+            background: var(--gold-light); color: var(--maroon);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; margin-bottom: 8px; border: 1px solid #F5DEB3;
         }
 
         .bottom-nav {
-            background: linear-gradient(to top, var(--maroon-dark), var(--maroon));
-            border-top: 3px solid var(--gold);
+            background: white;
+            border-top: 1px solid #E2E8F0;
             border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
         }
         .nav-btn { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            color: #D1D5DB; cursor: pointer; transition: 0.3s; padding: 8px 0; 
+            color: #94A3B8; cursor: pointer; transition: 0.3s; padding: 8px 0; 
         }
-        .nav-btn.active { color: var(--gold); font-weight: bold; }
+        .nav-btn.active { color: var(--maroon); font-weight: bold; }
         .nav-btn i { font-size: 22px; margin-bottom: 4px; }
-        .nav-btn span { font-size: 11px; font-weight: 700; }
+        .nav-btn span { font-size: 10px; font-weight: 700; }
 
-        /* --------- تصميم الدردشة --------- */
-        #chatRoomModal { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
+        /* ================= الدردشة ================= */
+        #chatRoomModal { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(100%); }
         #chatRoomModal.show { transform: translateX(0); }
         
         .chat-bg {
-            background-color: #efeae2;
+            background-color: var(--chat-bg);
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-size: cover; background-blend-mode: overlay;
+            background-size: cover; background-blend-mode: soft-light;
         }
 
         .msg-bubble { 
-            max-width: 85%; padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; 
-            font-size: 15px; position: relative; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
+            max-width: 85%; padding: 8px 12px; border-radius: 10px; margin-bottom: 10px; 
+            font-size: 14px; position: relative; word-wrap: break-word; box-shadow: 0 1px 1px rgba(0,0,0,0.1); 
         }
-        .msg-sent { background: #dcf8c6; align-self: flex-end; border-bottom-left-radius: 0; }
-        .msg-received { background: white; align-self: flex-start; border-bottom-right-radius: 0; }
-        .msg-time { font-size: 10px; color: #94a3b8; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+        .msg-sent { background: #DCF8C6; align-self: flex-end; border-top-left-radius: 0; }
+        .msg-received { background: white; align-self: flex-start; border-top-right-radius: 0; }
         
-        .reply-bubble {
-            background: rgba(0,0,0,0.05);
-            border-right: 3px solid var(--maroon);
-            padding: 4px 8px;
-            border-radius: 4px;
-            margin-bottom: 6px;
-            font-size: 12px;
-            color: #555;
+        .msg-sent::before {
+            content: ''; position: absolute; top: 0; left: -8px;
+            border: 4px solid transparent; border-right-color: #DCF8C6; border-top-color: #DCF8C6;
+        }
+        .msg-received::before {
+            content: ''; position: absolute; top: 0; right: -8px;
+            border: 4px solid transparent; border-left-color: white; border-top-color: white;
         }
 
-        .reaction-badge {
-            position: absolute; bottom: -10px; left: 10px;
-            background: white; border-radius: 10px; padding: 2px 6px;
-            font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 10;
-        }
-
+        .msg-time { font-size: 10px; color: #999; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+        
         .typing-indicator {
-            font-size: 12px; color: #666; font-style: italic;
-            margin-bottom: 5px; display: none;
+            background: white; padding: 8px 12px; border-radius: 10px; display: none;
+            align-self: flex-start; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
+        .typing-dot {
+            display: inline-block; width: 6px; height: 6px; background: #999;
+            border-radius: 50%; margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-        #msgActionMenu {
-            position: fixed; z-index: 10005; background: white; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: none; flex-direction: column;
-            overflow: hidden; border: 1px solid #eee; width: 150px;
+        .storage-warning {
+            background: #ef4444; color: white; text-align: center; font-size: 12px; padding: 4px; font-weight: bold; display: none;
         }
-        #msgActionMenu button { padding: 10px; text-align: right; font-size: 14px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; }
-        #msgActionMenu button:active { background: #f9f9f9; }
     </style>
 </head>
 <body class="text-gray-800">
 
+    <div id="storageWarning" class="storage-warning">تنبيه: التخزين المحلي معطل في متصفحك. لن يتم حفظ البيانات!</div>
+
     <!-- ================= 1. شاشة تسجيل الدخول ================= -->
-    <div id="authScreen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-6 transition-opacity duration-500" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
+    <div id="authScreen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-6" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
         <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl relative border-4 border-[var(--gold)]">
-            <div class="text-center mb-8">
-                <div class="w-24 h-24 bg-[var(--maroon)] rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-[var(--gold)] shadow-lg">
-                    <i class="fa-solid fa-mosque text-5xl text-[var(--gold)]"></i>
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-[var(--maroon)] rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-[var(--gold)] shadow-lg">
+                    <i class="fa-solid fa-mosque text-4xl text-[var(--gold)]"></i>
                 </div>
                 <h1 class="text-2xl font-black text-[var(--maroon)] mb-1">دليل مواكب كربلاء</h1>
-                <p class="text-gray-500 text-sm font-bold" id="authSubtitle">مرحباً بك، يرجى تسجيل الدخول</p>
+                <p class="text-gray-500 text-xs font-bold" id="authSubtitle">مرحباً بك، يرجى تسجيل الدخول</p>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <div id="nameField" class="hidden">
-                    <label class="block text-sm font-bold text-gray-700 mb-1">الاسم الكامل</label>
-                    <input type="text" id="authName" placeholder="أدخل اسمك" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
+                    <input type="text" id="authName" placeholder="الاسم الكامل" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">رقم الهاتف</label>
-                    <input type="tel" id="authPhone" placeholder="07XXXXXXXXX" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
+                    <input type="tel" id="authPhone" placeholder="رقم الهاتف (07XXXXXXXXX)" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">كلمة المرور</label>
-                    <input type="password" id="authPassword" placeholder="••••••••" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
+                    <input type="password" id="authPassword" placeholder="كلمة المرور" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
                 </div>
                 
-                <button onclick="handleAuth()" id="authBtn" class="w-full bg-[var(--maroon)] text-[var(--gold)] border-2 border-[var(--gold)] font-bold py-3.5 rounded-xl shadow-md click-effect hover:bg-[var(--maroon-dark)] transition mt-2">دخول</button>
+                <button onclick="handleAuth()" id="authBtn" class="w-full bg-[var(--maroon)] text-white font-bold py-3.5 rounded-xl shadow-md click-effect hover:bg-[var(--maroon-dark)] transition mt-2 border-2 border-[var(--gold)]">دخول</button>
             </div>
 
-            <div class="mt-6 text-center">
+            <div class="mt-4 flex flex-col gap-2 text-center">
                 <button onclick="toggleAuthMode()" id="toggleAuthBtn" class="text-[var(--maroon)] font-bold text-sm hover:underline">ليس لديك حساب؟ إنشاء حساب جديد</button>
+                <button onclick="forgotPassword()" class="text-gray-500 text-xs hover:text-gray-800">نسيت كلمة المرور؟</button>
             </div>
+            
+            <!-- زر الطوارئ لمسح البيانات إذا علق التطبيق -->
+            <button onclick="clearAppData()" class="absolute -bottom-12 left-0 w-full text-center text-white/50 text-xs hover:text-white transition">مسح بيانات التطبيق (إعادة ضبط)</button>
         </div>
     </div>
 
-    <!-- شاشة الترحيب (Splash) -->
-    <div id="splash" class="fixed inset-0 z-[9999] hidden flex-col items-center justify-center transition-opacity duration-500" style="background: linear-gradient(to bottom, var(--maroon-dark), var(--maroon));">
+    <!-- شاشة الترحيب -->
+    <div id="splash" class="fixed inset-0 z-[9999] hidden flex-col items-center justify-center" style="background: linear-gradient(to bottom, var(--maroon-dark), var(--maroon));">
         <div class="w-32 h-32 mb-4 flex items-center justify-center bg-white rounded-full border-4 border-[var(--gold)] shadow-[0_0_30px_rgba(212,175,55,0.5)]">
             <i class="fa-solid fa-mosque text-6xl text-[var(--maroon)]"></i>
         </div>
@@ -193,94 +183,64 @@
             
             <!-- 1. الصفحة الرئيسية -->
             <div id="page-home" class="page active">
-                <!-- الهيدر الفخم -->
-                <div class="header-luxury pb-10 px-5 pt-8 rounded-b-[40px] relative">
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="flex items-center gap-3 w-full justify-between">
-                            <button onclick="switchTab('notifications')" class="text-[var(--gold)] text-xl w-10 h-10 rounded-full flex items-center justify-center click-effect bg-black/20">
-                                <i class="fa-solid fa-bell"></i>
-                            </button>
-                            <div class="text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-mosque text-[var(--gold)] text-3xl"></i>
-                                    <h1 class="text-[var(--gold)] text-2xl font-black">دليل مواكب كربلاء</h1>
-                                </div>
-                                <p class="text-gray-200 text-[11px] font-semibold mt-1">دليلك إلى المواكب والخدمات الحسينية</p>
-                            </div>
-                            <div class="w-10"></div>
+                <!-- الهيدر -->
+                <div class="header-luxury pt-10 pb-4 px-4 rounded-b-2xl relative z-10">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-mosque text-[var(--gold)] text-2xl"></i>
+                            <h1 class="text-[var(--gold)] text-lg font-black">دليل المواكب</h1>
                         </div>
+                        <span class="text-white text-xs bg-black/20 px-3 py-1 rounded-full"><i class="fa-solid fa-user ml-1"></i> <span id="homeUserName">مستخدم</span></span>
                     </div>
-
-                    <!-- شريط البحث الفخم -->
-                    <div class="relative mt-4">
-                        <div class="search-bar flex items-center px-4 py-2">
-                            <i class="fa-solid fa-magnifying-glass text-[var(--maroon)] text-lg"></i>
-                            <input type="text" id="searchHome" oninput="searchMawkibs()" placeholder="ابحث عن موكب أو خدمة..." class="w-full bg-transparent border-none px-3 focus:outline-none text-sm font-bold text-[var(--maroon-dark)] placeholder-[var(--maroon)]">
-                        </div>
+                    <div class="relative w-full">
+                        <input type="text" id="searchHome" oninput="searchMawkibs()" placeholder="ابحث عن موكب..." class="w-full bg-white/90 border-none rounded-xl py-2 px-4 text-sm focus:outline-none text-[var(--maroon)] placeholder-[var(--maroon)] font-bold shadow-inner">
+                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-[var(--maroon)]"></i>
                     </div>
                 </div>
 
-                <div class="px-5 -mt-6 relative z-10">
-                    <!-- أقرب المواكب -->
-                    <button onclick="findClosestMawkib()" class="btn-closest w-full text-white p-4 flex items-center justify-between mb-8 click-effect">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center">
-                                <i class="fa-solid fa-location-dot text-[var(--gold)] text-xl"></i>
-                            </div>
-                            <div class="text-right">
-                                <span class="block font-bold text-lg text-[var(--gold)]">أقرب المواكب إليك</span>
-                                <span class="block text-[11px] text-gray-200 mt-0.5">اضغط لعرض المواكب القريبة</span>
-                            </div>
-                        </div>
-                        <i class="fa-solid fa-chevron-left text-[var(--gold)]"></i>
-                    </button>
+                <!-- الخريطة فوق مباشرة -->
+                <div id="homeMap" class="w-full shadow-md relative z-0"></div>
+
+                <div class="px-4 mt-4 relative z-10">
+                    <!-- أزرار سريعة -->
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <button onclick="findClosestMawkib()" class="bg-[var(--maroon)] text-white p-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-[var(--gold)] click-effect">
+                            <i class="fa-solid fa-map-location text-[var(--gold)]"></i>
+                            <span class="font-bold text-sm">الأقرب إليك</span>
+                        </button>
+                        <button onclick="switchTab('add')" class="bg-[var(--gold)] text-[var(--maroon-dark)] p-3 rounded-xl shadow-md flex items-center justify-center gap-2 click-effect border border-[var(--maroon)]">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span class="font-bold text-sm">تسجيل موكب</span>
+                        </button>
+                    </div>
 
                     <!-- الخدمات -->
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-extrabold text-[var(--maroon)] text-xl">الخدمات المتوفرة</h2>
-                        <button class="text-xs text-[var(--maroon)] font-bold bg-[var(--gold-light)] px-3 py-1 rounded-lg border border-[var(--gold)]">عرض الكل</button>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="service-card p-4 flex flex-col items-center justify-center cursor-pointer" onclick="filterByService('مبيت')">
-                            <div class="service-icon-circle"><i class="fa-solid fa-bed text-3xl text-green-700"></i></div>
-                            <span class="text-sm font-bold text-[var(--maroon)] text-center">أماكن المبيت</span>
-                            <span class="text-[11px] text-gray-500 mt-1" id="count-bed">0 موكب</span>
+                    <h2 class="font-extrabold text-[var(--maroon)] text-lg mb-3">الخدمات المتوفرة</h2>
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <div class="service-card" onclick="filterByService('طعام')">
+                            <div class="service-icon"><i class="fa-solid fa-utensils"></i></div>
+                            <span class="text-xs font-bold text-gray-700">الطعام</span>
                         </div>
-                        <div class="service-card p-4 flex flex-col items-center justify-center cursor-pointer" onclick="filterByService('ماء')">
-                            <div class="service-icon-circle"><i class="fa-solid fa-mug-hot text-3xl text-green-700"></i></div>
-                            <span class="text-sm font-bold text-[var(--maroon)] text-center">الماء والشاي</span>
-                            <span class="text-[11px] text-gray-500 mt-1" id="count-water">0 موكب</span>
+                        <div class="service-card" onclick="filterByService('ماء')">
+                            <div class="service-icon"><i class="fa-solid fa-mug-hot"></i></div>
+                            <span class="text-xs font-bold text-gray-700">الماء والشاي</span>
                         </div>
-                        <div class="service-card p-4 flex flex-col items-center justify-center cursor-pointer" onclick="filterByService('طعام')">
-                            <div class="service-icon-circle"><i class="fa-solid fa-utensils text-3xl text-green-700"></i></div>
-                            <span class="text-sm font-bold text-[var(--maroon)] text-center">الطعام والوجبات</span>
-                            <span class="text-[11px] text-gray-500 mt-1" id="count-food">0 موكب</span>
+                        <div class="service-card" onclick="filterByService('مبيت')">
+                            <div class="service-icon"><i class="fa-solid fa-bed"></i></div>
+                            <span class="text-xs font-bold text-gray-700">المبيت</span>
                         </div>
-                        <div class="service-card p-4 flex flex-col items-center justify-center cursor-pointer" onclick="filterByService('إسعاف')">
-                            <div class="service-icon-circle"><i class="fa-solid fa-briefcase-medical text-3xl text-red-700"></i></div>
-                            <span class="text-sm font-bold text-[var(--maroon)] text-center">الإسعافات</span>
-                            <span class="text-[11px] text-gray-500 mt-1" id="count-med">0 موكب</span>
+                        <div class="service-card" onclick="filterByService('إسعاف')">
+                            <div class="service-icon"><i class="fa-solid fa-kit-medical"></i></div>
+                            <span class="text-xs font-bold text-gray-700">الإسعافات</span>
                         </div>
-                        <div class="service-card p-4 flex flex-col items-center justify-center cursor-pointer" onclick="filterByService('مياه')">
-                            <div class="service-icon-circle"><span class="text-lg font-black text-white bg-green-700 px-2 py-0.5 rounded">WC</span></div>
-                            <span class="text-sm font-bold text-[var(--maroon)] text-center">دورات المياه</span>
-                            <span class="text-[11px] text-gray-500 mt-1" id="count-wc">0 موكب</span>
+                        <div class="service-card" onclick="filterByService('مياه')">
+                            <div class="service-icon text-lg font-black">WC</div>
+                            <span class="text-xs font-bold text-gray-700">دورات المياه</span>
                         </div>
-                        <div class="service-card p-4 flex flex-col items-center justify-center cursor-pointer" onclick="filterByService('شحن')">
-                            <div class="service-icon-circle"><i class="fa-solid fa-battery-full text-3xl text-green-700"></i></div>
-                            <span class="text-sm font-bold text-[var(--maroon)] text-center">شحن الهواتف</span>
-                            <span class="text-[11px] text-gray-500 mt-1" id="count-charge">0 موكب</span>
+                        <div class="service-card" onclick="filterByService('شحن')">
+                            <div class="service-icon"><i class="fa-solid fa-battery-full"></i></div>
+                            <span class="text-xs font-bold text-gray-700">شحن الهواتف</span>
                         </div>
-                    </div>
-
-                    <!-- خريطة مصغرة -->
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="font-extrabold text-[var(--maroon)] text-xl">خريطة المواكب</h2>
-                    </div>
-                    
-                    <div class="relative w-full h-48 rounded-xl overflow-hidden shadow-lg mb-8 border-4 border-[var(--maroon)] cursor-pointer" onclick="switchTab('map')">
-                        <div id="previewMap" class="w-full h-full pointer-events-none"></div>
                     </div>
                 </div>
             </div>
@@ -288,24 +248,22 @@
             <!-- 2. صفحة الدردشات -->
             <div id="page-chats" class="page bg-white">
                 <div class="header-luxury px-4 py-4 flex justify-between items-center sticky top-0 z-20">
-                    <h2 class="font-black text-[var(--gold)] text-2xl">الدردشات</h2>
+                    <h2 class="font-black text-[var(--gold)] text-xl">الدردشات</h2>
                 </div>
                 <div id="chatsList" class="pb-10"></div>
             </div>
 
-            <!-- 3. صفحة تسجيل موكب -->
-            <div id="page-add" class="page p-5 bg-[var(--bg-color)]">
-                <div class="flex items-center justify-between mb-6 mt-2">
-                    <div class="flex items-center gap-3">
-                        <button onclick="switchTab('home')" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-[var(--maroon)] click-effect border border-gray-200"><i class="fa-solid fa-arrow-right"></i></button>
-                        <h2 id="formTitle" class="text-xl font-bold text-[var(--maroon)]">تسجيل موكب جديد</h2>
-                    </div>
+            <!-- 3. صفحة إضافة موكب -->
+            <div id="page-add" class="page p-5 bg-[var(--bg-app)]">
+                <div class="flex items-center gap-3 mb-6 mt-4">
+                    <button onclick="switchTab('home')" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-[var(--maroon)] click-effect border border-gray-200"><i class="fa-solid fa-arrow-right"></i></button>
+                    <h2 class="text-xl font-bold text-[var(--maroon)]">تسجيل موكب جديد</h2>
                 </div>
 
                 <form id="addForm" onsubmit="handleSaveMawkib(event)" class="space-y-5">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">صورة الموكب</label>
-                        <input type="file" id="mawkibImage" accept="image/*" onchange="previewImage(event)" class="w-full border border-gray-200 rounded-xl p-2 text-sm bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--maroon)] file:text-[var(--gold)]">
+                        <input type="file" id="mawkibImage" accept="image/*" onchange="previewImage(event)" class="w-full border border-gray-200 rounded-xl p-2 text-sm bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--maroon)] file:text-white">
                         <img id="imagePreview" class="hidden w-full h-40 object-cover rounded-xl mt-3 border-2 border-[var(--maroon)] shadow-sm">
                     </div>
                     <div>
@@ -313,38 +271,36 @@
                         <input type="text" id="mawkibName" required maxlength="50" class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">العنوان / المنطقة</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">العنوان</label>
                         <input type="text" id="mawkibAddress" required maxlength="100" class="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-white">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">الخدمات المتوفرة</label>
-                        <div class="service-list">
-                            <label class="service-item"><input type="checkbox" name="service" value="طعام" class="service-checkbox"><span class="service-name"><span class="text-xl">🍲</span> طعام ووجبات</span></label>
-                            <label class="service-item"><input type="checkbox" name="service" value="ماء" class="service-checkbox"><span class="service-name"><span class="text-xl">💧</span> ماء وشاي وقهوة</span></label>
-                            <label class="service-item"><input type="checkbox" name="service" value="مبيت" class="service-checkbox"><span class="service-name"><span class="text-xl">🛏️</span> أماكن المبيت</span></label>
-                            <label class="service-item"><input type="checkbox" name="service" value="إسعاف" class="service-checkbox"><span class="service-name"><span class="text-xl">🩺</span> إسعافات أولية</span></label>
-                            <label class="service-item"><input type="checkbox" name="service" value="مياه" class="service-checkbox"><span class="service-name"><span class="text-xl">🚻</span> دورات مياه ووضوء</span></label>
-                            <label class="service-item"><input type="checkbox" name="service" value="شحن" class="service-checkbox"><span class="service-name"><span class="text-xl">🔋</span> شحن هواتف</span></label>
+                        <div class="bg-gray-900 rounded-xl p-3 text-white space-y-2">
+                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="طعام" class="w-5 h-5 accent-green-500"> 🍲 طعام ووجبات</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="ماء" class="w-5 h-5 accent-green-500"> 💧 ماء وشاي</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="مبيت" class="w-5 h-5 accent-green-500"> 🛏️ مبيت</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="إسعاف" class="w-5 h-5 accent-green-500"> 🩺 إسعافات</label>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">حدد الموقع على الخريطة</label>
-                        <div id="pickMap" class="w-full h-56 rounded-xl border-2 border-[var(--maroon)] z-0"></div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">الموقع على الخريطة</label>
+                        <div id="pickMap"></div>
                     </div>
-                    <button type="submit" id="submitBtn" class="w-full bg-[var(--maroon)] text-[var(--gold)] border-2 border-[var(--gold)] font-bold py-4 rounded-xl shadow-md mt-4 click-effect"><i class="fa-solid fa-check-circle ml-2"></i> حفظ وإرسال</button>
+                    <button type="submit" class="w-full bg-[var(--maroon)] text-white font-bold py-4 rounded-xl shadow-md mt-4 click-effect border border-[var(--gold)]">حفظ الموكب</button>
                 </form>
             </div>
 
             <!-- 4. صفحة الإشعارات -->
-            <div id="page-notifications" class="page bg-[var(--bg-color)]">
+            <div id="page-notifications" class="page bg-[var(--bg-app)]">
                 <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20">
                     <h2 class="font-black text-[var(--gold)] text-xl">الإشعارات</h2>
                 </div>
                 <div id="notificationsList" class="p-3 space-y-3 pb-10"></div>
             </div>
 
-            <!-- 5. صفحة البحث / الخدمات -->
-            <div id="page-search" class="page bg-[var(--bg-color)]">
+            <!-- 5. صفحة البحث -->
+            <div id="page-search" class="page bg-[var(--bg-app)]">
                 <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20">
                     <button onclick="switchTab('home')" class="w-8 h-8 flex items-center justify-center text-[var(--gold)]"><i class="fa-solid fa-arrow-right"></i></button>
                     <h2 class="font-bold text-[var(--gold)] text-lg">نتائج البحث</h2>
@@ -352,21 +308,10 @@
                 <div id="searchResultsList" class="p-3 space-y-3 pb-10"></div>
             </div>
 
-            <!-- 6. صفحة الخريطة الرئيسية -->
-            <div id="page-map" class="page relative bg-gray-100 !p-0">
-                <button onclick="switchTab('home')" class="absolute top-6 right-4 z-[500] bg-[var(--maroon)] text-[var(--gold)] w-10 h-10 rounded-full shadow-lg flex items-center justify-center border-2 border-[var(--gold)] click-effect">
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-                <div id="mainMap"></div>
-                <button onclick="locateUser()" class="absolute bottom-24 left-4 z-[400] bg-[var(--maroon)] text-[var(--gold)] w-12 h-12 rounded-full shadow-lg text-xl flex items-center justify-center border-2 border-[var(--gold)] click-effect">
-                    <i class="fa-solid fa-location-crosshairs"></i>
-                </button>
-            </div>
-
         </main>
 
-        <!-- شريط التنقل السفلي (4 أزرار) -->
-        <nav class="bottom-nav flex justify-around z-50 h-[75px] px-2 fixed bottom-0 w-full">
+        <!-- شريط التنقل السفلي -->
+        <nav class="bottom-nav flex justify-around z-50 h-[70px] px-2 fixed bottom-0 w-full">
             <div class="nav-btn active" id="nav-home" onclick="switchTab('home')">
                 <i class="fa-solid fa-house"></i><span>الرئيسية</span>
             </div>
@@ -374,7 +319,7 @@
                 <i class="fa-solid fa-comments"></i><span>الدردشات</span>
             </div>
             <div class="nav-btn" id="nav-add" onclick="switchTab('add')">
-                <i class="fa-solid fa-circle-plus text-2xl"></i><span>تسجيل موكب</span>
+                <i class="fa-solid fa-plus-square text-2xl"></i><span>إضافة</span>
             </div>
             <div class="nav-btn" id="nav-notifications" onclick="switchTab('notifications')">
                 <i class="fa-regular fa-bell"></i><span>الإشعارات</span>
@@ -382,83 +327,42 @@
         </nav>
     </div>
 
-    <!-- ================= شاشة المحادثة ================= -->
-    <div id="chatRoomModal" class="fixed inset-0 bg-[#efeae2] z-[10002] flex flex-col w-full h-[100dvh]">
+    <!-- ================= شاشة الدردشة (احترافية) ================= -->
+    <div id="chatRoomModal" class="fixed inset-0 bg-[var(--chat-bg)] z-[10002] flex flex-col w-full h-[100dvh]">
         <div class="bg-[var(--maroon)] text-white px-4 py-3 flex items-center justify-between shadow-md border-b-2 border-[var(--gold)] z-20">
             <div class="flex items-center gap-3">
                 <button onclick="closeChatRoom()" class="text-xl text-[var(--gold)]"><i class="fa-solid fa-arrow-right"></i></button>
-                <div class="relative">
-                    <img id="chatHeaderAvatar" src="" class="w-10 h-10 rounded-full object-cover border-2 border-[var(--gold)]">
-                    <span id="chatOnlineDot" class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-                </div>
+                <img id="chatHeaderAvatar" src="" class="w-10 h-10 rounded-full object-cover border-2 border-[var(--gold)]">
                 <div>
                     <h3 id="chatHeaderName" class="font-bold text-sm text-[var(--gold)]">اسم الموكب</h3>
                     <p id="chatStatusText" class="text-[10px] text-gray-200">متصل الآن</p>
                 </div>
             </div>
             <div class="flex gap-4 text-lg text-[var(--gold)]">
-                <button onclick="simulateCall('voice')"><i class="fa-solid fa-phone"></i></button>
-                <button onclick="simulateCall('video')"><i class="fa-solid fa-video"></i></button>
+                <button><i class="fa-solid fa-phone"></i></button>
+                <button><i class="fa-solid fa-video"></i></button>
             </div>
         </div>
 
         <div id="chatMessages" class="flex-1 overflow-y-auto p-4 flex flex-col hide-scrollbar chat-bg relative">
-            <div id="typingIndicator" class="typing-indicator">الطرف الآخر يكتب...</div>
-        </div>
-
-        <div id="replyPreviewContainer" class="hidden bg-white border-t border-gray-200 p-2 flex items-center justify-between shadow-inner">
-            <div class="border-r-4 border-[var(--maroon)] pr-2">
-                <span class="text-xs font-bold text-[var(--maroon)]" id="replyAuthor">أنت</span>
-                <p class="text-xs text-gray-500 truncate max-w-[200px]" id="replyText">نص الرسالة...</p>
+            <div id="typingIndicator" class="typing-indicator">
+                <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
             </div>
-            <button onclick="cancelReply()" class="text-gray-400 px-2"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
 
-        <div class="bg-[#f0f0f0] p-2 flex items-end gap-2 pb-safe z-20">
-            <div class="flex-1 bg-white rounded-3xl flex items-center px-3 py-1 shadow-sm border border-gray-200">
-                <button onclick="toggleEmojiPicker()" class="text-gray-500 text-2xl px-1"><i class="fa-regular fa-face-smile"></i></button>
+        <div class="bg-[#F0F2F5] p-2 flex items-end gap-2 pb-safe z-20 border-t border-gray-300">
+            <div class="flex-1 bg-white rounded-3xl flex items-center px-3 py-1 shadow-sm border border-gray-300">
+                <button class="text-gray-500 text-2xl px-1"><i class="fa-regular fa-face-smile"></i></button>
                 <input type="text" id="chatInput" onkeypress="if(event.key === 'Enter') sendChatMessage()" placeholder="اكتب رسالة..." class="flex-1 px-2 py-2 text-sm focus:outline-none bg-transparent">
-                
                 <label class="text-gray-500 text-xl px-2 cursor-pointer">
                     <i class="fa-solid fa-paperclip"></i>
                     <input type="file" accept="image/*" class="hidden" onchange="sendChatMedia(event)">
                 </label>
-                <label class="text-gray-500 text-xl px-2 cursor-pointer">
-                    <i class="fa-solid fa-camera"></i>
-                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="sendChatMedia(event)">
-                </label>
             </div>
-
-            <button id="sendBtn" onclick="sendChatMessage()" class="w-12 h-12 bg-[var(--maroon)] text-[var(--gold)] border border-[var(--gold)] rounded-full flex items-center justify-center shadow-md click-effect">
+            <button onclick="sendChatMessage()" class="w-12 h-12 bg-[var(--maroon)] text-[var(--gold)] rounded-full flex items-center justify-center shadow-md click-effect">
                 <i class="fa-solid fa-paper-plane text-lg"></i>
             </button>
         </div>
-    </div>
-
-    <!-- نافذة خيارات الرسالة -->
-    <div id="msgActionMenu">
-        <button onclick="replyToMessage()"><i class="fa-solid fa-reply text-blue-500"></i> رد</button>
-        <button onclick="reactToMessage('❤️')"><i class="fa-solid fa-heart text-red-500"></i> إعجاب</button>
-        <button onclick="reactToMessage('😂')"><i class="fa-regular fa-face-laugh-squint text-yellow-500"></i> ضحك</button>
-        <button onclick="deleteMessage()" class="text-red-600"><i class="fa-solid fa-trash"></i> حذف</button>
-    </div>
-
-    <!-- القائمة الجانبية (الإعدادات) -->
-    <div id="settingsOverlay" class="fixed inset-0 bg-black/60 z-[9998] hidden" onclick="toggleSettings()"></div>
-    <div id="settingsSidebar" class="fixed top-0 right-0 w-64 h-full bg-white z-[9999] shadow-2xl p-5 flex flex-col" style="transition: transform 0.3s; transform: translateX(100%);" dir="rtl">
-        <div class="flex justify-between items-center mb-8 border-b pb-4">
-            <h2 class="text-xl font-bold text-[var(--maroon)]">الإعدادات</h2>
-            <button onclick="toggleSettings()" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
-        </div>
-        <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
-            <img id="settingsAvatar" src="" class="w-12 h-12 rounded-full border-2 border-[var(--maroon)]">
-            <div>
-                <h3 id="settingsName" class="font-bold text-gray-800 text-sm">مستخدم</h3>
-            </div>
-        </div>
-        <ul class="space-y-2 flex-1">
-            <li onclick="logoutUser()" class="p-3 bg-red-50 text-red-600 rounded-lg cursor-pointer font-bold flex items-center gap-3"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</li>
-        </ul>
     </div>
 
     <!-- نافذة تفاصيل الموكب -->
@@ -468,28 +372,21 @@
             <img id="detailsImg" src="" class="w-full h-48 object-cover rounded-xl mb-4 border-2 border-[var(--maroon)]">
             <h2 id="detailsName" class="text-2xl font-black text-[var(--maroon)] mb-2">اسم الموكب</h2>
             <p id="detailsAddress" class="text-gray-500 text-sm mb-4"><i class="fa-solid fa-location-dot text-green-600 ml-1"></i> العنوان</p>
-            
             <h3 class="font-bold text-gray-800 mb-2">الخدمات المتوفرة:</h3>
             <div id="detailsServices" class="flex flex-wrap gap-2 mb-6"></div>
-
-            <button id="detailsDirectionsBtn" class="w-full bg-[var(--maroon)] text-[var(--gold)] border border-[var(--gold)] font-bold py-3.5 rounded-xl shadow-md click-effect mb-3"><i class="fa-solid fa-diamond-turn-right ml-2"></i> الاتجاهات إلى الموكب</button>
+            <button id="detailsDirectionsBtn" class="w-full bg-[var(--maroon)] text-white font-bold py-3.5 rounded-xl shadow-md click-effect mb-3">الاتجاهات إلى الموكب</button>
             <button onclick="closeMawkibDetails()" class="w-full bg-gray-100 text-gray-700 font-bold py-3 rounded-xl click-effect">إغلاق</button>
         </div>
     </div>
 
-    <!-- نافذة الاتصال -->
-    <div id="callModal" class="fixed inset-0 z-[10005] hidden flex-col items-center justify-center text-white" style="backdrop-filter: blur(15px); background: rgba(0,0,0,0.85);">
-        <img id="callAvatar" src="" class="w-32 h-32 rounded-full object-cover border-4 border-[var(--gold)] mb-4 shadow-2xl">
-        <h2 id="callName" class="text-2xl font-bold mb-2 text-[var(--gold)]">اسم الموكب</h2>
-        <p class="text-gray-300 mb-10">جاري الاتصال...</p>
-        <div class="flex gap-6">
-            <button onclick="endCall()" class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg click-effect"><i class="fa-solid fa-phone-slash"></i></button>
-        </div>
+    <div id="toast" class="fixed top-[-50px] left-1/2 transform -translate-x-1/2 bg-gray-900 text-white p-3 rounded-xl shadow-2xl flex items-center gap-3 z-[100000] transition-all duration-300 w-[90%] max-w-[400px]">
+        <i class="fa-solid fa-bell text-[var(--gold)]"></i>
+        <span id="toastText" class="text-sm">إشعار جديد</span>
     </div>
 
     <script>
         // ==========================================
-        // 1. أدوات مساعدة وأمان
+        // 1. أدوات مساعدة (الأمان والتخزين)
         // ==========================================
         function escapeHTML(str) {
             if (!str) return '';
@@ -507,92 +404,112 @@
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     const MAX_SIZE = 600; 
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > height) {
-                        if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
-                    } else {
-                        if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    canvas.width = width; canvas.height = height;
                     canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                     callback(canvas.toDataURL('image/jpeg', 0.6));
                 };
             };
         }
 
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').innerText = msg;
+            toast.style.top = '20px';
+            setTimeout(() => toast.style.top = '-50px', 3000);
+        }
+
+        // التحقق من عمل التخزين
+        function checkStorage() {
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                return true;
+            } catch (e) {
+                document.getElementById('storageWarning').style.display = 'block';
+                return false;
+            }
+        }
+        const storageWorks = checkStorage();
+
+        // دالة آمنة لقراءة JSON
+        function safeParse(json, fallback) {
+            try {
+                if (!json) return fallback;
+                const parsed = JSON.parse(json);
+                return parsed !== null && parsed !== undefined ? parsed : fallback;
+            } catch (e) { return fallback; }
+        }
+
         // ==========================================
-        // 2. البيانات والتخزين
+        // 2. قاعدة البيانات المحلية
         // ==========================================
-        const dummyMawkibs = [
+        const defaultMawkibs = [
             { id: 1, name: "موكب العباس (ع)", lat: 32.6160, lng: 44.0249, services: "طعام, ماء, مبيت", address: "شارع العباس", img: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" },
-            { id: 2, name: "موكب شباب الحسين", lat: 32.6180, lng: 44.0280, services: "ماء, شحن", address: "حي الحسين", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=400" },
-            { id: 3, name: "موكب قمر بني هاشم", lat: 32.6130, lng: 44.0220, services: "إسعاف, مياه, طعام", address: "باب القبلة", img: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400" }
+            { id: 2, name: "موكب شباب الحسين", lat: 32.6180, lng: 44.0280, services: "ماء, شحن", address: "حي الحسين", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&w=400" }
         ];
 
         const defaultChats = [
             { 
-                id: 1, 
-                name: "موكب العباس", 
-                avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100", 
-                status: "متصل الآن",
-                messages: [
-                    { id: 1, text: "أهلاً بك في موكب العباس. كيف يمكننا خدمتك؟", sender: 'them', time: "10:00", status: 'read', replyTo: null, reaction: null }
-                ] 
-            },
-            { 
-                id: 2, 
-                name: "خدام الزائرين", 
-                avatar: "https://images.unsplash.com/photo-1590075865416-4c5c5e4f8e7d?q=80&w=100", 
-                status: "آخر ظهور قبل ساعة",
-                messages: [
-                    { id: 1, text: "تم توزيع الوجبات في باب القبلة", sender: 'them', time: "أمس", status: 'read', replyTo: null, reaction: null }
-                ] 
+                id: 1, name: "موكب العباس", avatar: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=100", status: "متصل الآن",
+                messages: [{ id: 1, text: "أهلاً بك في موكب العباس. كيف يمكننا خدمتك؟", sender: 'them', time: "10:00", status: 'read' }] 
             }
         ];
 
-        const db = {
-            users: JSON.parse(localStorage.getItem('karbalaUsers')) || [],
-            currentUser: JSON.parse(localStorage.getItem('karbalaCurrentUser')) || null,
-            mawkibs: JSON.parse(localStorage.getItem('karbalaMawkibs')) || [...dummyMawkibs],
-            chats: JSON.parse(localStorage.getItem('karbalaChats')) || [...defaultChats],
-            notifications: JSON.parse(localStorage.getItem('karbalaNotifs')) || [
-                { id: 1, title: "أهلاً بك", text: "مرحباً بك في دليل مواكب كربلاء. يمكنك تصفح المواكب وإضافة موكبك الخاص.", time: "الآن" }
-            ]
+        let db = {
+            users: safeParse(localStorage.getItem('karbalaUsers'), []),
+            currentUser: safeParse(localStorage.getItem('karbalaCurrentUser'), null),
+            mawkibs: safeParse(localStorage.getItem('karbalaMawkibs'), [...defaultMawkibs]),
+            chats: safeParse(localStorage.getItem('karbalaChats'), [...defaultChats])
         };
+
+        // التأكد من أن المصفوفات سليمة (لمنع انهيار التطبيق)
+        if (!Array.isArray(db.users)) db.users = [];
+        if (!Array.isArray(db.mawkibs)) db.mawkibs = [...defaultMawkibs];
+        if (!Array.isArray(db.chats)) db.chats = [...defaultChats];
 
         let profile = { name: "", img: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200" };
         let isSignupMode = false;
         let activeChatId = null;
-        
-        let replyingToMessage = null;
-        let selectedMessageId = null;
 
+        // الحفظ مع الحماية من الامتلاء
         function saveData() {
+            if (!storageWorks) return;
             try {
+                // تقليم الدردشات لمنع امتلاء الذاكرة (حفظ آخر 30 رسالة فقط)
+                db.chats.forEach(c => {
+                    if (c.messages.length > 30) c.messages = c.messages.slice(c.messages.length - 30);
+                });
+
                 localStorage.setItem('karbalaUsers', JSON.stringify(db.users));
                 localStorage.setItem('karbalaCurrentUser', JSON.stringify(db.currentUser));
                 localStorage.setItem('karbalaMawkibs', JSON.stringify(db.mawkibs));
                 localStorage.setItem('karbalaChats', JSON.stringify(db.chats));
-                localStorage.setItem('karbalaNotifs', JSON.stringify(db.notifications));
             } catch (e) {
-                console.error(e);
-                alert("مساحة التخزين ممتلئة، سيتم حذف أقدم الرسائل للحفاظ على مساحة.");
-                db.chats.forEach(c => { if(c.messages.length > 50) c.messages = c.messages.slice(c.messages.length - 50); });
-                try { localStorage.setItem('karbalaChats', JSON.stringify(db.chats)); } catch(err) {}
+                console.error("Storage Error", e);
+                // محاولة حفظ الحساب فقط إذا كانت الصور هي المشكلة
+                try {
+                    localStorage.setItem('karbalaUsers', JSON.stringify(db.users));
+                    localStorage.setItem('karbalaCurrentUser', JSON.stringify(db.currentUser));
+                } catch (err) {
+                    alert("مساحة التخزين ممتلئة جداً! يرجى مسح بيانات التطبيق من إعدادات المتصفح.");
+                }
             }
         }
 
         // ==========================================
-        // 3. نظام الحسابات
+        // 3. نظام الحسابات (تم إصلاحه)
         // ==========================================
         function checkAuth() {
-            if (db.currentUser) {
+            if (db.currentUser && db.users.find(u => u.phone === db.currentUser.phone)) {
                 profile.name = db.currentUser.name;
                 profile.img = db.currentUser.img || profile.img;
+                document.getElementById('homeUserName').innerText = profile.name;
                 showApp();
             } else {
+                db.currentUser = null; // تصفير إذا كان الحساب غير موجود
                 document.getElementById('authScreen').style.display = 'flex';
                 document.getElementById('app').style.display = 'none';
                 document.getElementById('splash').style.display = 'none';
@@ -618,14 +535,14 @@
             const nameField = document.getElementById('nameField');
             if (isSignupMode) {
                 nameField.classList.remove('hidden');
-                document.getElementById('authSubtitle').innerText = "أنشئ حسابك للانضمام إلينا";
+                document.getElementById('authSubtitle').innerText = "أنشئ حسابك";
                 document.getElementById('authBtn').innerText = "إنشاء الحساب";
-                document.getElementById('toggleAuthBtn').innerText = "لديك حساب بالفعل؟ تسجيل الدخول";
+                document.getElementById('toggleAuthBtn').innerText = "لديك حساب؟ تسجيل الدخول";
             } else {
                 nameField.classList.add('hidden');
                 document.getElementById('authSubtitle').innerText = "مرحباً بك، يرجى تسجيل الدخول";
                 document.getElementById('authBtn').innerText = "دخول";
-                document.getElementById('toggleAuthBtn').innerText = "ليس لديك حساب؟ إنشاء حساب جديد";
+                document.getElementById('toggleAuthBtn').innerText = "ليس لديك حساب؟ إنشاء حساب";
             }
         }
 
@@ -634,36 +551,54 @@
             const phone = document.getElementById('authPhone').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
 
-            if (!phone || !pass) { alert('يرجى إدخال رقم الهاتف وكلمة المرور'); return; }
+            if (!phone || !pass) { showToast('أدخل الهاتف وكلمة المرور'); return; }
 
             if (isSignupMode) {
-                if (!name) { alert('يرجى إدخال الاسم'); return; }
-                if (db.users.find(u => u.phone === phone)) { alert('رقم الهاتف مسجل مسبقاً!'); return; }
+                if (!name) { showToast('أدخل الاسم'); return; }
+                
+                // التحقق من وجود الحساب مسبقاً
+                if (db.users.find(u => u.phone === phone)) { 
+                    if(confirm('هذا الرقم مسجل مسبقاً! هل تريد تسجيل الدخول بدلاً من ذلك؟')) {
+                        toggleAuthMode();
+                        document.getElementById('authName').value = "";
+                    }
+                    return; 
+                }
                 
                 const newUser = { id: Date.now(), name, phone, pass, img: "" };
                 db.users.push(newUser);
                 db.currentUser = newUser;
                 saveData();
-                alert('تم إنشاء الحساب بنجاح!');
+                showToast('تم إنشاء الحساب بنجاح!');
                 checkAuth(); 
             } else {
                 const user = db.users.find(u => u.phone === phone && u.pass === pass);
                 if (user) {
                     db.currentUser = user;
                     saveData();
-                    alert('تم تسجيل الدخول بنجاح');
+                    showToast('تم تسجيل الدخول بنجاح');
                     checkAuth(); 
                 } else {
-                    alert('رقم الهاتف أو كلمة المرور غير صحيحة');
+                    showToast('البيانات غير صحيحة، تأكد من الرقم وكلمة المرور');
                 }
             }
         }
 
-        function logoutUser() {
-            if(confirm('هل تريد تسجيل الخروج؟')) {
-                db.currentUser = null;
-                saveData();
-                window.location.reload(); 
+        function forgotPassword() {
+            const phone = prompt("أدخل رقم الهاتف لاستعادة كلمة المرور:");
+            if (!phone) return;
+            const user = db.users.find(u => u.phone === phone.trim());
+            if (user) {
+                alert(`كلمة المرور الخاصة بك هي: ${user.pass}`);
+            } else {
+                alert("رقم الهاتف غير مسجل.");
+            }
+        }
+
+        function clearAppData() {
+            if (confirm('هل أنت متأكد من مسح جميع البيانات (الحسابات، المواكب) للبدء من جديد؟')) {
+                localStorage.clear();
+                window.location.reload();
             }
         }
 
@@ -675,32 +610,26 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             
             document.getElementById(`page-${pageId}`).classList.add('active');
-            const navBtn = document.getElementById(`nav-${pageId}`);
-            if (navBtn) navBtn.classList.add('active');
+            document.getElementById(`nav-${pageId}`).classList.add('active');
 
-            if (pageId === 'map' && mainMap) setTimeout(() => mainMap.invalidateSize(), 200);
+            if (pageId === 'home' && homeMap) setTimeout(() => homeMap.invalidateSize(), 200);
             if (pageId === 'add' && pickMap) setTimeout(() => pickMap.invalidateSize(), 200);
-            if (pageId === 'home' && previewMap) setTimeout(() => previewMap.invalidateSize(), 200);
         }
 
         // ==========================================
-        // 5. المواكب
+        // 5. الخرائط
         // ==========================================
-        let mainMap, pickMap, previewMap;
+        let homeMap, pickMap, markerGroup;
         let pickMarker = null;
         let pickedLat = 32.6160, pickedLng = 44.0249;
         let pickedImageBase64 = null;
-        let markerGroup = null;
 
         function initMaps() {
             const osmTile = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
             
-            previewMap = L.map('previewMap', { zoomControl: false, dragging: false, scrollWheelZoom: false }).setView([32.6160, 44.0249], 14);
-            L.tileLayer(osmTile, { maxZoom: 19 }).addTo(previewMap);
-
-            mainMap = L.map('mainMap').setView([32.6160, 44.0249], 14);
-            L.tileLayer(osmTile, { maxZoom: 19 }).addTo(mainMap);
-            markerGroup = L.layerGroup().addTo(mainMap);
+            homeMap = L.map('homeMap', { zoomControl: false }).setView([32.6160, 44.0249], 14);
+            L.tileLayer(osmTile, { maxZoom: 19 }).addTo(homeMap);
+            markerGroup = L.layerGroup().addTo(homeMap);
 
             pickMap = L.map('pickMap').setView([pickedLat, pickedLng], 14);
             L.tileLayer(osmTile, { maxZoom: 19 }).addTo(pickMap);
@@ -708,64 +637,17 @@
             pickMap.on('click', function(e) { pickedLat = e.latlng.lat; pickedLng = e.latlng.lng; pickMarker.setLatLng([pickedLat, pickedLng]); });
             pickMarker.on('dragend', function(e) { let pos = pickMarker.getLatLng(); pickedLat = pos.lat; pickedLng = pos.lng; });
 
-            renderMapMarkers();
-            updateServiceCounts();
+            renderMarkers();
         }
 
-        function renderMapMarkers() {
-            if (!mainMap) return;
-            markerGroup.clearLayers(); // مسح العلامات القديمة بسرعة
-            
-            previewMap.eachLayer(layer => { if (layer instanceof L.Marker) previewMap.removeLayer(layer); });
-
-            const goldMosqueIcon = L.divIcon({ className: 'custom-icon', html: '<div style="color: #D4AF37; font-size: 35px; text-align: center; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"><i class="fa-solid fa-mosque"></i></div>', iconSize: [35, 35], iconAnchor: [17, 35] });
-
+        function renderMarkers() {
+            if (!homeMap) return;
+            markerGroup.clearLayers();
+            const icon = L.divIcon({ className: 'custom-icon', html: '<div style="color: #8B1A1A; font-size: 35px; text-align: center; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"><i class="fa-solid fa-location-dot"></i></div>', iconSize: [35, 35], iconAnchor: [17, 35] });
             db.mawkibs.forEach(m => {
-                const marker = L.marker([m.lat, m.lng], {icon: goldMosqueIcon});
+                const marker = L.marker([m.lat, m.lng], {icon: icon});
                 marker.on('click', () => openMawkibDetails(m.id));
-                markerGroup.addLayer(marker); // إضافة للمجموعة الرئيسية
-                L.marker([m.lat, m.lng], {icon: goldMosqueIcon}).addTo(previewMap);
-            });
-        }
-
-        function updateServiceCounts() {
-            const counts = { food: 0, water: 0, bed: 0, charge: 0, wc: 0, med: 0 };
-            db.mawkibs.forEach(m => {
-                const s = m.services || '';
-                if (s.includes('طعام')) counts.food++;
-                if (s.includes('ماء')) counts.water++;
-                if (s.includes('مبيت')) counts.bed++;
-                if (s.includes('شحن')) counts.charge++;
-                if (s.includes('مياه')) counts.wc++;
-                if (s.includes('إسعاف')) counts.med++;
-            });
-            document.getElementById('count-food').textContent = counts.food + ' موكب';
-            document.getElementById('count-water').textContent = counts.water + ' موكب';
-            document.getElementById('count-bed').textContent = counts.bed + ' موكب';
-            document.getElementById('count-charge').textContent = counts.charge + ' موكب';
-            document.getElementById('count-wc').textContent = counts.wc + ' موكب';
-            document.getElementById('count-med').textContent = counts.med + ' موكب';
-        }
-
-        function filterByService(service) {
-            const resultsDiv = document.getElementById('searchResultsList');
-            resultsDiv.innerHTML = '';
-            switchTab('search');
-            const filtered = db.mawkibs.filter(m => m.services.includes(service));
-            if (filtered.length === 0) {
-                resultsDiv.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد مواكب تقدم هذه الخدمة</div>';
-                return;
-            }
-            filtered.forEach(m => {
-                resultsDiv.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center cursor-pointer click-effect" onclick="openMawkibDetails(${m.id})">
-                        <img src="${m.img}" class="w-16 h-16 rounded-lg object-cover ml-3 border border-gray-100">
-                        <div class="flex-1">
-                            <h3 class="font-bold text-sm text-[var(--maroon)]">${escapeHTML(m.name)}</h3>
-                            <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-location-dot ml-1 text-green-600"></i>${escapeHTML(m.address)}</p>
-                        </div>
-                    </div>
-                `;
+                markerGroup.addLayer(marker);
             });
         }
 
@@ -785,18 +667,15 @@
             const name = document.getElementById('mawkibName').value.trim();
             const address = document.getElementById('mawkibAddress').value.trim();
             const services = Array.from(document.querySelectorAll('input[name="service"]:checked')).map(cb => cb.value).join(', ');
-            
-            if (!services) { alert('يرجى اختيار خدمة واحدة على الأقل'); return; }
+            if (!services) { showToast('اختر خدمة واحدة على الأقل'); return; }
 
             db.mawkibs.push({ id: Date.now(), name, address, services, lat: pickedLat, lng: pickedLng, img: pickedImageBase64 || "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" });
-            alert('تم حفظ الموكب بنجاح!');
-            
             saveData();
-            renderMapMarkers();
-            updateServiceCounts();
+            renderMarkers();
             document.getElementById('addForm').reset();
             document.getElementById('imagePreview').classList.add('hidden');
             pickedImageBase64 = null;
+            showToast('تم تسجيل الموكب بنجاح!');
             switchTab('home');
         }
 
@@ -806,16 +685,10 @@
             document.getElementById('detailsImg').src = m.img;
             document.getElementById('detailsName').innerText = m.name;
             document.getElementById('detailsAddress').innerHTML = `<i class="fa-solid fa-location-dot text-green-600 ml-1"></i> ${escapeHTML(m.address)}`;
-            
-            const servicesDiv = document.getElementById('detailsServices');
-            servicesDiv.innerHTML = '';
-            m.services.split(',').forEach(s => {
-                servicesDiv.innerHTML += `<span class="bg-[var(--maroon)] text-[var(--gold)] px-3 py-1 rounded-full text-xs font-bold border border-[var(--gold)]">${escapeHTML(s.trim())}</span>`;
-            });
-
-            document.getElementById('detailsDirectionsBtn').onclick = () => {
-                window.open(`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}`, '_blank');
-            };
+            const sDiv = document.getElementById('detailsServices');
+            sDiv.innerHTML = '';
+            m.services.split(',').forEach(s => { sDiv.innerHTML += `<span class="bg-[var(--maroon)] text-white px-3 py-1 rounded-full text-xs font-bold">${escapeHTML(s.trim())}</span>`; });
+            document.getElementById('detailsDirectionsBtn').onclick = () => { window.open(`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}`, '_blank'); };
             document.getElementById('mawkibDetailsModal').classList.remove('hidden');
         }
 
@@ -823,72 +696,43 @@
             if(!e || e.target.id === 'mawkibDetailsModal') document.getElementById('mawkibDetailsModal').classList.add('hidden');
         }
 
-        function searchMawkibs() {
-            const q = document.getElementById('searchHome').value.toLowerCase().trim();
-            const resultsDiv = document.getElementById('searchResultsList');
-            resultsDiv.innerHTML = '';
-            if(q === '') { switchTab('home'); return; }
-            switchTab('search');
-            const filtered = db.mawkibs.filter(m => m.name.toLowerCase().includes(q) || m.address.toLowerCase().includes(q) || m.services.toLowerCase().includes(q));
-            if (filtered.length === 0) { resultsDiv.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد نتائج مطابقة</div>'; return; }
-            filtered.forEach(m => {
-                resultsDiv.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center cursor-pointer click-effect" onclick="openMawkibDetails(${m.id})">
-                        <img src="${m.img}" class="w-16 h-16 rounded-lg object-cover ml-3 border border-gray-100">
-                        <div class="flex-1">
-                            <h3 class="font-bold text-sm text-[var(--maroon)]">${escapeHTML(m.name)}</h3>
-                            <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-location-dot ml-1 text-green-600"></i>${escapeHTML(m.address)}</p>
-                        </div>
-                    </div>
-                `;
-            });
+        function locateUser() {
+            if (!navigator.geolocation) { showToast('المتصفح لا يدعم الموقع'); return; }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    homeMap.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                    L.circleMarker([pos.coords.latitude, pos.coords.longitude], { color: '#2196F3', fillColor: '#2196F3', radius: 8 }).addTo(homeMap).bindPopup("أنت هنا").openPopup();
+                },
+                () => showToast('يرجى السماح بالوصول للموقع.')
+            );
         }
 
         function findClosestMawkib() {
-            if (!navigator.geolocation) { alert('متصفحك لا يدعم تحديد الموقع'); return; }
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    if(db.mawkibs.length === 0) { alert('لا توجد مواكب مسجلة حالياً.'); return; }
-                    const sorted = db.mawkibs.map(m => { return { ...m, dist: L.latLng(userLat, userLng).distanceTo(L.latLng(m.lat, m.lng)) }; }).sort((a, b) => a.dist - b.dist);
-                    const closest = sorted[0];
-                    alert(`أقرب موكب إليك هو: ${closest.name} (يبعد عنك ${(closest.dist / 1000).toFixed(1)} كم)`);
-                    openMawkibDetails(closest.id);
-                },
-                () => alert('يرجى السماح للمتصفح بالوصول إلى موقعك.')
-            );
-        }
-
-        function locateUser() {
-            if (!navigator.geolocation) { alert('متصفحك لا يدعم تحديد الموقع'); return; }
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    mainMap.setView([pos.coords.latitude, pos.coords.longitude], 16);
-                    L.circleMarker([pos.coords.latitude, pos.coords.longitude], { color: '#2196F3', fillColor: '#2196F3', radius: 8 }).addTo(mainMap).bindPopup("أنت هنا").openPopup();
-                },
-                () => alert('يرجى السماح بالوصول إلى الموقع.')
-            );
+            if (!navigator.geolocation) { showToast('لا يدعم الموقع'); return; }
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const sorted = db.mawkibs.map(m => { return { ...m, dist: L.latLng(pos.coords.latitude, pos.coords.longitude).distanceTo(L.latLng(m.lat, m.lng)) }; }).sort((a, b) => a.dist - b.dist);
+                if(sorted.length > 0) { showToast(`أقرب موكب: ${sorted[0].name}`); openMawkibDetails(sorted[0].id); }
+            });
         }
 
         // ==========================================
-        // 6. الدردشة المتطورة
+        // 6. الدردشة (تصميم جديد ومستقر)
         // ==========================================
         function renderChats() {
             const list = document.getElementById('chatsList');
             list.innerHTML = '';
             db.chats.forEach(c => {
                 const lastMsg = c.messages.length > 0 ? c.messages[c.messages.length - 1] : { text: "لا توجد رسائل", time: "" };
-                const displayMsg = lastMsg.img ? "📷 صورة" : (lastMsg.voice ? "🎤 رسالة صوتية" : escapeHTML(lastMsg.text));
+                const displayMsg = lastMsg.img ? "📷 صورة" : escapeHTML(lastMsg.text);
                 list.innerHTML += `
-                    <div class="flex items-center p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer click-effect" onclick="openChatRoom(${c.id})">
-                        <img src="${c.avatar}" class="w-12 h-12 rounded-full object-cover ml-3 border border-gray-200">
+                    <div class="flex items-center p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer" onclick="openChatRoom(${c.id})">
+                        <img src="${c.avatar}" class="w-14 h-14 rounded-full object-cover ml-3 border border-gray-200 shadow-sm">
                         <div class="flex-1">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-sm text-[var(--maroon)]">${escapeHTML(c.name)}</span>
-                                <span class="text-[10px] text-gray-400">${lastMsg.time || ""}</span>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-[15px] text-gray-800">${escapeHTML(c.name)}</span>
+                                <span class="text-[11px] text-gray-400">${lastMsg.time || ""}</span>
                             </div>
-                            <span class="text-xs text-gray-500 block mt-1 truncate max-w-[200px]">${displayMsg}</span>
+                            <span class="text-xs text-gray-500 block truncate max-w-[200px]">${displayMsg}</span>
                         </div>
                     </div>
                 `;
@@ -901,65 +745,46 @@
             if(!chat) return;
             document.getElementById('chatHeaderName').innerText = chat.name;
             document.getElementById('chatHeaderAvatar').src = chat.avatar;
-            document.getElementById('chatStatusText').innerText = chat.status || "متصل الآن";
             renderChatMessages(chat);
             document.getElementById('chatRoomModal').classList.add('show');
-            cancelReply();
         }
 
         function closeChatRoom() {
             document.getElementById('chatRoomModal').classList.remove('show');
             activeChatId = null;
-            document.getElementById('typingIndicator').style.display = 'none'; // إخفاء مؤشر الكتابة
+            const typing = document.getElementById('typingIndicator');
+            if(typing) typing.style.display = 'none';
         }
 
         function renderChatMessages(chat) {
             const container = document.getElementById('chatMessages');
-            container.innerHTML = '';
+            container.innerHTML = '<div id="typingIndicator" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
             
             chat.messages.forEach(m => {
                 let isMe = m.sender === 'me';
                 let msgClass = isMe ? 'msg-sent' : 'msg-received';
                 
-                let replyHtml = '';
-                if(m.replyTo) {
-                    replyHtml = `
-                        <div class="reply-bubble">
-                            <span class="font-bold text-[10px] text-[var(--maroon)]">${m.replyTo.sender === 'me' ? 'أنت' : escapeHTML(chat.name)}</span>
-                            <p class="truncate">${escapeHTML(m.replyTo.text || 'صورة/صوت')}</p>
-                        </div>
-                    `;
-                }
-
                 let contentHtml = '';
                 if(m.text) contentHtml += `<span>${escapeHTML(m.text)}</span>`;
                 if(m.img) contentHtml += `<img src="${m.img}" class="w-full max-h-48 object-cover rounded-lg mt-1 mb-1">`;
                 
                 let statusIcon = '';
                 if(isMe) {
-                    if(m.status === 'sent') statusIcon = '<i class="fa-solid fa-check text-gray-400"></i>';
-                    else if(m.status === 'delivered') statusIcon = '<i class="fa-solid fa-check-double text-gray-400"></i>';
-                    else if(m.status === 'read') statusIcon = '<i class="fa-solid fa-check-double text-blue-500"></i>';
+                    if(m.status === 'sent') statusIcon = '<i class="fa-solid fa-check text-gray-400 text-[10px]"></i>';
+                    else if(m.status === 'read') statusIcon = '<i class="fa-solid fa-check-double text-blue-500 text-[10px]"></i>';
                 }
 
-                let reactionHtml = m.reaction ? `<div class="reaction-badge">${m.reaction}</div>` : '';
-
                 container.innerHTML += `
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} relative group">
-                        <div class="msg-bubble ${msgClass} relative" 
-                             oncontextmenu="showMsgOptions(event, ${m.id})" 
-                             ontouchstart="startPressTimer(event, ${m.id})" 
-                             ontouchend="cancelPressTimer()"
-                             ontouchmove="cancelPressTimer()">
-                            
-                            ${replyHtml}
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full">
+                        <div class="msg-bubble ${msgClass}">
                             ${contentHtml}
-                            <div class="msg-time flex items-center gap-1">${m.time} ${statusIcon}</div>
-                            ${reactionHtml}
+                            <div class="msg-time">${m.time} ${statusIcon}</div>
                         </div>
                     </div>
                 `;
             });
+            
+            container.innerHTML += '<div id="typingIndicator" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
             
             chat.messages.forEach(m => { if(m.sender === 'them') m.status = 'read'; });
             saveData();
@@ -973,211 +798,59 @@
             
             const chat = db.chats.find(c => c.id === activeChatId);
             const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-            const msgId = Date.now();
             
-            const newMsg = { 
-                id: msgId, text: text, sender: 'me', time: timeStr, status: 'sent',
-                replyTo: replyingToMessage ? { id: replyingToMessage.id, text: replyingToMessage.text || 'مرفق', sender: replyingToMessage.sender } : null,
-                reaction: null
-            };
-            
-            chat.messages.push(newMsg);
+            chat.messages.push({ id: Date.now(), text: text, sender: 'me', time: timeStr, status: 'sent' });
             input.value = '';
-            cancelReply();
             saveData();
             renderChatMessages(chat);
             
             setTimeout(() => {
-                newMsg.status = 'delivered';
-                if(activeChatId === chat.id) renderChatMessages(chat);
+                if(activeChatId !== chat.id) return;
+                const typing = document.getElementById('typingIndicator');
+                if(typing) typing.style.display = 'flex';
+                
                 setTimeout(() => {
-                    newMsg.status = 'read';
-                    if(activeChatId === chat.id) renderChatMessages(chat);
-                    simulateReply(chat);
-                }, 1500);
+                    if(activeChatId !== chat.id) return;
+                    const timeStr2 = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                    const replies = ["أهلاً وسهلاً بك، كيف يمكننا خدمتك؟", "نحن في الخدمة دائماً.", "الموكب مفتوح الآن، تفضل بزيارتنا."];
+                    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                    
+                    chat.messages.push({ id: Date.now(), text: randomReply, sender: 'them', time: timeStr2, status: 'read' });
+                    saveData();
+                    renderChatMessages(chat);
+                    renderChats();
+                }, 2000);
             }, 1000);
         }
 
         function sendChatMedia(event) {
             const file = event.target.files[0];
             if(!file || !activeChatId) return;
-            
             compressImage(file, function(base64) {
                 const chat = db.chats.find(c => c.id === activeChatId);
                 const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-                const msgId = Date.now();
-                
-                const newMsg = { 
-                    id: msgId, text: "", img: base64, sender: 'me', time: timeStr, status: 'sent',
-                    replyTo: replyingToMessage ? { id: replyingToMessage.id, text: 'مرفق', sender: replyingToMessage.sender } : null,
-                    reaction: null
-                };
-                
-                chat.messages.push(newMsg);
-                cancelReply();
+                chat.messages.push({ id: Date.now(), img: base64, sender: 'me', time: timeStr, status: 'sent' });
                 saveData();
                 renderChatMessages(chat);
-                setTimeout(() => { 
-                    newMsg.status = 'read'; 
-                    if(activeChatId === chat.id) renderChatMessages(chat); 
-                    simulateReply(chat); 
-                }, 1500);
             });
         }
 
-        function simulateReply(chat) {
-            if(activeChatId !== chat.id) return; // لا تكمل إذا كان المستخدم قد خرج من المحادثة
-            const typing = document.getElementById('typingIndicator');
-            typing.style.display = 'block';
-            
-            setTimeout(() => {
-                if(activeChatId !== chat.id) return;
-                typing.style.display = 'none';
-                const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-                const replies = ["أهلاً وسهلاً بك، كيف يمكننا خدمتك؟", "نحن في الخدمة دائماً.", "الموكب مفتوح الآن، تفضل بزيارتنا.", "تم استلام رسالتك، سنرد قريباً."];
-                const randomReply = replies[Math.floor(Math.random() * replies.length)];
-                
-                chat.messages.push({ id: Date.now(), text: randomReply, sender: 'them', time: timeStr, status: 'read', replyTo: null, reaction: null });
-                saveData();
-                if(activeChatId === chat.id) renderChatMessages(chat);
-                renderChats(); // تحديث القائمة الرئيسية
-            }, 3000);
-        }
-
         // ==========================================
-        // 7. ميزات الدردشة الإضافية
-        // ==========================================
-        let pressTimer;
-        let pressTargetId = null;
-
-        function startPressTimer(e, msgId) {
-            pressTargetId = msgId;
-            pressTimer = setTimeout(() => { showMsgOptions(e, msgId); }, 600);
-        }
-
-        function cancelPressTimer() {
-            clearTimeout(pressTimer);
-        }
-
-        function showMsgOptions(e, msgId) {
-            selectedMessageId = msgId;
-            const menu = document.getElementById('msgActionMenu');
-            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
-            if(clientX > window.innerWidth - 160) clientX = window.innerWidth - 160;
-            if(clientY > window.innerHeight - 200) clientY = window.innerHeight - 200;
-
-            menu.style.left = clientX + 'px';
-            menu.style.top = clientY + 'px';
-            menu.style.display = 'flex';
-            document.addEventListener('click', hideMsgOptions);
-        }
-
-        function hideMsgOptions() {
-            document.getElementById('msgActionMenu').style.display = 'none';
-            document.removeEventListener('click', hideMsgOptions);
-        }
-
-        function replyToMessage() {
-            hideMsgOptions();
-            const chat = db.chats.find(c => c.id === activeChatId);
-            const msg = chat.messages.find(m => m.id === selectedMessageId);
-            if(!msg) return;
-            
-            replyingToMessage = msg;
-            document.getElementById('replyAuthor').innerText = msg.sender === 'me' ? 'أنت' : chat.name;
-            document.getElementById('replyText').innerText = msg.text || 'مرفق';
-            document.getElementById('replyPreviewContainer').classList.remove('hidden');
-            document.getElementById('chatInput').focus();
-        }
-
-        function cancelReply() {
-            replyingToMessage = null;
-            document.getElementById('replyPreviewContainer').classList.add('hidden');
-        }
-
-        function reactToMessage(emoji) {
-            hideMsgOptions();
-            const chat = db.chats.find(c => c.id === activeChatId);
-            const msg = chat.messages.find(m => m.id === selectedMessageId);
-            if(!msg) return;
-            
-            if(msg.reaction === emoji) msg.reaction = null;
-            else msg.reaction = emoji;
-            
-            saveData();
-            renderChatMessages(chat);
-        }
-
-        function deleteMessage() {
-            hideMsgOptions();
-            if(confirm('حذف هذه الرسالة؟')) {
-                const chat = db.chats.find(c => c.id === activeChatId);
-                chat.messages = chat.messages.filter(m => m.id !== selectedMessageId);
-                saveData();
-                renderChatMessages(chat);
-            }
-        }
-
-        function toggleEmojiPicker() {
-            const input = document.getElementById('chatInput');
-            input.value += "😊";
-            input.focus();
-        }
-
-        function simulateCall(type) {
-            const chat = db.chats.find(c => c.id === activeChatId);
-            if(!chat) return;
-            document.getElementById('callName').innerText = chat.name;
-            document.getElementById('callAvatar').src = chat.avatar;
-            document.getElementById('callModal').classList.remove('hidden');
-            document.getElementById('callModal').classList.add('flex');
-        }
-
-        function endCall() {
-            document.getElementById('callModal').classList.add('hidden');
-            document.getElementById('callModal').classList.remove('flex');
-        }
-
-        // ==========================================
-        // 8. الإشعارات والتشغيل
+        // 7. الإشعارات والتشغيل
         // ==========================================
         function renderNotifications() {
             const list = document.getElementById('notificationsList');
-            list.innerHTML = '';
-            if(db.notifications.length === 0) {
-                list.innerHTML = '<div class="text-center text-gray-500 mt-10 font-bold">لا توجد إشعارات حالياً</div>';
-                return;
-            }
-            db.notifications.forEach(n => {
-                list.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3 border-r-4 border-[var(--maroon)]">
-                        <div class="w-10 h-10 bg-[var(--maroon)] text-[var(--gold)] rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-bell"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-bold text-[var(--maroon)]">${escapeHTML(n.title)}</p>
-                            <p class="text-xs text-gray-500 mt-1">${escapeHTML(n.text)}</p>
-                            <span class="text-[10px] text-gray-400 mt-1 block">${n.time}</span>
-                        </div>
+            list.innerHTML = `
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3 border-r-4 border-[var(--maroon)]">
+                    <div class="w-10 h-10 bg-[var(--maroon)] text-white rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-bell"></i>
                     </div>
-                `;
-            });
-        }
-
-        function toggleSettings() {
-            const sidebar = document.getElementById('settingsSidebar');
-            const overlay = document.getElementById('settingsOverlay');
-            if(sidebar.style.transform === 'translateX(100%)') {
-                sidebar.style.transform = 'translateX(0)';
-                overlay.classList.remove('hidden');
-                document.getElementById('settingsName').innerText = profile.name;
-                document.getElementById('settingsAvatar').src = profile.img;
-            } else {
-                sidebar.style.transform = 'translateX(100%)';
-                overlay.classList.add('hidden');
-            }
+                    <div class="flex-1">
+                        <p class="text-sm font-bold text-[var(--maroon)]">مرحباً بك</p>
+                        <p class="text-xs text-gray-500 mt-1">في دليل مواكب كربلاء. يمكنك تصفح المواكب وإضافة موكبك.</p>
+                    </div>
+                </div>
+            `;
         }
 
         function initApp() {
