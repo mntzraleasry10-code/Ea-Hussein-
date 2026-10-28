@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>مسابقة كربلاء الذكية</title>
+    <title>مسابقة كربلاء الحسينية</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -14,182 +14,256 @@
             background: linear-gradient(135deg, #111827, #1B5E20);
             height: 100dvh;
             overflow: hidden;
+            user-select: none;
         }
         
-        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        /* تأثيرات دخول العناصر */
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .option-btn { transition: all 0.3s ease; }
-        .option-btn:active { transform: scale(0.98); }
-
-        .correct { background-color: #4CAF50 !important; color: white !important; border-color: #4CAF50 !important; }
-        .wrong { background-color: #F44336 !important; color: white !important; border-color: #F44336 !important; }
-
-        .loader {
-            border: 4px solid #f3f3f3; border-top: 4px solid #D4AF37;
-            border-radius: 50%; width: 40px; height: 40px;
-            animation: spin 1s linear infinite; margin: 0 auto;
+        /* تنسيق أزرار الإجابات */
+        .option-btn {
+            transition: all 0.2s ease;
+            border: 2px solid #e5e7eb;
+            background-color: white;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .option-btn:active { transform: scale(0.97); }
+        .option-btn:hover { background-color: #f3f4f6; }
+
+        /* حالات الأزرار */
+        .correct { background-color: #10B981 !important; color: white !important; border-color: #10B981 !important; }
+        .wrong { background-color: #EF4444 !important; color: white !important; border-color: #EF4444 !important; }
+        .disabled-btn { pointer-events: none; opacity: 0.7; }
+
+        /* شريط الوقت */
+        #timerBar {
+            transition: width 1s linear;
+            height: 100%;
+            background-color: #D4AF37;
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-4">
 
+    <!-- شاشة البداية -->
     <div id="startScreen" class="w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-2xl border-4 border-[#D4AF37]">
-        <div class="text-6xl mb-4">🤖🕌</div>
-        <h1 class="text-3xl font-black text-[#1B5E20] mb-2">مسابقة كربلاء الذكية</h1>
-        <p class="text-gray-500 font-bold mb-6 text-sm">أسئلة لا تنتهي يتم توليدها بواسطة الذكاء الاصطناعي!</p>
-        
-        <div class="mb-4 text-right">
-            <label class="block text-xs font-bold text-gray-600 mb-1">أدخل مفتاح Groq API الجديد:</label>
-            <input type="password" id="apiKeyInput" placeholder="gsk_..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-[#1B5E20]">
-        </div>
-
-        <button onclick="startGame()" class="w-full bg-[#1B5E20] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-800 transition text-lg border border-[#D4AF37]">ابدأ اللعب الآن</button>
+        <div class="text-6xl mb-4">🕌</div>
+        <h1 class="text-3xl font-black text-[#1B5E20] mb-2">مسابقة كربلاء</h1>
+        <p class="text-gray-500 font-bold mb-6 text-sm leading-relaxed">اختبر معلوماتك الحسينية وأجب على 10 أسئلة عشوائية قبل انتهاء الوقت!</p>
+        <button onclick="startGame()" class="w-full bg-[#1B5E20] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-800 transition text-lg border border-[#D4AF37]">
+            ابدأ التحدي
+        </button>
     </div>
 
+    <!-- شاشة اللعب -->
     <div id="quizScreen" class="w-full max-w-md hidden">
-        <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-100">
-            <div class="text-center">
-                <p class="text-xs text-gray-500 font-bold">النقاط</p>
-                <p id="scoreDisplay" class="text-lg font-black text-[#D4AF37]">0</p>
+        
+        <!-- الشريط العلوي (النقاط والوقت) -->
+        <div class="flex justify-between items-center bg-white p-3 rounded-2xl shadow-sm mb-4 border border-gray-100">
+            <div class="text-center px-2">
+                <p class="text-[10px] text-gray-500 font-bold">السؤال</p>
+                <p id="questionCounter" class="text-sm font-black text-[#1B5E20]">1 / 10</p>
             </div>
-            <div class="text-center text-[#1B5E20] font-black text-sm">
-                <i class="fa-solid fa-brain mr-1"></i> AI Quiz
-            </div>
-            <button onclick="location.reload()" class="text-red-500 text-sm font-bold"><i class="fa-solid fa-arrow-right-from-bracket"></i> خروج</button>
-        </div>
-
-        <div id="questionCard" class="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 mb-6 fade-in min-h-[250px] flex flex-col justify-center">
-            <div id="loadingState">
-                <div class="loader mb-4"></div>
-                <p class="text-center text-gray-500 font-bold text-sm">جاري توليد سؤال جديد...</p>
+            
+            <!-- شريط الوقت -->
+            <div class="flex-1 mx-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div id="timerBar" class="w-full"></div>
             </div>
 
-            <div id="questionContent" class="hidden">
-                <h2 id="questionText" class="text-xl font-bold text-gray-800 text-center mb-6 leading-relaxed"></h2>
-                <div id="optionsContainer" class="space-y-3"></div>
+            <div class="text-center px-2">
+                <p class="text-[10px] text-gray-500 font-bold">النقاط</p>
+                <p id="scoreDisplay" class="text-sm font-black text-[#D4AF37]">0</p>
             </div>
         </div>
+
+        <!-- بطاقة السؤال -->
+        <div id="questionCard" class="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 fade-in min-h-[300px] flex flex-col justify-between">
+            <h2 id="questionText" class="text-lg font-bold text-gray-800 text-center mb-6 leading-relaxed"></h2>
+            <div id="optionsContainer" class="space-y-3">
+                <!-- سيتم توليد الأزرار هنا -->
+            </div>
+        </div>
+    </div>
+
+    <!-- شاشة النتيجة -->
+    <div id="resultScreen" class="w-full max-w-md hidden bg-white rounded-3xl p-8 text-center shadow-2xl border-4 border-[#D4AF37]">
+        <div class="text-6xl mb-4" id="resultEmoji">🏆</div>
+        <h1 class="text-3xl font-black text-[#1B5E20] mb-2" id="resultTitle">عمل رائع!</h1>
+        <p class="text-gray-600 font-bold mb-2">لقد أجبت بشكل صحيح على</p>
+        <p class="text-4xl font-black text-[#D4AF37] mb-6"><span id="finalScore">0</span> / 10</p>
+        
+        <button onclick="startGame()" class="w-full bg-[#1B5E20] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-800 transition text-lg">
+            لعب مرة أخرى
+        </button>
     </div>
 
     <script>
-        let currentScore = 0;
-        let isAnswering = false;
-        let apiKey = "";
+        // بنك الأسئلة (15 سؤالاً دينياً وثقافياً)
+        const allQuestions = [
+            { q: "في أي يوم استشهد الإمام الحسين (عليه السلام)؟", o: ["10 محرم (عاشوراء)", "1 محرم", "15 شعبان", "1 رمضان"], a: 0 },
+            { q: "ما هو اللقب الذي يُعرف به أبو الفضل العباس (عليه السلام)؟", o: ["سيف الله", "قمر بني هاشم", "زين العابدين", "أبو تراب"], a: 1 },
+            { q: "في أي مدينة وقعت معركة الطف؟", o: ["النجف الأشرف", "الكوفة", "كربلاء المقدسة", "سامراء"], a: 2 },
+            { q: "ما هي العبارة الشهيرة التي قالها الإمام الحسين يوم عاشوراء؟", o: ["الصبر جميل", "لا حول ولا قوة إلا بالله", "هيهات منا الذلة", "حسبنا الله"], a: 2 },
+            { q: "من هي السيدة التي قادت سبايا كربلاء ورعت السيدة زين العابدين؟", o: ["السيدة رقية", "السيدة زينب", "السيدة أم البنين", "السيدة فاطمة الزهراء"], a: 1 },
+            { q: "من هو قائد جيش يزيد بن معاوية في معركة الطف؟", o: ["الشمر بن ذي الجوشن", "عمر بن سعد", "عبيد الله بن زياد", "الحصين بن نمير"], a: 1 },
+            { q: "كم كان عمر الإمام الحسين (ع) عند استشهاده؟", o: ["50 عاماً", "57 عاماً", "63 عاماً", "45 عاماً"], a: 1 },
+            { q: "ما اسم النهر الذي استشهد الإمام الحسين وهو عطشان قربه؟", o: ["نهر الفرات", "نهر دجلة", "نهر النيل", "نهر الكوفة"], a: 0 },
+            { q: "من هو الصحابي الذي دفن الإمام الحسين (ع)؟", o: ["جابر بن عبد الله الأنصاري", "بنو أسد", "الإمام السجاد", "أبو ذر الغفاري"], a: 1 },
+            { q: "أي من هذه الأسماء هو اسم زوجة الإمام الحسين (ع) وأم علي الأكبر؟", o: ["ليلى بنت أبي مرة", "شهربانو", "أم إسحاق", "لبابة"], a: 0 },
+            { q: "في أي عام هجري وقعت معركة الطف؟", o: ["السنة 60 للهجرة", "السنة 61 للهجرة", "السنة 62 للهجرة", "السنة 50 للهجرة"], a: 1 },
+            { q: "من هو الشخص الذي خان الإمام الحسين (ع) في الكوفة وخرج لقتاله؟", o: ["الحر بن يزيد الرياحي", "الحسين بن علي", "المختار الثقفي", "الشمر بن ذي الجوشن"], a: 3 },
+            { q: "ما هو لقب الإمام الحسين (ع)؟", o: ["أبو الشهداء", "سيد الشهداء", "سيف الإسلام", "ذو الفقار"], a: 1 },
+            { q: "من هو أول شهيد في معركة الطف؟", o: ["علي الأكبر", "مسلم بن عقيل", "عبد الله الرضيع", "علي الأصغر"], a: 0 },
+            { q: "بأي شيء طلب الإمام الحسين من جيش العدو أن يسمحوا له؟", o: ["بالماء", "بالخروج من العراق", "بالرجوع إلى مكة", "بالتوجه لليزيد"], a: 2 }
+        ];
+
+        let questions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = 15; // 15 ثانية لكل سؤال
+        const maxQuestions = 10;
 
         const startScreen = document.getElementById('startScreen');
         const quizScreen = document.getElementById('quizScreen');
+        const resultScreen = document.getElementById('resultScreen');
         const questionText = document.getElementById('questionText');
         const optionsContainer = document.getElementById('optionsContainer');
+        const questionCounter = document.getElementById('questionCounter');
         const scoreDisplay = document.getElementById('scoreDisplay');
-        const loadingState = document.getElementById('loadingState');
-        const questionContent = document.getElementById('questionContent');
-        const apiKeyInput = document.getElementById('apiKeyInput');
+        const finalScore = document.getElementById('finalScore');
+        const timerBar = document.getElementById('timerBar');
 
-        if(localStorage.getItem('groqKey')) {
-            apiKeyInput.value = localStorage.getItem('groqKey');
+        // خلط المصفوفة
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         }
 
         function startGame() {
-            apiKey = apiKeyInput.value.trim();
-            if (!apiKey) {
-                alert('يرجى إدخال مفتاح API أولاً!');
+            // خلط الأسئلة واختيار 10 فقط
+            questions = shuffleArray([...allQuestions]).slice(0, maxQuestions);
+            currentIndex = 0;
+            score = 0;
+            scoreDisplay.innerText = score;
+
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(timer);
+            if (currentIndex >= questions.length) {
+                endGame();
                 return;
             }
-            localStorage.setItem('groqKey', apiKey);
-            startScreen.classList.add('hidden');
-            quizScreen.classList.remove('hidden');
-            currentScore = 0;
-            scoreDisplay.innerText = currentScore;
-            fetchAIQuestion();
-        }
 
-        async function fetchAIQuestion() {
-            loadingState.classList.remove('hidden');
-            questionContent.classList.add('hidden');
-            isAnswering = false;
-
-            const prompt = `Generate a multiple-choice trivia question about Karbala, Imam Hussein, or Hussaini processions. 
-            The language MUST be Arabic. 
-            Provide 3 options. 
-            Return ONLY a valid JSON object with this exact structure:
-            {"question": "السؤال هنا", "options": ["خيار 1", "خيار 2", "خيار 3"], "correct": 0}`;
-
-            try {
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.1-8b-instant", // تحديث اسم الموديل هنا
-                        messages: [{ role: "user", content: prompt }],
-                        temperature: 0.7,
-                        response_format: { type: "json_object" }
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || 'تأكد من المفتاح');
-                }
-
-                const data = await response.json();
-                const aiText = data.choices[0].message.content;
-                const qData = JSON.parse(aiText);
-                displayQuestion(qData);
-
-            } catch (error) {
-                // هذا السطر سيطبع الخطأ الحقيقي في الكونسول لمساعدتنا
-                console.error("الخطأ الحقيقي:", error); 
-                
-                loadingState.innerHTML = `
-                    <p class="text-red-500 text-center font-bold mb-2">حدث خطأ!</p>
-                    <p class="text-gray-500 text-center text-xs mb-4">${error.message}</p>
-                    <button onclick="fetchAIQuestion()" class="bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold w-full">إعادة المحاولة</button>
-                `;
-            }
-        }
-
-        function displayQuestion(qData) {
-            loadingState.classList.add('hidden');
-            questionContent.classList.remove('hidden');
+            const currentQ = questions[currentIndex];
             
-            questionText.innerText = qData.question;
+            // تحديث العداد
+            questionCounter.innerText = `${currentIndex + 1} / ${maxQuestions}`;
+            
+            // تأثير الدخول
+            const card = document.getElementById('questionCard');
+            card.classList.remove('fade-in');
+            void card.offsetWidth; 
+            card.classList.add('fade-in');
+
+            questionText.innerText = currentQ.q;
             optionsContainer.innerHTML = '';
 
-            qData.options.forEach((option, index) => {
+            // إنشاء الخيارات
+            currentQ.o.forEach((opt, index) => {
                 const btn = document.createElement('button');
-                btn.className = "option-btn w-full text-right bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl hover:bg-gray-100";
-                btn.innerText = option;
-                btn.onclick = () => checkAnswer(index, qData.correct, btn);
+                btn.className = "option-btn w-full text-right font-bold py-3 px-4 rounded-xl text-gray-700";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, currentQ.a, btn);
                 optionsContainer.appendChild(btn);
             });
+
+            // بدء المؤقت
+            timeLeft = 15;
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = '#D4AF37';
+            
+            // تحديث شريط الوقت كل ثانية
+            timer = setInterval(() => {
+                timeLeft -= 1;
+                timerBar.style.width = `${(timeLeft / 15) * 100}%`;
+                
+                if (timeLeft <= 5) timerBar.style.backgroundColor = '#EF4444'; // يصبح أحمر
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timeOut();
+                }
+            }, 1000);
         }
 
-        function checkAnswer(selectedIndex, correctIndex, btnElement) {
-            if (isAnswering) return;
-            isAnswering = true;
+        function checkAnswer(selected, correct, btn) {
+            clearInterval(timer);
+            const allBtns = optionsContainer.querySelectorAll('button');
+            allBtns.forEach(b => b.classList.add('disabled-btn'));
 
-            const allButtons = optionsContainer.querySelectorAll('button');
-
-            if (selectedIndex === correctIndex) {
-                btnElement.classList.remove('bg-gray-50', 'border-gray-200', 'text-gray-700');
-                btnElement.classList.add('correct');
-                currentScore++;
-                scoreDisplay.innerText = currentScore;
+            if (selected === correct) {
+                btn.classList.remove('option-btn');
+                btn.classList.add('correct');
+                score++;
+                scoreDisplay.innerText = score;
             } else {
-                btnElement.classList.remove('bg-gray-50', 'border-gray-200', 'text-gray-700');
-                btnElement.classList.add('wrong');
-                allButtons[correctIndex].classList.remove('bg-gray-50', 'border-gray-200', 'text-gray-700');
-                allButtons[correctIndex].classList.add('correct');
+                btn.classList.remove('option-btn');
+                btn.classList.add('wrong');
+                allBtns[correct].classList.remove('option-btn');
+                allBtns[correct].classList.add('correct');
             }
 
             setTimeout(() => {
-                fetchAIQuestion();
-            }, 1500);
+                currentIndex++;
+                loadQuestion();
+            }, 1200); // الانتقال بعد ثانية
+        }
+
+        function timeOut() {
+            const currentQ = questions[currentIndex];
+            const allBtns = optionsContainer.querySelectorAll('button');
+            allBtns.forEach(b => b.classList.add('disabled-btn'));
+            
+            allBtns[currentQ.a].classList.remove('option-btn');
+            allBtns[currentQ.a].classList.add('correct');
+
+            setTimeout(() => {
+                currentIndex++;
+                loadQuestion();
+            }, 1200);
+        }
+
+        function endGame() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScore.innerText = score;
+
+            const emoji = document.getElementById('resultEmoji');
+            const title = document.getElementById('resultTitle');
+
+            if (score === 10) {
+                emoji.innerText = "👑";
+                title.innerText = "أنت خبير كربلاء!";
+            } else if (score >= 7) {
+                emoji.innerText = "🏆";
+                title.innerText = "معلوماتك ممتازة!";
+            } else if (score >= 4) {
+                emoji.innerText = "🌟";
+                title.innerText = "جيد، يمكنك التحسن!";
+            } else {
+                emoji.innerText = "📚";
+                title.innerText = "تحتاج لقراءة المزيد!";
+            }
         }
     </script>
 </body>
