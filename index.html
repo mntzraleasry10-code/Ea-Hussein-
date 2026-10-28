@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>تحدي المواكب - مسابقة المراحل</title>
+    <title>تحدي المواكب الذكي - AI Quiz</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         body {
@@ -20,7 +21,6 @@
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* أزرار الخيارات */
         .option-btn {
             transition: all 0.2s ease;
             border: 2px solid #e5e7eb;
@@ -56,70 +56,62 @@
             transform: translateX(-50%) scale(1);
         }
 
-        /* بطاقات المراحل */
-        .stage-card {
-            background: white;
-            border: 3px solid #D4AF37;
-            border-radius: 20px;
-            transition: 0.3s;
-            position: relative;
-            overflow: hidden;
+        .loader {
+            border: 4px solid #f3f3f3; border-top: 4px solid #D4AF37;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 0 auto;
         }
-        .stage-card.locked {
-            filter: grayscale(1);
-            opacity: 0.6;
-        }
-        .stage-card:not(.locked):active {
-            transform: scale(0.95);
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-4">
 
-    <!-- شاشة المراحل -->
-    <div id="homeScreen" class="w-full max-w-md flex flex-col items-center">
-        <div class="bg-white rounded-3xl p-6 text-center shadow-2xl border-4 border-[#D4AF37] mb-6 w-full">
-            <div class="text-5xl mb-2">🏆</div>
-            <h1 class="text-2xl font-black text-[#1B5E20]">تحدي المواكب</h1>
-            <p class="text-gray-500 font-bold text-sm mt-1">أكمل المراحل لتصبح خبيراً حسينياً!</p>
-        </div>
+    <!-- شاشة البداية وإدخال المفتاح -->
+    <div id="startScreen" class="w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-2xl border-4 border-[#D4AF37]">
+        <div class="text-6xl mb-4">🤖🕌</div>
+        <h1 class="text-3xl font-black text-[#1B5E20] mb-2">تحدي المواكب الذكي</h1>
+        <p class="text-gray-500 font-bold mb-6 text-sm">لعبة لا نهائية.. الذكاء الاصطناعي يولد لك أسئلة جديدة في كل مرة!</p>
         
-        <div id="stagesContainer" class="w-full grid grid-cols-2 gap-4">
-            <!-- سيتم توليد المراحل هنا -->
+        <div class="mb-4 text-right">
+            <label class="block text-xs font-bold text-gray-600 mb-1">أدخل مفتاح Groq API للبدء:</label>
+            <input type="password" id="apiKeyInput" placeholder="gsk_..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-[#1B5E20]" dir="ltr">
         </div>
+
+        <button onclick="startGame()" class="w-full bg-[#1B5E20] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-800 transition text-lg border border-[#D4AF37]">
+            ابدأ التحدي
+        </button>
     </div>
 
     <!-- شاشة اللعب -->
-    <div id="quizScreen" class="w-full max-w-md hidden">
+    <div id="quizScreen" class="w-full max-w-md hidden flex-col">
+        
         <!-- الشريط العلوي -->
         <div class="flex justify-between items-center bg-white p-3 rounded-2xl shadow-sm mb-4 border border-gray-100">
-            <button onclick="goHome()" class="text-red-500 font-bold text-sm"><i class="fa-solid fa-arrow-right"></i> رجوع</button>
+            <button onclick="location.reload()" class="text-red-500 font-bold text-sm"><i class="fa-solid fa-arrow-right"></i> خروج</button>
             <div class="text-center">
                 <p class="text-[10px] text-gray-500 font-bold">المرحلة</p>
                 <p id="stageDisplay" class="text-sm font-black text-[#1B5E20]">1</p>
             </div>
             <div class="text-center">
-                <p class="text-[10px] text-gray-500 font-bold">السؤال</p>
-                <p id="questionCounter" class="text-sm font-black text-[#1B5E20]">1 / 5</p>
+                <p class="text-[10px] text-gray-500 font-bold">النقاط</p>
+                <p id="scoreDisplay" class="text-sm font-black text-[#D4AF37]">0</p>
             </div>
         </div>
 
         <!-- بطاقة السؤال -->
-        <div id="questionCard" class="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 fade-in min-h-[300px] flex flex-col justify-between">
-            <h2 id="questionText" class="text-lg font-bold text-gray-800 text-center mb-6 leading-relaxed"></h2>
-            <div id="optionsContainer" class="space-y-3"></div>
-        </div>
-    </div>
+        <div id="questionCard" class="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 fade-in min-h-[300px] flex flex-col justify-center">
+            
+            <!-- حالة التحميل -->
+            <div id="loadingState">
+                <div class="loader mb-4"></div>
+                <p class="text-center text-gray-500 font-bold text-sm">جاري سؤال الذكاء الاصطناعي لتوليد سؤال جديد...</p>
+            </div>
 
-    <!-- شاشة النتيجة -->
-    <div id="resultScreen" class="w-full max-w-md hidden bg-white rounded-3xl p-8 text-center shadow-2xl border-4 border-[#D4AF37]">
-        <div class="text-6xl mb-4" id="resultEmoji">🎉</div>
-        <h1 class="text-3xl font-black text-[#1B5E20] mb-2" id="resultTitle">أحسنت!</h1>
-        <p class="text-gray-600 font-bold mb-6" id="resultDesc">لقد أكملت المرحلة بنجاح.</p>
-        
-        <div class="flex gap-2">
-            <button onclick="retryStage()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">إعادة</button>
-            <button onclick="goHome()" class="flex-1 bg-[#1B5E20] text-white font-bold py-3 rounded-xl">القائمة الرئيسية</button>
+            <!-- محتوى السؤال -->
+            <div id="questionContent" class="hidden">
+                <h2 id="questionText" class="text-lg font-bold text-gray-800 text-center mb-6 leading-relaxed"></h2>
+                <div id="optionsContainer" class="space-y-3"></div>
+            </div>
         </div>
     </div>
 
@@ -127,165 +119,162 @@
     <div id="praisePopup">أحسنت!</div>
 
     <script>
-        // 1. بنك الأسئلة (50 سؤالاً)
-        // ملاحظة: يمكنك إضافة المزيد من الأسئلة هنا حتى تصل إلى 1000 سؤال بنفس الطريقة.
-        const allQuestions = [
-            { q: "في أي يوم استشهد الإمام الحسين (عليه السلام)؟", o: ["10 محرم", "1 محرم", "15 شعبان", "1 رمضان"], a: 0 },
-            { q: "ما هو اللقب الذي يُعرف به أبو الفضل العباس (ع)؟", o: ["سيف الله", "قمر بني هاشم", "زين العابدين", "أبو تراب"], a: 1 },
-            { q: "في أي مدينة وقعت معركة الطف؟", o: ["النجف", "الكوفة", "كربلاء", "سامراء"], a: 2 },
-            { q: "ما هي العبارة الشهيرة التي قالها الإمام الحسين يوم عاشوراء؟", o: ["الصبر جميل", "لا حول ولا قوة إلا بالله", "هيهات منا الذلة", "حسبنا الله"], a: 2 },
-            { q: "من هي السيدة التي قادت سبايا كربلاء؟", o: ["السيدة رقية", "السيدة زينب", "السيدة أم البنين", "السيدة فاطمة"], a: 1 },
-            { q: "من هو قائد جيش يزيد في معركة الطف؟", o: ["الشمر", "عمر بن سعد", "عبيد الله بن زياد", "الحصين"], a: 1 },
-            { q: "كم كان عمر الإمام الحسين عند استشهاده؟", o: ["50 عاماً", "57 عاماً", "63 عاماً", "45 عاماً"], a: 1 },
-            { q: "ما اسم النهر الذي استشهد الإمام الحسين عطشاناً قربه؟", o: ["الفرات", "دجلة", "النيل", "الكوفة"], a: 0 },
-            { q: "من هو الصحابي الذي دفن الإمام الحسين؟", o: ["جابر", "بنو أسد", "السجاد", "أبو ذر"], a: 1 },
-            { q: "في أي عام هجري وقعت معركة الطف؟", o: ["60 هـ", "61 هـ", "62 هـ", "50 هـ"], a: 1 },
-            // يمكنك إضافة المزيد هنا...
-            { q: "من هو أول شهيد في معركة الطف؟", o: ["علي الأكبر", "مسلم بن عقيل", "عبد الله الرضيع", "علي الأصغر"], a: 0 },
-            { q: "بأي شيء طلب الإمام الحسين من جيش العدو أن يسمحوا له؟", o: ["بالماء", "بالخروج من العراق", "بالرجوع إلى مكة", "بالتوجه ليزيد"], a: 2 },
-            { q: "أين دفن الإمام الحسين (ع)؟", o: ["النجف", "كربلاء", "الكوفة", "المدينة"], a: 1 },
-            { q: "من هو أخو الإمام الحسين الذي استشهد قبله في معركة الطف؟", o: ["الإمام الحسن", "العباس", "علي الأكبر", "عبد الله"], a: 1 },
-            { q: "ما اسم زوجة الإمام الحسين وأم علي الأكبر؟", o: ["ليلى", "شهربانو", "أم إسحاق", "لبابة"], a: 0 }
-            // أضف بقية الأسئلة بنفس الصيغة...
-        ];
-
-        // 2. رسائل التشجيع
+        // رسائل التشجيع
         const praises = [
-            "أحسنت!", 
-            "ممتاز!", 
-            "قوي جداً!", 
-            "شنو هذا الذكاء يا بطل!", 
-            "ما شاء الله عليك!",
-            "إجابة صحيحة!",
-            "عظيم!",
-            "استمر يا نجم!"
+            "أحسنت!", "ممتاز!", "قوي جداً!", "شنو هذا الذكاء يا بطل!", 
+            "ما شاء الله عليك!", "إجابة صحيحة!", "عظيم!", "استمر يا نجم!"
         ];
 
-        // 3. إعدادات المراحل
-        const questionsPerStage = 5; // عدد الأسئلة في كل مرحلة
-        const totalStages = 5; // إجمالي عدد المراحل
+        let apiKey = "";
+        let score = 0;
+        let stage = 1;
+        let questionsInStage = 0;
+        let isAnswering = false;
 
-        // المتغيرات
-        let currentStage = 1;
-        let currentQuestionIndex = 0;
-        let currentStageQuestions = [];
-        let correctAnswersInStage = 0;
-
-        // عناصر الصفحة
-        const homeScreen = document.getElementById('homeScreen');
+        const startScreen = document.getElementById('startScreen');
         const quizScreen = document.getElementById('quizScreen');
-        const resultScreen = document.getElementById('resultScreen');
-        const stagesContainer = document.getElementById('stagesContainer');
         const questionText = document.getElementById('questionText');
         const optionsContainer = document.getElementById('optionsContainer');
-        const questionCounter = document.getElementById('questionCounter');
+        const scoreDisplay = document.getElementById('scoreDisplay');
         const stageDisplay = document.getElementById('stageDisplay');
+        const loadingState = document.getElementById('loadingState');
+        const questionContent = document.getElementById('questionContent');
+        const apiKeyInput = document.getElementById('apiKeyInput');
         const praisePopup = document.getElementById('praisePopup');
 
-        // خلط المصفوفة
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
+        // استرجاع المفتاح إذا كان محفوظاً
+        if(localStorage.getItem('groqKey')) {
+            apiKeyInput.value = localStorage.getItem('groqKey');
         }
 
-        // رسم المراحل في الشاشة الرئيسية
-        function renderStages() {
-            stagesContainer.innerHTML = '';
-            const maxUnlocked = parseInt(localStorage.getItem('maxUnlockedStage')) || 1;
-
-            for (let i = 1; i <= totalStages; i++) {
-                const isLocked = i > maxUnlocked;
-                const stageDiv = document.createElement('div');
-                stageDiv.className = `stage-card p-4 flex flex-col items-center justify-center cursor-pointer ${isLocked ? 'locked' : ''}`;
-                
-                if (!isLocked) {
-                    stageDiv.onclick = () => startStage(i);
-                }
-
-                stageDiv.innerHTML = `
-                    <div class="text-3xl mb-2">${isLocked ? '🔒' : '🏅'}</div>
-                    <h3 class="font-bold text-[#1B5E20]">المرحلة ${i}</h3>
-                    <p class="text-xs text-gray-500 mt-1">${questionsPerStage} أسئلة</p>
-                `;
-                stagesContainer.appendChild(stageDiv);
-            }
-        }
-
-        // بدء المرحلة
-        function startStage(stageNum) {
-            currentStage = stageNum;
-            currentQuestionIndex = 0;
-            correctAnswersInStage = 0;
-            
-            // اختيار أسئلة عشوائية لهذه المرحلة
-            currentStageQuestions = shuffleArray([...allQuestions]).slice(0, questionsPerStage);
-
-            stageDisplay.innerText = currentStage;
-            
-            homeScreen.classList.add('hidden');
-            resultScreen.classList.add('hidden');
-            quizScreen.classList.remove('hidden');
-            
-            loadQuestion();
-        }
-
-        // تحميل السؤال
-        function loadQuestion() {
-            if (currentQuestionIndex >= questionsPerStage) {
-                endStage();
+        function startGame() {
+            apiKey = apiKeyInput.value.trim();
+            if (!apiKey || !apiKey.startsWith('gsk_')) {
+                alert('يرجى إدخال مفتاح Groq API صحيح يبدأ بـ gsk_');
                 return;
             }
-
-            const currentQ = currentStageQuestions[currentQuestionIndex];
+            localStorage.setItem('groqKey', apiKey); // حفظ المفتاح
             
-            questionCounter.innerText = `${currentQuestionIndex + 1} / ${questionsPerStage}`;
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            quizScreen.classList.add('flex');
             
-            const card = document.getElementById('questionCard');
-            card.classList.remove('fade-in');
-            void card.offsetWidth; 
-            card.classList.add('fade-in');
+            score = 0;
+            stage = 1;
+            questionsInStage = 0;
+            scoreDisplay.innerText = score;
+            stageDisplay.innerText = stage;
+            
+            fetchAIQuestion();
+        }
 
-            questionText.innerText = currentQ.q;
+        async function fetchAIQuestion() {
+            loadingState.classList.remove('hidden');
+            questionContent.classList.add('hidden');
+            isAnswering = false;
+
+            // نص التوجيه للذكاء الاصطناعي
+            const prompt = `Generate a multiple-choice trivia question about Karbala, Imam Hussein, or Hussaini processions. 
+            The language MUST be Arabic. 
+            Provide 4 options. 
+            Return ONLY a valid JSON object with this exact structure, without any markdown or extra text:
+            {"question": "نص السؤال هنا", "options": ["خيار 1", "خيار 2", "خيار 3", "خيار 4"], "correct": 0}
+            Note: 'correct' is the index (0, 1, 2, or 3) of the correct option.`;
+
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.1-8b-instant", // الموديل المحدث
+                        messages: [{ role: "user", content: prompt }],
+                        temperature: 0.8,
+                        response_format: { type: "json_object" }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('تأكد من صحة المفتاح أو اتصالك بالإنترنت.');
+                }
+
+                const data = await response.json();
+                const aiText = data.choices[0].message.content;
+                
+                // تنظيف النص من أي علامات إضافية قد يضعها الذكاء الاصطناعي
+                const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
+                const qData = JSON.parse(cleanJson);
+
+                displayQuestion(qData);
+
+            } catch (error) {
+                console.error("Error:", error);
+                loadingState.innerHTML = `
+                    <div class="text-center">
+                        <i class="fa-solid fa-triangle-exclamation text-red-500 text-4xl mb-3"></i>
+                        <p class="text-red-500 font-bold mb-2">فشل الاتصال بالذكاء الاصطناعي</p>
+                        <p class="text-gray-500 text-xs mb-4">${error.message}</p>
+                        <button onclick="fetchAIQuestion()" class="bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold w-full">إعادة المحاولة</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayQuestion(qData) {
+            loadingState.classList.add('hidden');
+            questionContent.classList.remove('hidden');
+            questionContent.classList.remove('fade-in');
+            void questionContent.offsetWidth; 
+            questionContent.classList.add('fade-in');
+
+            questionText.innerText = qData.question;
             optionsContainer.innerHTML = '';
 
-            currentQ.o.forEach((opt, index) => {
+            qData.options.forEach((option, index) => {
                 const btn = document.createElement('button');
                 btn.className = "option-btn w-full text-right font-bold py-3 px-4 rounded-xl text-gray-700";
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(index, currentQ.a, btn);
+                btn.innerText = option;
+                btn.onclick = () => checkAnswer(index, qData.correct, btn);
                 optionsContainer.appendChild(btn);
             });
         }
 
-        // التحقق من الإجابة
-        function checkAnswer(selected, correct, btn) {
-            const allBtns = optionsContainer.querySelectorAll('button');
-            allBtns.forEach(b => b.classList.add('disabled-btn'));
+        function checkAnswer(selectedIndex, correctIndex, btnElement) {
+            if (isAnswering) return;
+            isAnswering = true;
 
-            if (selected === correct) {
-                btn.classList.remove('option-btn');
-                btn.classList.add('correct');
-                correctAnswersInStage++;
-                
-                // إظهار رسالة التشجيع
+            const allButtons = optionsContainer.querySelectorAll('button');
+            allButtons.forEach(b => b.classList.add('disabled-btn'));
+
+            if (selectedIndex === correctIndex) {
+                btnElement.classList.remove('option-btn');
+                btnElement.classList.add('correct');
+                score++;
+                scoreDisplay.innerText = score;
                 showPraise();
             } else {
-                btn.classList.remove('option-btn');
-                btn.classList.add('wrong');
-                allBtns[correct].classList.remove('option-btn');
-                allBtns[correct].classList.add('correct');
+                btnElement.classList.remove('option-btn');
+                btnElement.classList.add('wrong');
+                allButtons[correctIndex].classList.remove('option-btn');
+                allButtons[correctIndex].classList.add('correct');
+            }
+
+            // نظام المراحل (كل 5 أسئلة مرحلة جديدة)
+            questionsInStage++;
+            if (questionsInStage >= 5) {
+                stage++;
+                questionsInStage = 0;
+                stageDisplay.innerText = stage;
+                // يمكنك إضافة تأثير صوتي هنا أو رسالة تهنئة بالانتقال للمرحلة الجديدة
             }
 
             setTimeout(() => {
-                currentQuestionIndex++;
-                loadQuestion();
-            }, 1200);
+                fetchAIQuestion();
+            }, 1500);
         }
 
-        // إظهار رسالة التشجيع
         function showPraise() {
             const randomMsg = praises[Math.floor(Math.random() * praises.length)];
             praisePopup.innerText = randomMsg;
@@ -295,49 +284,6 @@
                 praisePopup.classList.remove('show');
             }, 1000);
         }
-
-        // إنهاء المرحلة
-        function endStage() {
-            quizScreen.classList.add('hidden');
-            resultScreen.classList.remove('hidden');
-
-            const passed = correctAnswersInStage >= 3; // النجاح يحتاج 3 إجابات صحيحة من 5
-            const emoji = document.getElementById('resultEmoji');
-            const title = document.getElementById('resultTitle');
-            const desc = document.getElementById('resultDesc');
-
-            if (passed) {
-                emoji.innerText = "🎉";
-                title.innerText = "أحسنت!";
-                desc.innerText = `لقد نجحت في المرحلة ${currentStage} بـ ${correctAnswersInStage} إجابات صحيحة.`;
-                
-                // فتح المرحلة التالية
-                const maxUnlocked = parseInt(localStorage.getItem('maxUnlockedStage')) || 1;
-                if (currentStage >= maxUnlocked && currentStage < totalStages) {
-                    localStorage.setItem('maxUnlockedStage', currentStage + 1);
-                }
-            } else {
-                emoji.innerText = "😔";
-                title.innerText = "حاول مرة أخرى!";
-                desc.innerText = `لقد أجبت على ${correctAnswersInStage} فقط. تحتاج إلى 3 على الأقل للنجاح.`;
-            }
-
-            document.getElementById('retryStageBtn').style.display = passed ? 'none' : 'block';
-        }
-
-        function retryStage() {
-            startStage(currentStage);
-        }
-
-        function goHome() {
-            quizScreen.classList.add('hidden');
-            resultScreen.classList.add('hidden');
-            homeScreen.classList.remove('hidden');
-            renderStages();
-        }
-
-        // تشغيل التطبيق عند فتح الصفحة
-        window.onload = renderStages;
     </script>
 </body>
 </html>
