@@ -3,395 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>دليل مواكب كربلاء</title>
+    <title>لعبة مواكب كربلاء</title>
     
-    <!-- إعدادات PWA -->
-    <meta name="theme-color" content="#8B1A1A">
-    <meta name="description" content="Directory of Hussaini processions in Karbala">
-    <link rel="manifest" href='data:application/manifest+json,{"background_color":"%23ffffff","display":"standalone","name":"MawkibKarbala","orientation":"any","scope":"/","short_name":"MawkibKarbala","start_url":"/","theme_color":"%23ffffff","id":"com.mawkib.karbala","description":"Directory of Hussaini processions in Karbala"}'>
-    
-    <script>
-        // تسجيل Service Worker وهمي لتجاوز الفحص
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                self.addEventListener('install', function(e) { self.skipWaiting(); });
-                self.addEventListener('fetch', function(event) { });
-            `;
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log(err));
-        }
-    </script>
-
+    <!-- Tailwind CSS & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <style>
-        :root {
-            --maroon: #8B1A1A;
-            --maroon-dark: #5E0B0B;
-            --gold: #D4AF37;
-            --gold-light: #FDF5E6;
-            --bg-app: #F4F7F6;
-            --chat-bg: #EFEAE2;
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #F4F7F6;
+            overflow: hidden;
+            touch-action: manipulation; /* لمنع التكبير بالخطأ */
         }
 
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            background-color: var(--bg-app); 
-            overflow: hidden; 
-            height: 100dvh; 
-            padding-top: env(safe-area-inset-top);
+        /* إعدادات بطاقات اللعبة */
+        .card-container {
+            perspective: 1000px;
+            aspect-ratio: 1 / 1;
         }
 
-        .page { 
-            display: none; 
-            height: calc(100dvh - 70px - env(safe-area-inset-top)); 
-            overflow-y: auto; 
-            padding-bottom: 20px; 
-        }
-        .page.active { display: block; }
-
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .header-luxury {
-            background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));
-            border-bottom: 2px solid var(--gold);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            padding-top: 15px; padding-bottom: 15px;
-            position: relative; overflow: hidden;
-        }
-        .header-luxury::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url('https://www.transparenttextures.com/patterns/arabesque.png');
-            opacity: 0.15; pointer-events: none;
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            cursor: pointer;
         }
 
-        .marble-bg {
-            background-color: #F8F6F0;
-            background-image: url('https://www.transparenttextures.com/patterns/white-marble.png');
-            min-height: 100%;
+        .card.flipped {
+            transform: rotateY(180deg);
         }
 
-        #homeMap { height: 220px; width: 100%; z-index: 1; }
-        #pickMap { height: 200px; width: 100%; z-index: 1; border-radius: 15px; border: 2px solid var(--maroon); }
-
-        .service-card {
-            background: white; border: 1px solid #E2E8F0; border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 12px; cursor: pointer;
-        }
-        .service-card:active { transform: scale(0.95); }
-        .service-icon {
-            width: 45px; height: 45px; border-radius: 12px;
-            background: var(--gold-light); color: var(--maroon);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; margin-bottom: 8px; border: 1px solid #F5DEB3;
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .bottom-nav {
-            background: white; border-top: 1px solid #E2E8F0;
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .nav-btn { 
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            color: #94A3B8; cursor: pointer; transition: 0.3s; padding: 8px 0; 
-        }
-        .nav-btn.active { color: var(--maroon); font-weight: bold; }
-        .nav-btn i { font-size: 22px; margin-bottom: 4px; }
-        .nav-btn span { font-size: 10px; font-weight: 700; }
-
-        .chat-item {
-            display: flex; align-items: center; padding: 12px;
-            background: white; border: 2px solid var(--gold); border-radius: 15px;
-            margin-bottom: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            position: relative; z-index: 1;
-        }
-        .chat-avatar {
-            width: 55px; height: 55px; border-radius: 50%;
-            object-fit: cover; margin-left: 12px; border: 2px solid var(--maroon);
-            background: var(--gold-light);
-        }
-        .chat-name { font-weight: 700; font-size: 15px; color: var(--maroon); }
-        .chat-time { font-size: 11px; color: #94a3b8; }
-        .chat-message { font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-
-        .call-item {
-            display: flex; align-items: center; padding: 12px;
-            background: white; border: 1px solid #E2E8F0; border-radius: 12px;
-            margin-bottom: 10px; cursor: pointer;
-        }
-        .call-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 12px; }
-        .call-in { background: #E8F5E9; color: #2E7D32; }
-        .call-out { background: #E3F2FD; color: #1976D2; }
-        .call-missed { background: #FFEBEE; color: #D32F2F; }
-
-        #chatRoomModal { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(100%); }
-        #chatRoomModal.show { transform: translateX(0); }
-        
-        .chat-bg {
-            background-color: var(--chat-bg);
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-size: cover; background-blend-mode: soft-light;
+        .card-front {
+            background: linear-gradient(135deg, #8B1A1A, #5E0B0B);
+            border: 2px solid #D4AF37;
+            font-size: 2rem;
+            color: #D4AF37;
         }
 
-        .msg-bubble { 
-            max-width: 85%; padding: 8px 12px; border-radius: 10px; margin-bottom: 10px; 
-            font-size: 14px; position: relative; word-wrap: break-word; box-shadow: 0 1px 1px rgba(0,0,0,0.1); 
-        }
-        .msg-sent { background: #DCF8C6; align-self: flex-end; border-top-left-radius: 0; }
-        .msg-received { background: white; align-self: flex-start; border-top-right-radius: 0; }
-        
-        .msg-sent::before {
-            content: ''; position: absolute; top: 0; left: -8px;
-            border: 4px solid transparent; border-right-color: #DCF8C6; border-top-color: #DCF8C6;
-        }
-        .msg-received::before {
-            content: ''; position: absolute; top: 0; right: -8px;
-            border: 4px solid transparent; border-left-color: white; border-top-color: white;
+        .card-back {
+            background: white;
+            border: 2px solid #8B1A1A;
+            transform: rotateY(180deg);
+            font-size: 3rem;
         }
 
-        .msg-time { font-size: 10px; color: #999; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
-        
-        .typing-indicator { background: white; padding: 8px 12px; border-radius: 10px; display: none; align-self: flex-start; margin-bottom: 10px; }
-        .typing-dot { display: inline-block; width: 6px; height: 6px; background: #999; border-radius: 50%; margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both; }
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        /* تأثير النجاح */
+        .card.matched .card-back {
+            background-color: #E8F5E9;
+            border-color: #4CAF50;
+            animation: bounce 0.5s;
+        }
 
-        #callModal { backdrop-filter: blur(15px); background: rgba(17, 24, 39, 0.95); }
+        @keyframes bounce {
+            0%, 100% { transform: rotateY(180deg) scale(1); }
+            50% { transform: rotateY(180deg) scale(1.1); }
+        }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="h-[100dvh] flex flex-col items-center justify-center p-4">
 
-    <div id="authScreen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-6" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
-        <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl relative border-4 border-[var(--gold)]">
-            <div class="text-center mb-6">
-                <div class="w-20 h-20 bg-[var(--maroon)] rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-[var(--gold)] shadow-lg">
-                    <i class="fa-solid fa-mosque text-4xl text-[var(--gold)]"></i>
-                </div>
-                <h1 class="text-2xl font-black text-[var(--maroon)] mb-1">دليل مواكب كربلاء</h1>
-                <p class="text-gray-500 text-xs font-bold" id="authSubtitle">مرحباً بك، يرجى تسجيل الدخول</p>
-            </div>
-            <div class="space-y-3">
-                <div id="nameField" class="hidden">
-                    <input type="text" id="authName" placeholder="الاسم الكامل" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
-                </div>
-                <input type="tel" id="authPhone" placeholder="رقم الهاتف" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
-                <input type="password" id="authPassword" placeholder="كلمة المرور" class="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[var(--maroon)] text-sm bg-gray-50">
-                <button onclick="handleAuth()" id="authBtn" class="w-full bg-[var(--maroon)] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[var(--maroon-dark)] transition mt-2 border-2 border-[var(--gold)]">دخول</button>
-            </div>
-            <div class="mt-4 flex flex-col gap-2 text-center">
-                <button onclick="toggleAuthMode()" id="toggleAuthBtn" class="text-[var(--maroon)] font-bold text-sm hover:underline">ليس لديك حساب؟ إنشاء حساب</button>
-                <button onclick="forgotPassword()" class="text-gray-500 text-xs hover:text-gray-800">نسيت كلمة المرور؟</button>
-            </div>
-            <button onclick="clearAppData()" class="absolute -bottom-12 left-0 w-full text-center text-white/50 text-xs">مسح البيانات</button>
+    <!-- شريط المعلومات -->
+    <div class="w-full max-w-md flex justify-between items-center mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        <div class="text-center">
+            <p class="text-xs text-gray-500 font-bold">المحاولات</p>
+            <p id="movesCount" class="text-xl font-black text-[#8B1A1A]">0</p>
         </div>
+        <h1 class="text-xl font-black text-[#8B1A1A] text-center leading-tight">لعبة<br><span class="text-sm">مواكب كربلاء</span></h1>
+        <button onclick="startGame()" class="bg-[#D4AF37] text-[#5E0B0B] px-4 py-2 rounded-xl font-bold text-sm shadow hover:bg-yellow-500 transition">إعادة</button>
     </div>
 
-    <div id="splash" class="fixed inset-0 z-[9999] hidden flex-col items-center justify-center" style="background: linear-gradient(to bottom, var(--maroon-dark), var(--maroon));">
-        <div class="w-32 h-32 mb-4 flex items-center justify-center bg-white rounded-full border-4 border-[var(--gold)] shadow-[0_0_30px_rgba(212,175,55,0.5)]">
-            <i class="fa-solid fa-mosque text-6xl text-[var(--maroon)]"></i>
-        </div>
-        <h1 class="text-[var(--gold)] text-3xl font-extrabold mb-2">دليل مواكب كربلاء</h1>
-        <p class="text-white text-sm font-semibold">دليلك إلى المواكب والخدمات الحسينية</p>
+    <!-- لوحة اللعب -->
+    <div id="gameBoard" class="grid grid-cols-4 gap-3 w-full max-w-md">
+        <!-- سيتم توليد البطاقات هنا بواسطة الجافاسكريبت -->
     </div>
 
-    <div id="app" class="hidden flex-col h-[100dvh]">
-        <main class="flex-1 relative">
-            
-            <div id="page-home" class="page active">
-                <div class="header-luxury px-4 rounded-b-2xl relative z-10">
-                    <div class="flex justify-between items-center mb-3 relative z-10">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-mosque text-[var(--gold)] text-2xl"></i>
-                            <h1 class="text-[var(--gold)] text-lg font-black">دليل المواكب</h1>
-                        </div>
-                        <span class="text-white text-xs bg-black/20 px-3 py-1 rounded-full"><i class="fa-solid fa-user ml-1"></i> <span id="homeUserName">مستخدم</span></span>
-                    </div>
-                    <div class="relative w-full z-10">
-                        <input type="text" id="searchHome" oninput="searchMawkibs()" placeholder="ابحث عن موكب..." class="w-full bg-white/90 border-none rounded-xl py-2 px-4 text-sm focus:outline-none text-[var(--maroon)] placeholder-[var(--maroon)] font-bold shadow-inner">
-                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-[var(--maroon)]"></i>
-                    </div>
-                </div>
-                <div id="homeMap" class="w-full shadow-md relative z-0"></div>
-                <div class="px-4 mt-4 relative z-10">
-                    <div class="grid grid-cols-2 gap-3 mb-6">
-                        <button onclick="findClosestMawkib()" class="bg-[var(--maroon)] text-white p-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-[var(--gold)]">
-                            <i class="fa-solid fa-map-location text-[var(--gold)]"></i><span class="font-bold text-sm">الأقرب إليك</span>
-                        </button>
-                        <button onclick="switchTab('add')" class="bg-[var(--gold)] text-[var(--maroon-dark)] p-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-[var(--maroon)]">
-                            <i class="fa-solid fa-plus-circle"></i><span class="font-bold text-sm">تسجيل موكب</span>
-                        </button>
-                    </div>
-                    <h2 class="font-extrabold text-[var(--maroon)] text-lg mb-3">الخدمات المتوفرة</h2>
-                    <div class="grid grid-cols-3 gap-3 mb-6">
-                        <div class="service-card" onclick="filterByService('طعام')"><div class="service-icon"><i class="fa-solid fa-utensils"></i></div><span class="text-xs font-bold text-gray-700">الطعام</span></div>
-                        <div class="service-card" onclick="filterByService('ماء')"><div class="service-icon"><i class="fa-solid fa-mug-hot"></i></div><span class="text-xs font-bold text-gray-700">الماء والشاي</span></div>
-                        <div class="service-card" onclick="filterByService('مبيت')"><div class="service-icon"><i class="fa-solid fa-bed"></i></div><span class="text-xs font-bold text-gray-700">المبيت</span></div>
-                        <div class="service-card" onclick="filterByService('إسعاف')"><div class="service-icon"><i class="fa-solid fa-kit-medical"></i></div><span class="text-xs font-bold text-gray-700">الإسعافات</span></div>
-                        <div class="service-card" onclick="filterByService('مياه')"><div class="service-icon text-lg font-black">WC</div><span class="text-xs font-bold text-gray-700">دورات المياه</span></div>
-                        <div class="service-card" onclick="filterByService('شحن')"><div class="service-icon"><i class="fa-solid fa-battery-full"></i></div><span class="text-xs font-bold text-gray-700">شحن الهواتف</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="page-chats" class="page marble-bg relative">
-                <div class="header-luxury px-4 flex justify-between items-center sticky top-0 z-20">
-                    <h2 class="font-black text-[var(--gold)] text-xl">الدردشات</h2>
-                    <div class="flex gap-4 text-[var(--gold)] text-xl relative z-10">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <i class="fa-solid fa-video"></i>
-                    </div>
-                </div>
-                <div class="p-3 relative z-10"><div id="chatsList" class="pb-10"></div></div>
-            </div>
-
-            <div id="page-calls" class="page bg-[var(--bg-app)]">
-                <div class="header-luxury px-4 flex justify-between items-center sticky top-0 z-20">
-                    <h2 class="font-black text-[var(--gold)] text-xl">المكالمات</h2>
-                    <i class="fa-solid fa-phone text-[var(--gold)]"></i>
-                </div>
-                <div class="p-3"><div id="callsList" class="pb-10"></div></div>
-            </div>
-
-            <div id="page-add" class="page p-5 bg-[var(--bg-app)]">
-                <div class="flex items-center gap-3 mb-6 mt-4">
-                    <button onclick="switchTab('home')" class="bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-[var(--maroon)] border border-gray-200"><i class="fa-solid fa-arrow-right"></i></button>
-                    <h2 class="text-xl font-bold text-[var(--maroon)]">تسجيل موكب جديد</h2>
-                </div>
-                <form id="addForm" onsubmit="handleSaveMawkib(event)" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">صورة الموكب</label>
-                        <input type="file" id="mawkibImage" accept="image/*" onchange="previewImage(event)" class="w-full border border-gray-200 rounded-xl p-2 text-sm bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--maroon)] file:text-white">
-                        <img id="imagePreview" class="hidden w-full h-40 object-cover rounded-xl mt-3 border-2 border-[var(--maroon)]">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">اسم الموكب</label>
-                        <input type="text" id="mawkibName" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">العنوان</label>
-                        <input type="text" id="mawkibAddress" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">الخدمات المتوفرة</label>
-                        <div class="bg-gray-900 rounded-xl p-3 text-white space-y-2">
-                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="طعام" class="w-5 h-5 accent-green-500"> 🍲 طعام</label>
-                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="ماء" class="w-5 h-5 accent-green-500"> 💧 ماء</label>
-                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="مبيت" class="w-5 h-5 accent-green-500"> 🛏️ مبيت</label>
-                            <label class="flex items-center gap-3"><input type="checkbox" name="service" value="إسعاف" class="w-5 h-5 accent-green-500"> 🩺 إسعاف</label>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">الموقع على الخريطة</label>
-                        <div id="pickMap"></div>
-                    </div>
-                    <button type="submit" class="w-full bg-[var(--maroon)] text-white font-bold py-4 rounded-xl shadow-md mt-4 border border-[var(--gold)]">حفظ الموكب</button>
-                </form>
-            </div>
-
-            <div id="page-notifications" class="page bg-[var(--bg-app)]">
-                <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20"><h2 class="font-black text-[var(--gold)] text-xl">الإشعارات</h2></div>
-                <div id="notificationsList" class="p-3 space-y-3 pb-10"></div>
-            </div>
-
-            <div id="page-search" class="page bg-[var(--bg-app)]">
-                <div class="header-luxury p-4 flex items-center gap-3 sticky top-0 z-20">
-                    <button onclick="switchTab('home')" class="w-8 h-8 flex items-center justify-center text-[var(--gold)]"><i class="fa-solid fa-arrow-right"></i></button>
-                    <h2 class="font-bold text-[var(--gold)] text-lg">نتائج البحث</h2>
-                </div>
-                <div id="searchResultsList" class="p-3 space-y-3 pb-10"></div>
-            </div>
-        </main>
-
-        <nav class="bottom-nav flex justify-around z-50 h-[70px] px-2 fixed bottom-0 w-full">
-            <div class="nav-btn active" id="nav-home" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>الرئيسية</span></div>
-            <div class="nav-btn" id="nav-chats" onclick="switchTab('chats')"><i class="fa-solid fa-comments"></i><span>الدردشات</span></div>
-            <div class="nav-btn" id="nav-calls" onclick="switchTab('calls')"><i class="fa-solid fa-phone"></i><span>المكالمات</span></div>
-            <div class="nav-btn" id="nav-add" onclick="switchTab('add')"><i class="fa-solid fa-plus-square text-2xl"></i><span>إضافة</span></div>
-            <div class="nav-btn" id="nav-notifications" onclick="switchTab('notifications')"><i class="fa-regular fa-bell"></i><span>الإشعارات</span></div>
-        </nav>
-    </div>
-
-    <div id="chatRoomModal" class="fixed inset-0 bg-[var(--chat-bg)] z-[10002] flex flex-col w-full h-[100dvh]">
-        <div class="bg-[var(--maroon)] text-white px-4 py-3 flex items-center justify-between shadow-md border-b-2 border-[var(--gold)] z-20 pt-safe">
-            <div class="flex items-center gap-3">
-                <button onclick="closeChatRoom()" class="text-xl text-[var(--gold)]"><i class="fa-solid fa-arrow-right"></i></button>
-                <img id="chatHeaderAvatar" src="" class="w-10 h-10 rounded-full object-cover border-2 border-[var(--gold)]">
-                <div>
-                    <h3 id="chatHeaderName" class="font-bold text-sm text-[var(--gold)]">اسم الموكب</h3>
-                    <p id="chatStatusText" class="text-[10px] text-gray-200">متصل الآن</p>
-                </div>
-            </div>
-            <div class="flex gap-4 text-lg text-[var(--gold)]">
-                <button onclick="startCall('voice')"><i class="fa-solid fa-phone"></i></button>
-                <button onclick="startCall('video')"><i class="fa-solid fa-video"></i></button>
-            </div>
+    <!-- شاشة الفوز -->
+    <div id="winScreen" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-xs w-full border-4 border-[#D4AF37]">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-3xl font-black text-[#8B1A1A] mb-2">أحسنت!</h2>
+            <p class="text-gray-600 font-bold mb-6">لقد أكملت اللعبة في <span id="finalMoves" class="text-[#8B1A1A] text-xl">0</span> محاولة.</p>
+            <button onclick="startGame()" class="w-full bg-[#8B1A1A] text-white font-bold py-3 rounded-xl shadow-lg border-2 border-[#D4AF37]">العب مرة أخرى</button>
         </div>
-        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 flex flex-col hide-scrollbar chat-bg relative">
-            <div id="typingIndicator" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
-        </div>
-        <div class="bg-[#F0F2F5] p-2 flex items-end gap-2 pb-safe z-20 border-t border-gray-300">
-            <div class="flex-1 bg-white rounded-3xl flex items-center px-3 py-1 shadow-sm border border-gray-300">
-                <button class="text-gray-500 text-2xl px-1"><i class="fa-regular fa-face-smile"></i></button>
-                <input type="text" id="chatInput" onkeypress="if(event.key === 'Enter') sendChatMessage()" placeholder="اكتب رسالة..." class="flex-1 px-2 py-2 text-sm focus:outline-none bg-transparent">
-                <label class="text-gray-500 text-xl px-2 cursor-pointer"><i class="fa-solid fa-paperclip"></i><input type="file" accept="image/*" class="hidden" onchange="sendChatMedia(event)"></label>
-            </div>
-            <button onclick="sendChatMessage()" class="w-12 h-12 bg-[var(--maroon)] text-[var(--gold)] rounded-full flex items-center justify-center shadow-md">
-                <i class="fa-solid fa-paper-plane text-lg"></i>
-            </button>
-        </div>
-    </div>
-
-    <div id="callModal" class="fixed inset-0 z-[10005] hidden flex-col items-center justify-center text-white" style="background: linear-gradient(135deg, var(--maroon-dark), var(--maroon));">
-        <div class="absolute top-10 left-0 w-full text-center">
-            <p class="text-[var(--gold)] text-sm font-bold" id="callStatusText">جاري الاتصال...</p>
-        </div>
-        <img id="callAvatar" src="" class="w-32 h-32 rounded-full object-cover border-4 border-[var(--gold)] mb-4 shadow-2xl">
-        <h2 id="callName" class="text-2xl font-bold mb-2 text-[var(--gold)]">اسم الموكب</h2>
-        
-        <div class="flex gap-6 mt-12">
-            <button class="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-microphone-slash"></i></button>
-            <button id="recordBtn" onclick="toggleRecord()" class="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center text-xl">
-                <i class="fa-solid fa-circle text-red-500 text-sm" id="recordIcon"></i>
-            </button>
-            <button onclick="endCall()" class="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-red-600 transition">
-                <i class="fa-solid fa-phone-slash"></i>
-            </button>
-        </div>
-        <div id="recordStatus" class="mt-6 text-red-500 font-bold hidden animate-pulse"><i class="fa-solid fa-circle text-xs ml-1"></i> جاري التسجيل...</div>
-    </div>
-
-    <div id="mawkibDetailsModal" class="fixed inset-0 bg-black/60 z-[9999] hidden flex items-end justify-center backdrop-blur-sm" onclick="closeMawkibDetails(event)">
-        <div class="bg-white w-full max-w-md rounded-t-3xl p-5 shadow-2xl pb-8 max-h-[85vh] overflow-y-auto hide-scrollbar border-t-4 border-[var(--maroon)]" onclick="event.stopPropagation()">
-            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
-            <img id="detailsImg" src="" class="w-full h-48 object-cover rounded-xl mb-4 border-2 border-[var(--maroon)]">
-            <h2 id="detailsName" class="text-2xl font-black text-[var(--maroon)] mb-2">اسم الموكب</h2>
-            <p id="detailsAddress" class="text-gray-500 text-sm mb-4"><i class="fa-solid fa-location-dot text-green-600 ml-1"></i> العنوان</p>
-            <h3 class="font-bold text-gray-800 mb-2">الخدمات المتوفرة:</h3>
-            <div id="detailsServices" class="flex flex-wrap gap-2 mb-6"></div>
-            <button id="detailsDirectionsBtn" class="w-full bg-[var(--maroon)] text-white font-bold py-3.5 rounded-xl shadow-md mb-3">الاتجاهات إلى الموكب</button>
-            <button onclick="closeMawkibDetails()" class="w-full bg-gray-100 text-gray-700 font-bold py-3 rounded-xl">إغلاق</button>
-        </div>
-    </div>
-
-    <div id="toast" class="fixed top-[-50px] left-1/2 transform -translate-x-1/2 bg-gray-900 text-white p-3 rounded-xl shadow-2xl flex items-center gap-3 z-[100000] transition-all duration-300 w-[90%] max-w-[400px]">
-        <i class="fa-solid fa-bell text-[var(--gold)]"></i>
-        <span id="toastText" class="text-sm">إشعار جديد</span>
     </div>
 
     <script>
-        function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
-        function compressImage(file, callback) { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = function(event) { const img = new Image(); img.src = event.target.result; img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 600; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/jpeg', 0.6)); }; }; }
-        function showToast(msg) { const toast = document.getElementById('toast'); document.getElementById('toastText').innerText = msg; toast.style.top = '20px'; setTimeout(() => toast.style.top = '-50px', 3000); }
-        function safeParse(json, fallback) { try { if (!json) return fallback; const parsed = JSON.parse(json); return parsed !== null && parsed !== undefined ? parsed : fallback; } catch (e) { return fallback; } }
+        // الرموز التعبيرية المستخدمة في اللعبة
+        const icons = ['🕌', '💧', '🍲', '🛏️', '🩺', '🤲', '📖', '⭐'];
+        
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let lockBoard = false;
 
-        const defaultMawkibs = [{ id: 1, name: "موكب العباس (ع)", lat: 32.6160, lng: 44.0249, services: "طعام, ماء, مبيت", address: "شارع العباس", img: "https://images.unsplash.com/photo-1590075865410-597a1d476cb6?q=80&w=400" },{ id: 2, name: "موكب شباب الحسين", lat: 32.6180, lng: 44.0280, services: "ماء, شحن", address: "حي الحسين", img: "https://images.unsplash.com/photo-1584647707362-8e16785e03b0?q=80&
+        const board = document.getElementById('gameBoard');
+        const movesCount = document.getElementById('movesCount');
+        const winScreen = document.getElementById('winScreen');
+        const finalMoves = document.getElementById('finalMoves');
+
+        // دالة خلط المصفوفة (Fisher-Yates)
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // بدء أو إعادة تشغيل اللعبة
+        function startGame() {
+            board.innerHTML = '';
+            winScreen.classList.add('hidden');
+            winScreen.classList.remove('flex');
+            
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            lockBoard = false;
+            movesCount.innerText = moves;
+
+            // إنشاء بطاقات مزدوجة (كل أيقونة مرتين)
+            cards = [...icons, ...icons];
+            shuffle(cards);
+
+            // رسم البطاقات في الصفحة
+            cards.forEach((icon, index) => {
+                const cardContainer = document.createElement('div');
+                cardContainer.className = 'card-container';
+                
+                cardContainer.innerHTML = `
+                    <div class="card" data-icon="${icon}" data-index="${index}" onclick="flipCard(this)">
+                        <div class="card-face card-front">❓</div>
+                        <div class="card-face card-back">${icon}</div>
+                    </div>
+                `;
+                board.appendChild(cardContainer);
+            });
+        }
+
+        // دالة قلب البطاقة
+        function flipCard(card) {
+            if (lockBoard) return;
+            if (card.classList.contains('flipped')) return;
+
+            // قلب البطاقة
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            // إذا تم قلب بطاقتين
+            if (flippedCards.length === 2) {
+                moves++;
+                movesCount.innerText = moves;
+                checkMatch();
+            }
+        }
+
+        // التحقق من التطابق
+        function checkMatch() {
+            const card1 = flippedCards[0];
+            const card2 = flippedCards[1];
+            const isMatch = card1.dataset.icon === card2.dataset.icon;
+
+            if (isMatch) {
+                // إذا تطابقت البطاقات
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                card1.style.pointerEvents = 'none';
+                card2.style.pointerEvents = 'none';
+                
+                matchedPairs++;
+                flippedCards = [];
+
+                // التحقق من الفوز
+                if (matchedPairs === icons.length) {
+                    setTimeout(showWin, 600);
+                }
+            } else {
+                // إذا لم تتطابق
+                lockBoard = true;
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                    lockBoard = false;
+                }, 1000); // الانتظار ثانية قبل إعادة القلب
+            }
+        }
+
+        // إظهار شاشة الفوز
+        function showWin() {
+            finalMoves.innerText = moves;
+            winScreen.classList.remove('hidden');
+            winScreen.classList.add('flex');
+        }
+
+        // تشغيل اللعبة عند فتح الصفحة
+        window.onload = startGame;
+    </script>
+</body>
+</html>
