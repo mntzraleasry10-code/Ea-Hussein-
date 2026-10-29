@@ -3,130 +3,229 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎬 مشغل أفلامي</title>
+<title>🎬 دليل الأفلام - شاهد على Netflix</title>
 <style>
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    margin: 0;
     font-family: Tahoma, Arial, sans-serif;
-    background: #0f1115;
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a0000 100%);
     color: #fff;
+    min-height: 100vh;
     padding: 20px;
   }
+
   header {
     text-align: center;
-    font-size: 26px;
-    margin-bottom: 20px;
-    color: #ffcc00;
+    padding: 30px 0;
+    border-bottom: 1px solid #333;
+    margin-bottom: 30px;
   }
-  main { max-width: 900px; margin: auto; }
-  #dropZone {
-    border: 2px dashed #555;
+
+  header h1 {
+    font-size: 32px;
+    background: linear-gradient(90deg, #e50914, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  header p {
+    color: #888;
+    font-size: 14px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: auto;
+  }
+
+  .card {
+    background: #1a1a1a;
     border-radius: 12px;
-    padding: 30px;
-    text-align: center;
-    color: #aaa;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
     cursor: pointer;
-    margin-bottom: 15px;
-    transition: 0.2s;
   }
-  #dropZone.hover {
-    border-color: #ffcc00;
-    background: #1a1d24;
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(229, 9, 20, 0.3);
+  }
+
+  .poster {
+    width: 100%;
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .poster::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to top, #1a1a1a, transparent);
+  }
+
+  .info {
+    padding: 15px;
+  }
+
+  .info h3 {
+    font-size: 16px;
+    margin-bottom: 5px;
     color: #fff;
   }
-  input[type="file"] { display: none; }
-  video {
+
+  .info .meta {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 12px;
+  }
+
+  .btn-netflix {
     width: 100%;
-    max-height: 500px;
-    background: #000;
-    border-radius: 12px;
-    margin-bottom: 15px;
-  }
-  h3 { color: #ffcc00; }
-  ul { list-style: none; padding: 0; }
-  li {
-    background: #1a1d24;
-    padding: 12px;
-    margin-bottom: 8px;
-    border-radius: 8px;
+    padding: 10px;
+    background: #e50914;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
   }
-  li:hover { background: #2a2f3a; }
-  li.active { background: #ffcc00; color: #000; font-weight: bold; }
+
+  .btn-netflix:hover {
+    background: #f40612;
+  }
+
+  .btn-netflix:active {
+    transform: scale(0.98);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #333;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: transform 0.3s;
+    z-index: 1000;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
 </style>
 </head>
 <body>
-<header>🎬 مشغل أفلامي</header>
-<main>
-  <div id="dropZone">اسحب الأفلام هنا أو اضغط لاختيار ملفات</div>
-  <input type="file" id="fileInput" accept="video/*" multiple>
 
-  <video id="player" controls></video>
+<header>
+  <h1>🎬 دليل الأفلام</h1>
+  <p>اضغط "شاهد على Netflix" ليفتح التطبيق مباشرة على الفيلم</p>
+</header>
 
-  <h3>قائمة الأفلام</h3>
-  <ul id="playlist"></ul>
-</main>
+<div class="grid" id="grid"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-  const fileInput = document.getElementById('fileInput');
-  const dropZone = document.getElementById('dropZone');
-  const player = document.getElementById('player');
-  const playlist = document.getElementById('playlist');
-  const urls = [];
+  // قاعدة الأفلام - ID هو رقم الفيلم الرسمي على Netflix
+  const movies = [
+    { title: "Stranger Things", year: "2016", id: "80057281", emoji: "👽", color: "#8b0000" },
+    { title: "The Witcher", year: "2019", id: "80189685", emoji: "⚔️", color: "#2d3a4b" },
+    { title: "Squid Game", year: "2021", id: "81040344", emoji: "🦑", color: "#1e4d3d" },
+    { title: "Money Heist", year: "2017", id: "80192098", emoji: "💰", color: "#8b2500" },
+    { title: "Dark", year: "2017", id: "80100172", emoji: "🌑", color: "#1a1a2e" },
+    { title: "Breaking Bad", year: "2008", id: "70143836", emoji: "🧪", color: "#4a4a1a" },
+    { title: "The Queen's Gambit", year: "2020", id: "80234304", emoji: "♟️", color: "#4b2d1a" },
+    { title: "Wednesday", year: "2022", id: "81231974", emoji: "🖤", color: "#1a0033" },
+    { title: "Extraction", year: "2020", id: "80230399", emoji: "🔥", color: "#5c1a1a" },
+    { title: "Bird Box", year: "2018", id: "80196789", emoji: "🐦", color: "#2d1a4b" },
+  ];
 
-  dropZone.addEventListener('click', () => fileInput.click());
+  const grid = document.getElementById('grid');
+  const toast = document.getElementById('toast');
 
-  dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('hover');
+  // بناء الكروت
+  movies.forEach(movie => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="poster" style="background: linear-gradient(135deg, ${movie.color}, #000);">
+        ${movie.emoji}
+      </div>
+      <div class="info">
+        <h3>${movie.title}</h3>
+        <div class="meta">${movie.year} • Netflix</div>
+        <button class="btn-netflix" onclick="openNetflix('${movie.id}', '${movie.title.replace(/'/g, "\\'")}')">
+          ▶ شاهد على Netflix
+        </button>
+      </div>
+    `;
+    grid.appendChild(card);
   });
 
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('hover');
-  });
+  // فتح Netflix - يحاول التطبيق أولاً ثم يفتح الموقع
+  function openNetflix(id, title) {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const webUrl = `https://www.netflix.com/title/${id}`;
 
-  dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('hover');
-    addFiles(e.dataTransfer.files);
-  });
+    if (!isMobile) {
+      // على الكمبيوتر: نفتح الموقع مباشرة
+      showToast(`فتح "${title}" على Netflix...`);
+      window.open(webUrl, '_blank');
+      return;
+    }
 
-  fileInput.addEventListener('change', (e) => {
-    addFiles(e.target.files);
-  });
+    // على الموبايل: نحاول التطبيق أولاً
+    const appUrl = `nflx://www.netflix.com/title/${id}`;
+    let appOpened = false;
 
-  function addFiles(files) {
-    const videos = [...files].filter(f => f.type.startsWith('video/'));
+    // نراقب إذا الصفحة اختفت (يعني التطبيق فتح)
+    const onBlur = () => { appOpened = true; };
+    window.addEventListener('blur', onBlur);
 
-    videos.forEach(file => {
-      const url = URL.createObjectURL(file);
-      urls.push(url);
+    // نحاول فتح التطبيق
+    window.location.href = appUrl;
 
-      const li = document.createElement('li');
-      li.textContent = '🎞️ ' + file.name;
-
-      li.addEventListener('click', () => {
-        player.src = url;
-        player.play();
-
-        document.querySelectorAll('li').forEach(x => x.classList.remove('active'));
-        li.classList.add('active');
-      });
-
-      playlist.appendChild(li);
-
-      if (!player.src) {
-        player.src = url;
-        li.classList.add('active');
+    // إذا ما فتح التطبيق خلال 2.5 ثانية، نفتح الموقع
+    setTimeout(() => {
+      window.removeEventListener('blur', onBlur);
+      if (!appOpened && !document.hidden) {
+        showToast('فتح نسخة الويب...');
+        window.location.href = webUrl;
       }
-    });
+    }, 2500);
   }
 
-  window.addEventListener('beforeunload', () => {
-    urls.forEach(url => URL.revokeObjectURL(url));
-  });
+  // رسالة تنبيه
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
 </script>
+
 </body>
 </html>
