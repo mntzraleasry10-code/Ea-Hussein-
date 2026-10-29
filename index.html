@@ -1,359 +1,372 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Neon Breaker - تكسير الطوب</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            margin: 0;
-            overflow: hidden;
-            background-color: #0f172a;
-            user-select: none;
-            touch-action: none;
-        }
-        
-        canvas {
-            display: block;
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-        }
-
-        .overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-            backdrop-filter: blur(8px);
-        }
-        
-        .hidden { display: none !important; }
-
-        .btn {
-            background: #10b981; /* أخضر نيون */
-            color: #fff;
-            padding: 15px 50px;
-            border-radius: 50px;
-            font-weight: 900;
-            font-size: 22px;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-            transition: all 0.2s;
-            border: none;
-        }
-        .btn:active { transform: scale(0.95); box-shadow: 0 0 10px rgba(16, 185, 129, 0.8); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لعبة تركيب الصور - 50 مرحلة</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+  }
+  .game {
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    text-align: center;
+    max-width: 700px;
+    width: 100%;
+  }
+  h1 { margin: 0 0 15px; color: #333; font-size: 1.8rem; }
+  .controls {
+    display: flex; justify-content: center; align-items: center;
+    gap: 10px; margin-bottom: 15px; flex-wrap: wrap;
+  }
+  select {
+    padding: 8px 12px; border-radius: 10px; border: 2px solid #764ba2;
+    font-size: 1rem; background: #fff; color: #333; cursor: pointer;
+  }
+  #difficultyLabel {
+    font-weight: bold; color: #764ba2; background: #f0e6ff;
+    padding: 4px 12px; border-radius: 20px;
+  }
+  .board-wrapper { display: flex; justify-content: center; margin: 10px 0; }
+  .board {
+    display: grid;
+    border: 4px solid #764ba2;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ddd;
+    max-width: 90vw;
+    max-height: 90vw;
+    aspect-ratio: 1;
+    margin: 0 auto;
+  }
+  .piece {
+    background-repeat: no-repeat;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    border: 1px solid rgba(255,255,255,0.4);
+    background-color: #fff;
+  }
+  .piece:hover { transform: scale(0.98); }
+  .piece.selected {
+    outline: 4px solid #ffcc00;
+    outline-offset: -4px;
+    z-index: 2;
+    transform: scale(1.02);
+    box-shadow: 0 0 15px #ffcc00;
+  }
+  .buttons {
+    display: flex; justify-content: center; gap: 10px;
+    flex-wrap: wrap; margin-top: 15px;
+  }
+  button {
+    padding: 10px 20px; border: none; border-radius: 12px;
+    font-size: 1rem; font-weight: bold; cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    background: #764ba2; color: white; box-shadow: 0 4px 0 #5a3780;
+  }
+  button:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #5a3780; }
+  button:active { transform: translateY(2px); box-shadow: 0 2px 0 #5a3780; }
+  .message {
+    margin-top: 15px; padding: 20px; background: #d4edda;
+    border-radius: 15px; border: 2px solid #28a745;
+  }
+  .message p { font-size: 1.5rem; margin: 0 0 10px; color: #155724; }
+  .hidden { display: none !important; }
+  .hint-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7); display: flex;
+    justify-content: center; align-items: center;
+    z-index: 100; cursor: pointer;
+  }
+  .hint-overlay img {
+    max-width: 80vw; max-height: 80vh; border-radius: 15px;
+    border: 5px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+</style>
 </head>
 <body>
-
-    <canvas id="gameCanvas"></canvas>
-
-    <!-- شريط النقاط والحياة -->
-    <div id="hud" class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center text-white z-10 hidden">
-        <div class="bg-black/40 px-4 py-2 rounded-xl text-lg font-bold border border-cyan-500/50 text-cyan-400">
-            النقاط: <span id="scoreText">0</span>
-        </div>
-        <div class="bg-black/40 px-4 py-2 rounded-xl text-lg font-bold border border-red-500/50 text-red-400" id="livesContainer">
-            ❤️❤️❤️
-        </div>
+  <div class="game">
+    <h1>🧩 لعبة تركيب الصور</h1>
+    <div class="controls">
+      <label>المرحلة: <select id="levelSelect"></select></label>
+      <span id="difficultyLabel"></span>
     </div>
-
-    <!-- شاشة البداية -->
-    <div id="startScreen" class="overlay">
-        <div class="text-7xl mb-4">🧱</div>
-        <h1 class="text-4xl font-black text-white mb-2">تكسير الطوب</h1>
-        <p class="text-gray-400 mb-8 text-center px-8">حرك المضرب بيدك لكسر جميع الطوب!</p>
-        <button onclick="startGame()" class="btn">ابدأ اللعب</button>
+    <div class="board-wrapper">
+      <div id="board" class="board"></div>
     </div>
-
-    <!-- شاشة النهاية -->
-    <div id="gameOverScreen" class="overlay hidden">
-        <div class="text-7xl mb-4">💥</div>
-        <h1 class="text-4xl font-black text-red-500 mb-2">انتهت اللعبة!</h1>
-        <p class="text-white text-xl mb-8">نقاطك النهائية: <span id="finalScore" class="text-cyan-400 font-black text-3xl">0</span></p>
-        <button onclick="startGame()" class="btn">حاول مجدداً</button>
+    <div class="buttons">
+      <button id="shuffleBtn">🔀 خلط</button>
+      <button id="hintBtn">👁️ تلميح</button>
+      <button id="resetBtn">🔄 إعادة</button>
     </div>
+    <div id="message" class="message hidden">
+      <p>🎉 أحسنت! أكملت المرحلة</p>
+      <button id="nextBtn">المرحلة التالية ➡️</button>
+    </div>
+  </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        let width, height;
-        let score = 0;
-        let lives = 3;
-        let isPlaying = false;
-        let animationId;
-        
-        // إعدادات اللعبة
-        const paddleWidth = 100;
-        const paddleHeight = 15;
-        const ballRadius = 8;
-        let gameSpeed = 5; // سرعة الكرة
-        
-        // الكائنات
-        const paddle = {
-            x: 0,
-            y: 0,
-            w: paddleWidth,
-            h: paddleHeight,
-            color: '#06b6d4'
-        };
+  <div id="hintOverlay" class="hint-overlay hidden">
+    <img id="hintImg" src="" alt="تلميح">
+  </div>
 
-        const ball = {
-            x: 0,
-            y: 0,
-            dx: 0,
-            dy: 0,
-            radius: ballRadius,
-            color: '#ffffff'
-        };
+<script>
+  // 50 شخصية (إيموجي) — تكدر تبدل الإيموجي بصور حقيقية لاحقاً
+  const characters = [
+    { emoji: '🦸‍♂️', name: 'سوبرمان' },
+    { emoji: '🦸‍♀️', name: 'وندر وومان' },
+    { emoji: '🧙‍♂️', name: 'ساحر' },
+    { emoji: '🧚‍♀️', name: 'جنية' },
+    { emoji: '🧜‍♀️', name: 'حورية البحر' },
+    { emoji: '🧛‍♂️', name: 'دراكولا' },
+    { emoji: '🧟‍♂️', name: 'زومبي' },
+    { emoji: '🤖', name: 'روبوت' },
+    { emoji: '👽', name: 'فضائي' },
+    { emoji: '🐉', name: 'تنين' },
+    { emoji: '🦄', name: 'وحيد القرن' },
+    { emoji: '🐭', name: 'ميكي ماوس' },
+    { emoji: '🐻', name: 'دبدوب' },
+    { emoji: '🦊', name: 'ثعلب' },
+    { emoji: '🐯', name: 'نمر' },
+    { emoji: '🦁', name: 'أسد' },
+    { emoji: '🐸', name: 'ضفدع' },
+    { emoji: '🐵', name: 'قرد' },
+    { emoji: '🐼', name: 'باندا' },
+    { emoji: '🐨', name: 'كوالا' },
+    { emoji: '🐧', name: 'بطريق' },
+    { emoji: '🦉', name: 'بومة' },
+    { emoji: '🐙', name: 'أخطبوط' },
+    { emoji: '🦖', name: 'ديناصور' },
+    { emoji: '🐝', name: 'نحلة' },
+    { emoji: '🦋', name: 'فراشة' },
+    { emoji: '🐞', name: 'دعسوقة' },
+    { emoji: '🐢', name: 'سلحفاة' },
+    { emoji: '🐰', name: 'أرنب' },
+    { emoji: '🐮', name: 'بقرة' },
+    { emoji: '🐷', name: 'خنزير' },
+    { emoji: '🐔', name: 'دجاجة' },
+    { emoji: '🐺', name: 'ذئب' },
+    { emoji: '🦇', name: 'خفاش' },
+    { emoji: '🦅', name: 'نسر' },
+    { emoji: '🐬', name: 'دلفين' },
+    { emoji: '🐳', name: 'حوت' },
+    { emoji: '🦈', name: 'قرش' },
+    { emoji: '🐊', name: 'تمساح' },
+    { emoji: '🦒', name: 'زرافة' },
+    { emoji: '🦓', name: 'حمار وحشي' },
+    { emoji: '🐘', name: 'فيل' },
+    { emoji: '🦔', name: 'قنفذ' },
+    { emoji: '🐿️', name: 'سنجاب' },
+    { emoji: '🦥', name: 'كسلان' },
+    { emoji: '🦦', name: 'ثعلب الماء' },
+    { emoji: '🦩', name: 'فلامنغو' },
+    { emoji: '🦚', name: 'طاووس' },
+    { emoji: '👑', name: 'ملك' },
+    { emoji: '🎩', name: 'ساحر' }
+  ];
 
-        let bricks = [];
-        const brickRowCount = 6;
-        const brickColumnCount = 6;
-        const brickWidth = 50;
-        const brickHeight = 20;
-        const brickPadding = 10;
-        const brickOffsetTop = 80;
-        let brickOffsetLeft = 0;
+  const boardEl = document.getElementById('board');
+  const levelSelect = document.getElementById('levelSelect');
+  const difficultyLabel = document.getElementById('difficultyLabel');
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  const hintBtn = document.getElementById('hintBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const messageEl = document.getElementById('message');
+  const nextBtn = document.getElementById('nextBtn');
+  const hintOverlay = document.getElementById('hintOverlay');
+  const hintImg = document.getElementById('hintImg');
 
-        const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+  let currentLevel = 1;
+  let gridSize = 2;
+  let pieces = [];
+  let selectedIndex = null;
+  let originalImageURL = '';
+  let isSolved = false;
 
-        // إعدادات الشاشة
-        function resize() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-            
-            // ضبط موضع المضرب والكرة عند تغيير الحجم
-            if (paddle.x === 0) {
-                paddle.x = (width - paddleWidth) / 2;
-                paddle.y = height - paddleHeight - 30;
-                resetBall();
-            }
-            
-            // حساب عرض الطوب ليتناسب مع الشاشة
-            brickOffsetLeft = (width - (brickColumnCount * (brickWidth + brickPadding))) / 2;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+  function getGridSize(level) {
+    if (level <= 5) return 2;
+    if (level <= 15) return 3;
+    if (level <= 30) return 4;
+    if (level <= 40) return 5;
+    return 6;
+  }
 
-        // إعادة ضبط الكرة
-        function resetBall() {
-            ball.x = paddle.x + paddle.w / 2;
-            ball.y = paddle.y - ballRadius - 2;
-            ball.dx = gameSpeed * (Math.random() > 0.5 ? 1 : -1);
-            ball.dy = -gameSpeed;
-        }
+  function getDifficultyText(level) {
+    if (level <= 5) return 'سهل جداً';
+    if (level <= 15) return 'سهل';
+    if (level <= 30) return 'متوسط';
+    if (level <= 40) return 'صعب';
+    return 'صعب جداً';
+  }
 
-        // إنشاء الطوب
-        function initBricks() {
-            bricks = [];
-            for (let c = 0; c < brickColumnCount; c++) {
-                bricks[c] = [];
-                for (let r = 0; r < brickRowCount; r++) {
-                    bricks[c][r] = { 
-                        x: 0, 
-                        y: 0, 
-                        status: 1, 
-                        color: colors[r % colors.length] 
-                    };
-                }
-            }
-        }
+  function generateCharacterImage(emoji, level) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 600;
+    const ctx = canvas.getContext('2d');
 
-        // التحكم بالمضرب (لمس أو ماوس)
-        function movePaddle(e) {
-            if (!isPlaying) return;
-            
-            let clientX = e.clientX;
-            if (e.touches && e.touches.length > 0) {
-                clientX = e.touches[0].clientX;
-            }
-            
-            paddle.x = clientX - (paddleWidth / 2);
-            
-            if (paddle.x < 0) paddle.x = 0;
-            if (paddle.x + paddle.w > width) paddle.x = width - paddle.w;
-        }
+    const hue1 = (level * 37) % 360;
+    const hue2 = (hue1 + 60) % 360;
+    const grad = ctx.createLinearGradient(0, 0, 600, 600);
+    grad.addColorStop(0, `hsl(${hue1}, 80%, 70%)`);
+    grad.addColorStop(1, `hsl(${hue2}, 80%, 50%)`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 600, 600);
 
-        canvas.addEventListener('mousemove', movePaddle);
-        canvas.addEventListener('touchmove', movePaddle, { passive: false });
+    ctx.globalAlpha = 0.2;
+    for (let i = 0; i < 8; i++) {
+      ctx.beginPath();
+      ctx.arc(Math.random()*600, Math.random()*600, 40 + Math.random()*80, 0, Math.PI*2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
 
-        // بدء اللعبة
-        function startGame() {
-            document.getElementById('startScreen').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            document.getElementById('hud').classList.remove('hidden');
-            
-            score = 0;
-            lives = 3;
-            gameSpeed = 5;
-            document.getElementById('scoreText').innerText = score;
-            updateLivesDisplay();
-            
-            paddle.x = (width - paddleWidth) / 2;
-            paddle.y = height - paddleHeight - 30;
-            
-            initBricks();
-            resetBall();
-            
-            isPlaying = true;
-            if(animationId) cancelAnimationFrame(animationId);
-            gameLoop();
-        }
+    ctx.font = '400px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.fillText(emoji, 300, 320);
 
-        function updateLivesDisplay() {
-            let hearts = '';
-            for(let i=0; i<lives; i++) hearts += '❤️';
-            for(let i=lives; i<3; i++) hearts += '🖤';
-            document.getElementById('livesContainer').innerText = hearts;
-        }
+    return canvas.toDataURL();
+  }
 
-        // حلقة اللعب
-        function gameLoop() {
-            if (!isPlaying) return;
-            update();
-            draw();
-            animationId = requestAnimationFrame(gameLoop);
-        }
+  function initLevelSelect() {
+    levelSelect.innerHTML = '';
+    characters.forEach((ch, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx + 1;
+      opt.textContent = `المرحلة ${idx + 1} - ${ch.name}`;
+      levelSelect.appendChild(opt);
+    });
+  }
 
-        // فيزياء اللعبة والتصادم
-        function update() {
-            // حركة الكرة
-            ball.x += ball.dx;
-            ball.y += ball.dy;
+  function loadLevel(level) {
+    currentLevel = level;
+    gridSize = getGridSize(level);
+    difficultyLabel.textContent = `(${getDifficultyText(level)})`;
+    levelSelect.value = level;
+    const char = characters[level - 1];
+    originalImageURL = generateCharacterImage(char.emoji, level);
+    isSolved = false;
+    selectedIndex = null;
+    messageEl.classList.add('hidden');
+    hintOverlay.classList.add('hidden');
 
-            // التصادم مع الحواف الجانبية
-            if (ball.x + ball.radius > width || ball.x - ball.radius < 0) {
-                ball.dx = -ball.dx;
-            }
+    const total = gridSize * gridSize;
+    pieces = Array.from({ length: total }, (_, i) => i);
+    shuffleArray(pieces);
+    if (isSolvedArray(pieces)) shuffleArray(pieces);
+    renderBoard();
+  }
 
-            // التصادم مع السقف
-            if (ball.y - ball.radius < 0) {
-                ball.dy = -ball.dy;
-            }
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
 
-            // التصادم مع المضرب
-            if (ball.y + ball.radius > paddle.y && 
-                ball.x > paddle.x && 
-                ball.x < paddle.x + paddle.w) {
-                
-                // تغيير زاوية الكرة بناء على مكان الاصطدام
-                let hitPos = ball.x - (paddle.x + paddle.w / 2);
-                hitPos = hitPos / (paddle.w / 2); // قيمة بين -1 و 1
-                
-                let angle = hitPos * (Math.PI / 3); // زاوية أقصاها 60 درجة
-                ball.dx = gameSpeed * Math.sin(angle);
-                ball.dy = -gameSpeed * Math.cos(angle);
-            }
+  function isSolvedArray(arr) {
+    return arr.every((val, idx) => val === idx);
+  }
 
-            // التصادم مع الطوب
-            for (let c = 0; c < brickColumnCount; c++) {
-                for (let r = 0; r < brickRowCount; r++) {
-                    let b = bricks[c][r];
-                    if (b.status === 1) {
-                        if (ball.x > b.x && 
-                            ball.x < b.x + brickWidth && 
-                            ball.y > b.y && 
-                            ball.y < b.y + brickHeight) {
-                            
-                            ball.dy = -ball.dy;
-                            b.status = 0;
-                            score++;
-                            document.getElementById('scoreText').innerText = score;
-                            
-                            // زيادة السرعة قليلاً مع كل طوبة
-                            gameSpeed += 0.05;
-                            
-                            // التحقق من الفوز
-                            if (score === brickRowCount * brickColumnCount) {
-                                winGame();
-                            }
-                        }
-                    }
-                }
-            }
+  function renderBoard() {
+    const gameWidth = document.querySelector('.game').clientWidth;
+    const boardSize = Math.min(gameWidth - 40, 600, window.innerWidth - 60);
+    const pieceSize = boardSize / gridSize;
+    boardEl.style.width = boardSize + 'px';
+    boardEl.style.height = boardSize + 'px';
+    boardEl.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    boardEl.innerHTML = '';
 
-            // سقوط الكرة (خسارة حياة)
-            if (ball.y + ball.radius > height) {
-                lives--;
-                updateLivesDisplay();
-                
-                if (lives <= 0) {
-                    gameOver();
-                } else {
-                    // إعادة ضبط الكرة للبدء من جديد
-                    resetBall();
-                }
-            }
-        }
+    pieces.forEach((correctIdx, pos) => {
+      const row = Math.floor(correctIdx / gridSize);
+      const col = correctIdx % gridSize;
+      const piece = document.createElement('div');
+      piece.className = 'piece';
+      if (selectedIndex === pos) piece.classList.add('selected');
+      piece.style.width = pieceSize + 'px';
+      piece.style.height = pieceSize + 'px';
+      piece.style.backgroundImage = `url(${originalImageURL})`;
+      piece.style.backgroundSize = `${boardSize}px ${boardSize}px`;
+      piece.style.backgroundPosition = `-${col * pieceSize}px -${row * pieceSize}px`;
+      piece.addEventListener('click', () => onPieceClick(pos));
+      boardEl.appendChild(piece);
+    });
+  }
 
-        // رسم العناصر
-        function draw() {
-            ctx.clearRect(0, 0, width, height);
+  function onPieceClick(pos) {
+    if (isSolved) return;
+    if (selectedIndex === null) {
+      selectedIndex = pos;
+      renderBoard();
+    } else if (selectedIndex === pos) {
+      selectedIndex = null;
+      renderBoard();
+    } else {
+      [pieces[selectedIndex], pieces[pos]] = [pieces[pos], pieces[selectedIndex]];
+      selectedIndex = null;
+      renderBoard();
+      checkWin();
+    }
+  }
 
-            // رسم الطوب
-            for (let c = 0; c < brickColumnCount; c++) {
-                for (let r = 0; r < brickRowCount; r++) {
-                    if (bricks[c][r].status === 1) {
-                        let b = bricks[c][r];
-                        b.x = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
-                        b.y = (r * (brickHeight + brickPadding)) + brickOffsetTop;
-                        
-                        ctx.fillStyle = b.color;
-                        ctx.shadowBlur = 10;
-                        ctx.shadowColor = b.color;
-                        ctx.beginPath();
-                        ctx.roundRect(b.x, b.y, brickWidth, brickHeight, 5);
-                        ctx.fill();
-                    }
-                }
-            }
+  function checkWin() {
+    if (isSolvedArray(pieces)) {
+      isSolved = true;
+      messageEl.classList.remove('hidden');
+    }
+  }
 
-            // رسم المضرب
-            ctx.fillStyle = paddle.color;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = paddle.color;
-            ctx.beginPath();
-            ctx.roundRect(paddle.x, paddle.y, paddle.w, paddle.h, 10);
-            ctx.fill();
+  function shuffleBoard() {
+    if (isSolved) return;
+    shuffleArray(pieces);
+    if (isSolvedArray(pieces)) shuffleArray(pieces);
+    selectedIndex = null;
+    renderBoard();
+  }
 
-            // رسم الكرة
-            ctx.fillStyle = ball.color;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // إعادة ضبط الظل
-            ctx.shadowBlur = 0;
-        }
+  function resetBoard() {
+    loadLevel(currentLevel);
+  }
 
-        function gameOver() {
-            isPlaying = false;
-            document.getElementById('hud').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.remove('hidden');
-            document.getElementById('finalScore').innerText = score;
-        }
+  function showHint() {
+    hintImg.src = originalImageURL;
+    hintOverlay.classList.remove('hidden');
+    setTimeout(() => hintOverlay.classList.add('hidden'), 2000);
+  }
 
-        function winGame() {
-            isPlaying = false;
-            alert('مبروك! لقد كسرت جميع الطوب!');
-            document.getElementById('hud').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.remove('hidden');
-            document.getElementById('finalScore').innerText = score;
-        }
+  levelSelect.addEventListener('change', (e) => loadLevel(parseInt(e.target.value)));
+  shuffleBtn.addEventListener('click', shuffleBoard);
+  hintBtn.addEventListener('click', showHint);
+  resetBtn.addEventListener('click', resetBoard);
+  nextBtn.addEventListener('click', () => {
+    let next = currentLevel + 1;
+    if (next > 50) next = 1;
+    loadLevel(next);
+  });
+  hintOverlay.addEventListener('click', () => hintOverlay.classList.add('hidden'));
 
-    </script>
+  initLevelSelect();
+  loadLevel(1);
+
+  window.addEventListener('resize', () => {
+    if (!isSolved) renderBoard();
+  });
+</script>
 </body>
 </html>
