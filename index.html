@@ -1,231 +1,87 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎬 دليل الأفلام - شاهد على Netflix</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QAbstractListModel>
+#include <QDateTime>
 
-  body {
-    font-family: Tahoma, Arial, sans-serif;
-    background: linear-gradient(135deg, #0f0f0f 0%, #1a0000 100%);
-    color: #fff;
-    min-height: 100vh;
-    padding: 20px;
-  }
+// هيكل بيانات الرسالة
+struct ChatMessage {
+    QString name;
+    QString message;
+    QString time;
+    bool isRead;
+    QString avatarColor; // نستخدم لون بدل صورة للتبسيط
+};
 
-  header {
-    text-align: center;
-    padding: 30px 0;
-    border-bottom: 1px solid #333;
-    margin-bottom: 30px;
-  }
+// نموذج البيانات (Model) لربطه مع QML
+class ChatModel : public QAbstractListModel {
+    Q_OBJECT
+public:
+    enum ChatRoles {
+        NameRole = Qt::UserRole + 1,
+        MessageRole,
+        TimeRole,
+        IsReadRole,
+        AvatarColorRole
+    };
 
-  header h1 {
-    font-size: 32px;
-    background: linear-gradient(90deg, #e50914, #ff6b6b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 8px;
-  }
-
-  header p {
-    color: #888;
-    font-size: 14px;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-    max-width: 1200px;
-    margin: auto;
-  }
-
-  .card {
-    background: #1a1a1a;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-  }
-
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(229, 9, 20, 0.3);
-  }
-
-  .poster {
-    width: 100%;
-    height: 320px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 60px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .poster::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: linear-gradient(to top, #1a1a1a, transparent);
-  }
-
-  .info {
-    padding: 15px;
-  }
-
-  .info h3 {
-    font-size: 16px;
-    margin-bottom: 5px;
-    color: #fff;
-  }
-
-  .info .meta {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 12px;
-  }
-
-  .btn-netflix {
-    width: 100%;
-    padding: 10px;
-    background: #e50914;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-family: inherit;
-  }
-
-  .btn-netflix:hover {
-    background: #f40612;
-  }
-
-  .btn-netflix:active {
-    transform: scale(0.98);
-  }
-
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: #333;
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: transform 0.3s;
-    z-index: 1000;
-  }
-
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <h1>🎬 دليل الأفلام</h1>
-  <p>اضغط "شاهد على Netflix" ليفتح التطبيق مباشرة على الفيلم</p>
-</header>
-
-<div class="grid" id="grid"></div>
-<div class="toast" id="toast"></div>
-
-<script>
-  // قاعدة الأفلام - ID هو رقم الفيلم الرسمي على Netflix
-  const movies = [
-    { title: "Stranger Things", year: "2016", id: "80057281", emoji: "👽", color: "#8b0000" },
-    { title: "The Witcher", year: "2019", id: "80189685", emoji: "⚔️", color: "#2d3a4b" },
-    { title: "Squid Game", year: "2021", id: "81040344", emoji: "🦑", color: "#1e4d3d" },
-    { title: "Money Heist", year: "2017", id: "80192098", emoji: "💰", color: "#8b2500" },
-    { title: "Dark", year: "2017", id: "80100172", emoji: "🌑", color: "#1a1a2e" },
-    { title: "Breaking Bad", year: "2008", id: "70143836", emoji: "🧪", color: "#4a4a1a" },
-    { title: "The Queen's Gambit", year: "2020", id: "80234304", emoji: "♟️", color: "#4b2d1a" },
-    { title: "Wednesday", year: "2022", id: "81231974", emoji: "🖤", color: "#1a0033" },
-    { title: "Extraction", year: "2020", id: "80230399", emoji: "🔥", color: "#5c1a1a" },
-    { title: "Bird Box", year: "2018", id: "80196789", emoji: "🐦", color: "#2d1a4b" },
-  ];
-
-  const grid = document.getElementById('grid');
-  const toast = document.getElementById('toast');
-
-  // بناء الكروت
-  movies.forEach(movie => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="poster" style="background: linear-gradient(135deg, ${movie.color}, #000);">
-        ${movie.emoji}
-      </div>
-      <div class="info">
-        <h3>${movie.title}</h3>
-        <div class="meta">${movie.year} • Netflix</div>
-        <button class="btn-netflix" onclick="openNetflix('${movie.id}', '${movie.title.replace(/'/g, "\\'")}')">
-          ▶ شاهد على Netflix
-        </button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-
-  // فتح Netflix - يحاول التطبيق أولاً ثم يفتح الموقع
-  function openNetflix(id, title) {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const webUrl = `https://www.netflix.com/title/${id}`;
-
-    if (!isMobile) {
-      // على الكمبيوتر: نفتح الموقع مباشرة
-      showToast(`فتح "${title}" على Netflix...`);
-      window.open(webUrl, '_blank');
-      return;
+    explicit ChatModel(QObject *parent = nullptr) : QAbstractListModel(parent) {
+        // تعبئة البيانات (نفس بيانات الصورة)
+        m_messages.append({"حسين الايراني", "تمام عيني", "12:10 ص", true, "#D4AF37"});
+        m_messages.append({"سجاد حامد", "اني", "أمس", true, "#00BFA5"});
+        m_messages.append({"مالك", "تفاعلت بالرمز ❤️ على \"تدلل\"", "2026/10/27", true, "#9D4EDD"});
+        m_messages.append({"محمد ناجي", "يستخدم محمد ناجي مؤقتًا افتراضيًا...", "2026/10/25", true, "#3F51B5"});
+        m_messages.append({"QiCard", "خدمه_مواكب_الحسينيه_apk.20328121", "2026/10/26", true, "#FF5722"});
+        m_messages.append({"سرحان", "لقد أنت حذفت هذه الرسالة", "2026/10/25", true, "#607D8B"});
+        m_messages.append({"Meta AI", "هذا الرابط الثاني هم ما أكدر افتحه", "2026/10/25", true, "#2196F3"});
+        m_messages.append({"Taxi Service", "your verification code. For your...", "", false, "#E91E63"});
     }
 
-    // على الموبايل: نحاول التطبيق أولاً
-    const appUrl = `nflx://www.netflix.com/title/${id}`;
-    let appOpened = false;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override {
+        Q_UNUSED(parent);
+        return m_messages.count();
+    }
 
-    // نراقب إذا الصفحة اختفت (يعني التطبيق فتح)
-    const onBlur = () => { appOpened = true; };
-    window.addEventListener('blur', onBlur);
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
+        if (index.row() < 0 || index.row() >= m_messages.count())
+            return QVariant();
 
-    // نحاول فتح التطبيق
-    window.location.href = appUrl;
+        const ChatMessage &msg = m_messages[index.row()];
+        switch (role) {
+        case NameRole: return msg.name;
+        case MessageRole: return msg.message;
+        case TimeRole: return msg.time;
+        case IsReadRole: return msg.isRead;
+        case AvatarColorRole: return msg.avatarColor;
+        default: return QVariant();
+        }
+    }
 
-    // إذا ما فتح التطبيق خلال 2.5 ثانية، نفتح الموقع
-    setTimeout(() => {
-      window.removeEventListener('blur', onBlur);
-      if (!appOpened && !document.hidden) {
-        showToast('فتح نسخة الويب...');
-        window.location.href = webUrl;
-      }
-    }, 2500);
-  }
+    QHash<int, QByteArray> roleNames() const override {
+        QHash<int, QByteArray> roles;
+        roles[NameRole] = "name";
+        roles[MessageRole] = "message";
+        roles[TimeRole] = "time";
+        roles[IsReadRole] = "isRead";
+        roles[AvatarColorRole] = "avatarColor";
+        return roles;
+    }
 
-  // رسالة تنبيه
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-  }
-</script>
+private:
+    QList<ChatMessage> m_messages;
+};
 
-</body>
-</html>
+int main(int argc, char *argv[]) {
+    QGuiApplication app(argc, argv);
+
+    // تسجيل النموذج للاستخدام في QML
+    qmlRegisterType<ChatModel>("ChatApp", 1, 0, "ChatModel");
+
+    QQmlApplicationEngine engine;
+    engine.load(QUrl(QStringLiteral("qrc:/Main.qml")));
+    if (engine.rootObjects().isEmpty())
+        return -1;
+
+    return app.exec();
+}
+
+#include "main.moc"
