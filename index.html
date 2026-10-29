@@ -318,7 +318,7 @@
       <div id="starsDisplay"></div>
       <p>الحركات: <b id="winMoves">0</b></p>
       <p>الوقت: <b id="winTime">0:00</b></p>
-      <button class="btn-primary" id="nextLevelBtn" onclick="goToNextLevel()">المرحلة التالية ➡️</button>
+      <button class="btn-primary" id="nextLevelBtn" onclick="goToNextLevel()">جاري الانتقال...</button>
       <button class="btn-secondary" onclick="fromWinToLevels()">📋 قائمة المراحل</button>
     </div>
   </div>
@@ -344,7 +344,7 @@
         2️⃣ اضغط على قطعة ثانية لتبديل مكانهما<br>
         3️⃣ رتّب القطع حتى تكتمل الصورة<br>
         4️⃣ احصل على 3 نجوم إذا حللتها بحركات قليلة!<br>
-        5️⃣ أكمل مرحلة لفتح المرحلة التالية 🔓
+        5️⃣ سينتقل بك اللعب تلقائياً للمرحلة التالية 🔓
       </p>
       <button class="btn-primary" onclick="hideHowTo()">فهمت! 👍</button>
     </div>
@@ -386,6 +386,7 @@ const characters = [
 ];
 
 const TOTAL_LEVELS = 50;
+let autoNextTimer = null;
 
 // ========== PROGRESS ==========
 let progress = { unlockedLevels: 1, stars: {}, completed: {} };
@@ -678,12 +679,26 @@ function showWinModal(stars) {
   document.getElementById('winTime').textContent = formatTime(state.timerSeconds);
 
   const nextBtn = document.getElementById('nextLevelBtn');
+  
   if (state.currentLevel >= TOTAL_LEVELS) {
     nextBtn.textContent = '🏆 المراحل';
     nextBtn.onclick = () => { hideAllModals(); openLevelSelect(); };
   } else {
-    nextBtn.textContent = 'المرحلة التالية ➡️';
+    // تشغيل العداد التلقائي
+    let countdown = 3;
+    nextBtn.textContent = `المرحلة التالية (${countdown}) ➡️`;
     nextBtn.onclick = goToNextLevel;
+
+    clearInterval(autoNextTimer);
+    autoNextTimer = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        nextBtn.textContent = `المرحلة التالية (${countdown}) ➡️`;
+      } else {
+        clearInterval(autoNextTimer);
+        goToNextLevel();
+      }
+    }, 1000);
   }
 
   document.getElementById('winModal').classList.remove('hidden');
@@ -694,6 +709,7 @@ function showFinalWin() {
 }
 
 function hideAllModals() {
+  clearInterval(autoNextTimer); // إيقاف العداد عند إغلاق النافذة
   document.getElementById('winModal').classList.add('hidden');
   document.getElementById('finalModal').classList.add('hidden');
   document.getElementById('howToModal').classList.add('hidden');
@@ -701,6 +717,7 @@ function hideAllModals() {
 }
 
 function goToNextLevel() {
+  clearInterval(autoNextTimer); // إيقاف العداد
   playClickSound();
   hideAllModals();
   const next = state.currentLevel + 1;
